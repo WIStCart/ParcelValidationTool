@@ -6,7 +6,7 @@ class Parcel:
 
 	#Initialize a parcel object
 	def __init__(self,row):
-
+		pass
 	#Get a parcel object
 	def getParcel(self):
 		return self
