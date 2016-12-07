@@ -52,7 +52,7 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		totError,currParcel = Error.testCheckNum(totError,currParcel)
 		arcpy.AddMessage(currParcel.addressErrors)
 		arcpy.AddMessage(str(totError.addressErrorCount))
-
+		totError2,currParcel2 = Error.checkNumber(totError,currParcel)
 
 
 		#End of loop, clear parcel
