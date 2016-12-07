@@ -10,12 +10,16 @@ class Error:
 		self.taxErrorCount = 0
 
 	def testCheckNum(Error,Parcel):
-		if Parcel.addnum.isdigit():
-			Parcel.addressErrors.append("All Digits")
+		if Parcel.addnum:
+			if Parcel.addnum.isdigit():
+				Parcel.addressErrors.append("All Digits")
+			else:
+				Parcel.addressErrors.append("Error")
+				Error.addressErrorCount += 1
+			return (Error, Parcel)
 		else:
-			Parcel.addressErrors.append("Error")
-			Error.addressErrorCount += 1
-		return (Error, Parcel)
+			Parcel.addressErrors.append("All Digits")
+			return (Error, Parcel)
 
 	#Will contain get, set, display methods
 
