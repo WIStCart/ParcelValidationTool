@@ -48,10 +48,10 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 	
 	for row in cursor:
 		currParcel = Parcel(row)
-		arcpy.AddMessage(currParcel.addnum)
+		#arcpy.AddMessage(currParcel.addnum)
 		totError,currParcel = Error.testCheckNum(totError,currParcel)
-		arcpy.AddMessage(currParcel.addressErrors)
-		arcpy.AddMessage(str(totError.addressErrorCount))
+		#arcpy.AddMessage(currParcel.addressErrors)
+		#arcpy.AddMessage(str(totError.addressErrorCount))
 		totError2,currParcel2 = Error.checkNumber(totError,currParcel)
 
 
@@ -59,6 +59,9 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		currParcel = None
 
 #Write general error report
-
+arcpy.AddMessage("General Errors: " + str(totError.genErrorCount))
+arcpy.AddMessage("Geometric Errors: " + str(totError.geomErrorCount))
+arcpy.AddMessage("Address Errors: " + str(totError.addressErrorCount))
+arcpy.AddMessage("Tax Errors: " + str(totError.taxErrorCount))
 #Write feature class from memory back out to hard disk
 #arcpy.FeatureClassToFeatureClass_conversion(output_fc_temp,outDir,outName)
