@@ -10,6 +10,15 @@ in_fc = arcpy.GetParameterAsText(0)  #input feature class
 outDir = arcpy.GetParameterAsText(1)  #output directory location
 outName = arcpy.GetParameterAsText(2)  #output feature class name
 
+#list of field names 
+
+fieldNames = ["OBJECTID","Shape","STATEID","PARCELID","TAXPARCELID","PARCELDATE","TAXROLLYEAR",
+"OWNERNME1","OWNERNME2","PSTLADRESS","SITEADRESS","ADDNUMPREFIX","ADDNUM","ADDNUMSUFFIX","PREFIX","STREETNAME",
+"STREETTYPE","SUFFIX","LANDMARKNAME","UNITTYPE","UNITID","PLACENAME","ZIPCODE","ZIP4","STATE","SCHOOLDIST",
+"SCHOOLDISTNO","IMPROVED","CNTASSDVALUE","LNDVALUE","IMPVALUE","FORESTVALUE","ESTFMKVALUE","NETPRPTA","GRSPRPTA",
+"PROPCLASS","AUXCLASS","ASSDACRES","DEEDACRES","GISACRES","CONAME","LOADDATE","PARCELFIPS","PARCELSRC",
+"Shape_Length","Shape_Area"]
+
 #Copy feature class, add new fields for error reporting
 arcpy.AddMessage("Writing to Memory")
 output_fc_temp = os.path.join("in_memory", "WORKING")
