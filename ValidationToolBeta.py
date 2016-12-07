@@ -14,6 +14,7 @@ outName = arcpy.GetParameterAsText(2)  #output feature class name
 #Run Original checks
 totError = Error()
 
+# testBranch
 
 #list of field names 
 fieldNames = ["OID@","SHAPE@","STATEID","PARCELID","TAXPARCELID","PARCELDATE","TAXROLLYEAR",
@@ -22,9 +23,6 @@ fieldNames = ["OID@","SHAPE@","STATEID","PARCELID","TAXPARCELID","PARCELDATE","T
 "SCHOOLDISTNO","IMPROVED","CNTASSDVALUE","LNDVALUE","IMPVALUE","FORESTVALUE","ESTFMKVALUE","NETPRPTA","GRSPRPTA",
 "PROPCLASS","AUXCLASS","ASSDACRES","DEEDACRES","GISACRES","CONAME","LOADDATE","PARCELFIPS","PARCELSRC",
 "SHAPE@LENGTH","SHAPE@AREA","GeneralElementErrors","AddressElementErrors","TaxrollElementErrors","GeometricElementErrors"]
-
-#This is just a comment, that has been edited...
-#Just another comment, from Codie.
 
 #Copy feature class, add new fields for error reporting
 arcpy.AddMessage("Writing to Memory")
