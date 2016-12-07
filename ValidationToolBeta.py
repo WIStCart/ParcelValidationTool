@@ -14,8 +14,6 @@ outName = arcpy.GetParameterAsText(2)  #output feature class name
 #Run Original checks
 totError = Error()
 
-# testBranch test test
-
 #list of field names 
 fieldNames = ["OID@","SHAPE@","STATEID","PARCELID","TAXPARCELID","PARCELDATE","TAXROLLYEAR",
 "OWNERNME1","OWNERNME2","PSTLADRESS","SITEADRESS","ADDNUMPREFIX","ADDNUM","ADDNUMSUFFIX","PREFIX","STREETNAME",
