@@ -13,7 +13,6 @@ outName = arcpy.GetParameterAsText(2)  #output feature class name
 
 #Run Original checks
 totError = Error()
-totError2 = Error()
 
 
 #list of field names 
@@ -53,9 +52,7 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		totError,currParcel = Error.testCheckNum(totError,currParcel)
 		#arcpy.AddMessage(currParcel.addressErrors)
 		#arcpy.AddMessage(str(totError.addressErrorCount))
-		totError,currParcel = Error.checkNumber(totError,currParcel)
-		arcpy.AddMessage(currParcel.addressErrors)
-		arcpy.AddMessage(totError.addressErrorCount)
+		totError2,currParcel2 = Error.checkNumber(totError,currParcel)
 
 
 		#End of loop, clear parcel
