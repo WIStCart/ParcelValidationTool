@@ -21,7 +21,7 @@ fieldNames = ["OID@","SHAPE@","STATEID","PARCELID","TAXPARCELID","PARCELDATE","T
 "STREETTYPE","SUFFIX","LANDMARKNAME","UNITTYPE","UNITID","PLACENAME","ZIPCODE","ZIP4","STATE","SCHOOLDIST",
 "SCHOOLDISTNO","IMPROVED","CNTASSDVALUE","LNDVALUE","IMPVALUE","FORESTVALUE","ESTFMKVALUE","NETPRPTA","GRSPRPTA",
 "PROPCLASS","AUXCLASS","ASSDACRES","DEEDACRES","GISACRES","CONAME","LOADDATE","PARCELFIPS","PARCELSRC",
-"SHAPE@LENGTH","SHAPE@AREA"]
+"SHAPE@LENGTH","SHAPE@AREA","GeneralElementErrors","AddressElementErrors","TaxrollElementErrors","GeometricErrors"]
 
 #Copy feature class, add new fields for error reporting
 arcpy.AddMessage("Writing to Memory")
@@ -33,10 +33,10 @@ arcpy.FeatureClassToFeatureClass_conversion(in_fc,dynamic_workspace, "WORKING")
 
 #Adding new fields for error reporting.  We can change names, lenght, etc...
 arcpy.AddMessage("Adding Error Fields")
-arcpy.AddField_management(output_fc_temp,"GeometricElementErrors", "TEXT", "", "", 250)
+arcpy.AddField_management(output_fc_temp,"GeneralElementErrors", "TEXT", "", "", 250)
 arcpy.AddField_management(output_fc_temp,"AddressElementErrors", "TEXT", "", "", 250)
 arcpy.AddField_management(output_fc_temp,"TaxrollElementErrors", "TEXT", "", "", 250)
-arcpy.AddField_management(output_fc_temp,"GeneralElementErrors", "TEXT", "", "", 250)
+arcpy.AddField_management(output_fc_temp,"GeometricElementErrors", "TEXT", "", "", 250)
 
 #Create update cursor
 #Iterate through records in feature class
@@ -52,7 +52,8 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		totError,currParcel = Error.testCheckNum(totError,currParcel)
 		#arcpy.AddMessage(currParcel.addressErrors)
 		#arcpy.AddMessage(str(totError.addressErrorCount))
-		totError2,currParcel2 = Error.checkNumber(totError,currParcel)
+		row[fieldNames.index("AddressElementErrors")] = "currParcel.addressErrors"
+		cursor.updateRow(row)
 
 
 		#End of loop, clear parcel
