@@ -52,8 +52,7 @@ class Parcel:
 		self.parcelsrc = row[43]
 		self.shapeLength = row[44]
 		self.shapeArea = row[45]
-
-
-	#Get a parcel object
-	def getParcel(self):
-		return self
+		self.geomErrors = []
+		self.addressErrors = []
+		self.taxErrors = []
+		self.genErrors = []

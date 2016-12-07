@@ -1,5 +1,6 @@
 import arcpy
 from Parcel import Parcel
+from Error import Error
 import os
 import re
 import csv
@@ -10,14 +11,17 @@ in_fc = arcpy.GetParameterAsText(0)  #input feature class
 outDir = arcpy.GetParameterAsText(1)  #output directory location
 outName = arcpy.GetParameterAsText(2)  #output feature class name
 
-#list of field names 
+#Run Original checks
+totError = Error()
 
-fieldNames = ["OBJECTID","Shape","STATEID","PARCELID","TAXPARCELID","PARCELDATE","TAXROLLYEAR",
+
+#list of field names 
+fieldNames = ["OID@","SHAPE@","STATEID","PARCELID","TAXPARCELID","PARCELDATE","TAXROLLYEAR",
 "OWNERNME1","OWNERNME2","PSTLADRESS","SITEADRESS","ADDNUMPREFIX","ADDNUM","ADDNUMSUFFIX","PREFIX","STREETNAME",
 "STREETTYPE","SUFFIX","LANDMARKNAME","UNITTYPE","UNITID","PLACENAME","ZIPCODE","ZIP4","STATE","SCHOOLDIST",
 "SCHOOLDISTNO","IMPROVED","CNTASSDVALUE","LNDVALUE","IMPVALUE","FORESTVALUE","ESTFMKVALUE","NETPRPTA","GRSPRPTA",
 "PROPCLASS","AUXCLASS","ASSDACRES","DEEDACRES","GISACRES","CONAME","LOADDATE","PARCELFIPS","PARCELSRC",
-"Shape_Length","Shape_Area"]
+"SHAPE@LENGTH","SHAPE@AREA"]
 
 #Copy feature class, add new fields for error reporting
 arcpy.AddMessage("Writing to Memory")
@@ -35,15 +39,26 @@ arcpy.AddField_management(output_fc_temp,"TaxrollElementErrors", "TEXT", "", "",
 arcpy.AddField_management(output_fc_temp,"GeneralElementErrors", "TEXT", "", "", 250)
 
 #Create update cursor
-
-
 #Iterate through records in feature class
 #	Create a parcel object
 #	Either call individual error checking methods (Error.GeomError.checkGeometry(Parcel)) or grouped methods in the parcel class (parcel.checkGeomErrors())
 #	Write out errors to record
 #	Del parcel object to conserve mem
+with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
+	
+	for row in cursor:
+		currParcel = Parcel(row)
+		arcpy.AddMessage(currParcel.addnum)
+		totError,currParcel = Error.testCheckNum(totError,currParcel)
+		arcpy.AddMessage(currParcel.addressErrors)
+		arcpy.AddMessage(str(totError.addressErrorCount))
+
+
+
+		#End of loop, clear parcel
+		currParcel = None
 
 #Write general error report
 
 #Write feature class from memory back out to hard disk
-arcpy.FeatureClassToFeatureClass_conversion(output_fc_temp,outDir,outName)
+#arcpy.FeatureClassToFeatureClass_conversion(output_fc_temp,outDir,outName)

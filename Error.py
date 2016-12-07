@@ -4,36 +4,19 @@ from Parcel import Parcel
 class Error:
 
 	def __init__(self):
-		pass
+		self.genErrorCount = 0
+		self.geomErrorCount = 0
+		self.addressErrorCount = 0
+		self.taxErrorCount = 0
+
+	def testCheckNum(Error,Parcel):
+		if Parcel.addnum.isdigit():
+			Parcel.addressErrors.append("All Digits")
+		else:
+			Parcel.addressErrors.append("Error")
+			Error.addressErrorCount += 1
+		return (Error, Parcel)
 
 	#Will contain get, set, display methods
 
 	#Any other total error report data will go here
-
-#Class for general error checking
-class GenError(Error):
-
-	def __init__(self):
-		self.count = 0
-		self.errors = []
-
-#Class for geometric error checking
-class GeomError(Error):
-
-	def __init__(self):
-		self.count = 0
-		self.errors = []
-
-#Class for address error checking
-class AddressError(Error):
-
-	def __init__(self):
-		self.count = 0
-		self.errors = []
-
-#Class for tax error checkingg
-class TaxError(Error):
-
-	def __init__(self):
-		self.count = 0
-		self.errors = []
