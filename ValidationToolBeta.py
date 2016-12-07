@@ -23,7 +23,6 @@ fieldNames = ["OID@","SHAPE@","STATEID","PARCELID","TAXPARCELID","PARCELDATE","T
 "PROPCLASS","AUXCLASS","ASSDACRES","DEEDACRES","GISACRES","CONAME","LOADDATE","PARCELFIPS","PARCELSRC",
 "SHAPE@LENGTH","SHAPE@AREA","GeneralElementErrors","AddressElementErrors","TaxrollElementErrors","GeometricElementErrors"]
 
-#This is just a comment to see if this merge works...
 
 #Copy feature class, add new fields for error reporting
 arcpy.AddMessage("Writing to Memory")
