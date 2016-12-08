@@ -49,7 +49,7 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		currParcel = Parcel(row)
 		#arcpy.AddMessage(currParcel.addnum)
 		totError,currParcel = Error.testCheckNum(totError,currParcel)
-		totError,currParcel = Error.testCheckNum(totError,currParcel)
+		totError,currParcel = Error.testCheckNum(totError,currParcel) # This line can be deleted in the future we are simply calling the testCheckNum() function twice here for sake of planting duplicate errors to be tested by writeErrors() 
 		#arcpy.AddMessage(currParcel.addressErrors)
 		#arcpy.AddMessage(str(totError.addressErrorCount))
 
