@@ -56,3 +56,17 @@ class Parcel:
 		self.addressErrors = []
 		self.taxErrors = []
 		self.genErrors = []
+		
+	def writeErrors(self, row, cursor, fieldNames):
+		arcpy.AddMessage(self.addressErrors)
+		# create 
+		if len(self.addressErrors) > 0:
+			row[fieldNames.index("AddressElementErrors")] = str(self.addressErrors).strip('[]').replace("'","")
+		if len(self.genErrors) > 0:
+			row[fieldNames.index("GeneralElementErrors")] = str(self.genErrors).strip('[]').replace("'","")
+		if len(self.taxErrors) > 0:
+			row[fieldNames.index("TaxrollElementErrors")] = str(self.taxErrors).strip('[]').replace("'","")
+		if len(self.geomErrors) > 0:
+			row[fieldNames.index("GeometricElementErrors")] = str(self.geomErrors).strip('[]').replace("'","")
+		#row[47] = "currParcel.addressErrors"
+		cursor.updateRow(row)

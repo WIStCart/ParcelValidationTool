@@ -49,13 +49,12 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		currParcel = Parcel(row)
 		#arcpy.AddMessage(currParcel.addnum)
 		totError,currParcel = Error.testCheckNum(totError,currParcel)
+		totError,currParcel = Error.testCheckNum(totError,currParcel)
 		#arcpy.AddMessage(currParcel.addressErrors)
 		#arcpy.AddMessage(str(totError.addressErrorCount))
-		row[fieldNames.index("AddressElementErrors")] = "currParcel.addressErrors"
-		cursor.updateRow(row)
-
 
 		#End of loop, clear parcel
+		currParcel.writeErrors(row,cursor, fieldNames)
 		currParcel = None
 
 #Write general error report
@@ -64,4 +63,4 @@ arcpy.AddMessage("Geometric Errors: " + str(totError.geomErrorCount))
 arcpy.AddMessage("Address Errors: " + str(totError.addressErrorCount))
 arcpy.AddMessage("Tax Errors: " + str(totError.taxErrorCount))
 #Write feature class from memory back out to hard disk
-#arcpy.FeatureClassToFeatureClass_conversion(output_fc_temp,outDir,outName)
+arcpy.FeatureClassToFeatureClass_conversion(output_fc_temp,outDir,outName)
