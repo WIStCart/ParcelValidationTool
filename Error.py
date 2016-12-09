@@ -1,6 +1,12 @@
 import arcpy
 from Parcel import Parcel
 
+# TODO
+# 1) Write exceptions on the function itself, per function. 
+#		Include errors in-line with the row (just like all other errors)      
+# 		try/catch/throw 
+# 		apply exceptions in last step of writing the function - to prevent from accidentally escaping errors that we can test for.
+
 class Error:
 
 	def __init__(self):
@@ -20,7 +26,6 @@ class Error:
 		else:
 			Parcel.addressErrors.append("All Digits")
 			return (Error, Parcel)
-
 
 	def checkNumber(Error,Parcel):
 		if Parcel.addnum:
