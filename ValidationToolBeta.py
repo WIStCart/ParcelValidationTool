@@ -10,6 +10,7 @@ import csv
 in_fc = arcpy.GetParameterAsText(0)  #input feature class
 outDir = arcpy.GetParameterAsText(1)  #output directory location
 outName = arcpy.GetParameterAsText(2)  #output feature class name
+outDirTxt = arcpy.GetParameterAsText(3)  #output directory error summary .txt file
 
 #Run Original checks
 totError = Error()
@@ -58,9 +59,23 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		currParcel = None
 
 #Write general error report
+errorSummaryFile = open(outDirTxt + "/" + outName + "_ValidationSummary.txt","w")
+arcpy.AddMessage("Creating Validation Summary here: " + outDirTxt + "/" + outName + "_ValidationSummary.txt")
+errorSummaryFile.write(outDirTxt + "\\" + outName + "_ValidationSummary.txt" + "\n")
+errorSummaryFile.write("Validation Summary Table: " + "\n")
+errorSummaryFile.write("This validation summary table contains an overview of any errors found by the Parcel Validation Tool. Please review the contents of this file and make changes to your parcel dataset as necessary." + "\n\n")
+errorSummaryFile.write("In-line errors - The following lines summarize the element-specific errors that were found while validating your parcel dataset. The stats below are meant as a means of reviewing the output. Please see the " + "GeneralElementErrors, AddressElementErrors, TaxrollElementErrors, and GeometricElementErrors fields in the output feature class to address these errors individually."+ "\n")
+errorSummaryFile.write("	General Errors: " + str(totError.genErrorCount) + "\n")
+errorSummaryFile.write("	Geometric Errors: " + str(totError.geomErrorCount) + "\n")
+errorSummaryFile.write("	Address Errors: " + str(totError.addressErrorCount) + "\n")
+errorSummaryFile.write("	Tax Errors: " + str(totError.taxErrorCount) + "\n")
+errorSummaryFile.write("* Within: " + outDirTxt + "\\" + outName  + "\n")
+
+# User messages:
 arcpy.AddMessage("General Errors: " + str(totError.genErrorCount))
 arcpy.AddMessage("Geometric Errors: " + str(totError.geomErrorCount))
 arcpy.AddMessage("Address Errors: " + str(totError.addressErrorCount))
 arcpy.AddMessage("Tax Errors: " + str(totError.taxErrorCount))
+
 #Write feature class from memory back out to hard disk
-arcpy.FeatureClassToFeatureClass_conversion(output_fc_temp,outDir,outName)
+#arcpy.FeatureClassToFeatureClass_conversion(output_fc_temp,outDir,outName)
