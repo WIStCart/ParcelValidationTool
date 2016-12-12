@@ -1,5 +1,5 @@
 import arcpy
-#TODO:
+# TODO:
 # 1) change the structure of the row to be fieldNames index (e.g. fieldNames.index("GeneralElementErrors")])
 # 2) ...
 
@@ -55,25 +55,19 @@ class Parcel:
 		self.parcelsrc = row[fieldNames.index("PARCELSRC")]
 		self.shapeLength = row[fieldNames.index("SHAPE@LENGTH")]
 		self.shapeArea = row[fieldNames.index("SHAPE@AREA")]
-		self.geomErrors = []
+		self.geometricErrors = []
 		self.addressErrors = []
 		self.taxErrors = []
-		self.genErrors = []
+		self.generalErrors = []
 		
 	def writeErrors(self, row, cursor, fieldNames):
-		arcpy.AddMessage(self.addressErrors)
-		arcpy.AddMessage(self.addressErrors)
-		# create 
+		# Write all accumulated errors to their respective rows, then update the row within the cursor
 		if len(self.addressErrors) > 0:
 			row[fieldNames.index("AddressElementErrors")] = str(self.addressErrors).strip('[]').replace("'","")
-		if len(self.genErrors) > 0:
-			row[fieldNames.index("GeneralElementErrors")] = str(self.genErrors).strip('[]').replace("'","")
+		if len(self.generalErrors) > 0:
+			row[fieldNames.index("GeneralElementErrors")] = str(self.generalErrors).strip('[]').replace("'","")
 		if len(self.taxErrors) > 0:
 			row[fieldNames.index("TaxrollElementErrors")] = str(self.taxErrors).strip('[]').replace("'","")
-		if len(self.geomErrors) > 0:
-			row[fieldNames.index("GeometricElementErrors")] = str(self.geomErrors).strip('[]').replace("'","")
-		#row[47] = "currParcel.addressErrors"
+		if len(self.geometricErrors) > 0:
+			row[fieldNames.index("GeometricElementErrors")] = str(self.geometricErrors).strip('[]').replace("'","")
 		cursor.updateRow(row)
-
-	#def __getitem__(self, key):
-	#	return self[key]

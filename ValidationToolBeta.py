@@ -5,7 +5,8 @@ from Summary import Summary
 import os
 import re
 import csv
-
+# TODO:
+# 1) ...
 
 #Tool inputs
 in_fc = arcpy.GetParameterAsText(0)  #input feature class
@@ -49,26 +50,27 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 	
 	for row in cursor:
 		currParcel = Parcel(row, fieldNames)
-		#arcpy.AddMessage(currParcel.addnum)
-		totError,currParcel = Error.testCheckNum(totError,currParcel)
-		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"ADDNUM") # This line can be deleted in the future we are simply calling the testCheckNum() function twice here for sake of planting duplicate errors to be tested by writeErrors() 
-		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"PARCELFIPS") # This line can be deleted in the future we are simply calling the testCheckNum() function twice here for sake of planting duplicate errors to be tested by writeErrors() 
+		#arcpy.AddMessage(currParcel)
+		#totError,currParcel = Error.testCheckNum(totError,currParcel)
+		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"addnum","address", False) 
+		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"parcelfips","general", False)
+		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"zip4","address", True)
 		#arcpy.AddMessage(currParcel.addressErrors)
 		#arcpy.AddMessage(str(totError.addressErrorCount))
 
-		#End of loop, clear parcel
+		#End of loop, finalize errors with the writeErrors function, then clear parcel
 		currParcel.writeErrors(row,cursor, fieldNames)
 		currParcel = None
 
-# Write all summary-type errors to file
+# Write all summary-type errors to file via Summary class
 summaryTxt = Summary()
 Summary.writeSummaryTxt(summaryTxt,outDirTxt,outName,totError)
 
 # User messages (for testing):
-arcpy.AddMessage("General Errors: " + str(totError.genErrorCount))
-arcpy.AddMessage("Geometric Errors: " + str(totError.geomErrorCount))
+arcpy.AddMessage("General Errors: " + str(totError.generalErrorCount))
+arcpy.AddMessage("Geometric Errors: " + str(totError.geometricErrorCount))
 arcpy.AddMessage("Address Errors: " + str(totError.addressErrorCount))
 arcpy.AddMessage("Tax Errors: " + str(totError.taxErrorCount))
 
 #Write feature class from memory back out to hard disk
-#arcpy.FeatureClassToFeatureClass_conversion(output_fc_temp,outDir,outName)
+arcpy.FeatureClassToFeatureClass_conversion(output_fc_temp,outDir,outName)
