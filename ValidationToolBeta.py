@@ -48,7 +48,7 @@ arcpy.AddField_management(output_fc_temp,"GeometricElementErrors", "TEXT", "", "
 with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 	
 	for row in cursor:
-		currParcel = Parcel(row)
+		currParcel = Parcel(row, fieldNames)
 		#arcpy.AddMessage(currParcel.addnum)
 		totError,currParcel = Error.testCheckNum(totError,currParcel)
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"ADDNUM") # This line can be deleted in the future we are simply calling the testCheckNum() function twice here for sake of planting duplicate errors to be tested by writeErrors() 

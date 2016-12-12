@@ -8,7 +8,7 @@ class Parcel:
 	#Class vars go here
 
 	#Initialize a parcel object
-	def __init__(self,row):
+	def __init__(self,row,fieldNames):
 		self.objectid = row[0]
 		self.shape = row[1]
 		self.stateid = row[2]
