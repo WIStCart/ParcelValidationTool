@@ -62,6 +62,7 @@ class Parcel:
 		
 	def writeErrors(self, row, cursor, fieldNames):
 		arcpy.AddMessage(self.addressErrors)
+		arcpy.AddMessage(self.addressErrors)
 		# create 
 		if len(self.addressErrors) > 0:
 			row[fieldNames.index("AddressElementErrors")] = str(self.addressErrors).strip('[]').replace("'","")
@@ -73,3 +74,6 @@ class Parcel:
 			row[fieldNames.index("GeometricElementErrors")] = str(self.geomErrors).strip('[]').replace("'","")
 		#row[47] = "currParcel.addressErrors"
 		cursor.updateRow(row)
+
+	#def __getitem__(self, key):
+	#	return self[key]
