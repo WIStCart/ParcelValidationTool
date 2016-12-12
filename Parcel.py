@@ -21,7 +21,7 @@ class Parcel:
 		self.mailadd = row[9]
 		self.siteadd = row[10]
 		self.addnumprefix = row[11]
-		self.addnum = row[12]
+		self.addnum = row[fieldNames.index("ADDNUM")]
 		self.addnumsuffix = row[13]
 		self.prefix = row[14]
 		self.streetname = row[15]

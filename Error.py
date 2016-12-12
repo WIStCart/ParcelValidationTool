@@ -29,7 +29,7 @@ class Error:
 			Parcel.addressErrors.append("All Digits")
 			return (Error, Parcel)
 
-	def checkNumber(Error,Parcel):
+	def checkNumericTextValue(Error,Parcel,field):
 		if Parcel.addnum:
 			if Parcel.addnum.isdigit():
 				Parcel.addressErrors.append("All Digits")

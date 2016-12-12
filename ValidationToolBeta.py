@@ -1,6 +1,7 @@
 import arcpy
 from Parcel import Parcel
 from Error import Error
+from Summary import Summary
 import os
 import re
 import csv
@@ -50,7 +51,8 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		currParcel = Parcel(row)
 		#arcpy.AddMessage(currParcel.addnum)
 		totError,currParcel = Error.testCheckNum(totError,currParcel)
-		totError,currParcel = Error.testCheckNum(totError,currParcel) # This line can be deleted in the future we are simply calling the testCheckNum() function twice here for sake of planting duplicate errors to be tested by writeErrors() 
+		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"ADDNUM") # This line can be deleted in the future we are simply calling the testCheckNum() function twice here for sake of planting duplicate errors to be tested by writeErrors() 
+		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"PARCELFIPS") # This line can be deleted in the future we are simply calling the testCheckNum() function twice here for sake of planting duplicate errors to be tested by writeErrors() 
 		#arcpy.AddMessage(currParcel.addressErrors)
 		#arcpy.AddMessage(str(totError.addressErrorCount))
 
@@ -58,20 +60,11 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		currParcel.writeErrors(row,cursor, fieldNames)
 		currParcel = None
 
-#Write general error report
-errorSummaryFile = open(outDirTxt + "/" + outName + "_ValidationSummary.txt","w")
-arcpy.AddMessage("Creating Validation Summary here: " + outDirTxt + "/" + outName + "_ValidationSummary.txt")
-errorSummaryFile.write(outDirTxt + "\\" + outName + "_ValidationSummary.txt" + "\n")
-errorSummaryFile.write("Validation Summary Table: " + "\n")
-errorSummaryFile.write("This validation summary table contains an overview of any errors found by the Parcel Validation Tool. Please review the contents of this file and make changes to your parcel dataset as necessary." + "\n\n")
-errorSummaryFile.write("In-line errors - The following lines summarize the element-specific errors that were found while validating your parcel dataset. The stats below are meant as a means of reviewing the output. Please see the " + "GeneralElementErrors, AddressElementErrors, TaxrollElementErrors, and GeometricElementErrors fields in the output feature class to address these errors individually."+ "\n")
-errorSummaryFile.write("	General Errors: " + str(totError.genErrorCount) + "\n")
-errorSummaryFile.write("	Geometric Errors: " + str(totError.geomErrorCount) + "\n")
-errorSummaryFile.write("	Address Errors: " + str(totError.addressErrorCount) + "\n")
-errorSummaryFile.write("	Tax Errors: " + str(totError.taxErrorCount) + "\n")
-errorSummaryFile.write("* Within: " + outDirTxt + "\\" + outName  + "\n")
+# Write all summary-type errors to file
+summaryTxt = Summary()
+Summary.writeSummaryTxt(summaryTxt,outDirTxt,outName,totError)
 
-# User messages:
+# User messages (for testing):
 arcpy.AddMessage("General Errors: " + str(totError.genErrorCount))
 arcpy.AddMessage("Geometric Errors: " + str(totError.geomErrorCount))
 arcpy.AddMessage("Address Errors: " + str(totError.addressErrorCount))
