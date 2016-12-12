@@ -3,9 +3,9 @@ from Parcel import Parcel
 
 # TODO
 # 1) Write exceptions on the function itself, per function. 
-#		Include errors in-line with the row (just like all other errors)      
-# 		try/catch/throw 
-# 		apply exceptions in last step of writing the function - to prevent from accidentally escaping errors that we can test for.
+#		a) Include errors in-line with the row (just like all other errors)      
+# 		b) try/catch/throw 
+# 		c) apply exceptions in last step of writing the function - to prevent from accidentally escaping errors that we can test for.
 
 class Error:
 
