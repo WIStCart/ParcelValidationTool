@@ -55,10 +55,10 @@ class Parcel:
 		self.parcelsrc = row[fieldNames.index("PARCELSRC")]
 		self.shapeLength = row[fieldNames.index("SHAPE@LENGTH")]
 		self.shapeArea = row[fieldNames.index("SHAPE@AREA")]
-		self.geomErrors = row[fieldNames.index("GeometricElementErrors")]
-		self.addressErrors = row[fieldNames.index("AddressElementErrors")]
-		self.taxErrors = row[fieldNames.index("TaxrollElementErrors")]
-		self.genErrors = row[fieldNames.index("GeneralElementErrors")]
+		self.geomErrors = []
+		self.addressErrors = []
+		self.taxErrors = []
+		self.genErrors = []
 		
 	def writeErrors(self, row, cursor, fieldNames):
 		arcpy.AddMessage(self.addressErrors)
