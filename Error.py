@@ -27,8 +27,8 @@ class Error:
 		else:
 			Parcel.addressErrors.append("All Digits")
 			return (Error, Parcel)
-
-	def checkNumericTextValue(Error,Parcel,field,errorType,acceptNull): # Error object, Parcel object, field to test, type of error to classify this as, are <Null>s are considered errors?  
+	#Check if text value is a valid number(Error object, Parcel object, field to test, type of error to classify this as, are <Null>s are considered errors?)  
+	def checkNumericTextValue(Error,Parcel,field,errorType,acceptNull): 
 		try:
 			stringToTest = getattr(Parcel,field)
 			if stringToTest is not None:
@@ -49,7 +49,7 @@ class Error:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the" + field + "field. Please manually inspect this field's value.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 
-
+	#Check if duplicates exist within an entire field(Error object, Parcel object, field to test, type of error to classify this as, are <Null>s are considered errors?)  
 	def checkIsDuplicate(Error,Parcel,field,errorType,acceptNull,ignoreList,testList):
 		stringToTest = getattr(Parcel,field)
 		if stringToTest is not None:
@@ -63,7 +63,7 @@ class Error:
 					testList.append(stringToTest)
 			return (Error, Parcel)
 		else:
-			if acceptNull:
+			if acceptNull == False:
 				pass
 			else:
 				getattr(Parcel,errorType + "Errors").append("Null Found on " + field)

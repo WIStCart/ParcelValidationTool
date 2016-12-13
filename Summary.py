@@ -5,7 +5,7 @@ import arcpy
 class Summary:
 
 	def __init__(self):
-		pass
+		pass # placeholder
 
 	def writeSummaryTxt(Summary,outDirTxt,outName,totError):
 		#Write general error report to .txt

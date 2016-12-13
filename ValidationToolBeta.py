@@ -49,28 +49,22 @@ arcpy.AddField_management(output_fc_temp,"AddressElementErrors", "TEXT", "", "",
 arcpy.AddField_management(output_fc_temp,"TaxrollElementErrors", "TEXT", "", "", 250)
 arcpy.AddField_management(output_fc_temp,"GeometricElementErrors", "TEXT", "", "", 250)
 
-#Create update cursor
-#Iterate through records in feature class
-#	Create a parcel object
-#	Either call individual error checking methods (Error.GeomError.checkGeometry(Parcel)) or grouped methods in the parcel class (parcel.checkGeomErrors())
-#	Write out errors to record
-#	Del parcel object to conserve mem
+#Create update cursor then iterate through records in feature class
 arcpy.AddMessage("Testing the data for various attribute error types.")
 with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 	
 	for row in cursor:
+		#Construct the Parcel object for the row
 		currParcel = Parcel(row, fieldNames)
-		#arcpy.AddMessage(currParcel)
-		#totError,currParcel = Error.testCheckNum(totError,currParcel)
+		#Execute in-cursor error tests
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"addnum","address", False) 
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"parcelfips","general", True)
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"taxrollyear","tax", True)
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"zipcode","address", False)
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"zip4","address", False)
-		#arcpy.AddMessage(currParcel.addressErrors)
-		#arcpy.AddMessage(str(totError.addressErrorCount))
-		totError,currParcel = Error.checkIsDuplicate(totError,currParcel,"parcelid","general", True, pinSkips, uniquePinList)
-		totError,currParcel = Error.checkIsDuplicate(totError,currParcel,"taxparcelid","general", True, pinSkips, uniqueTaxparList)
+		totError,currParcel = Error.checkIsDuplicate(totError,currParcel,"parcelid","general", False, pinSkips, uniquePinList)
+		totError,currParcel = Error.checkIsDuplicate(totError,currParcel,"taxparcelid","general", False, pinSkips, uniqueTaxparList)
+		
 		#End of loop, finalize errors with the writeErrors function, then clear parcel
 		currParcel.writeErrors(row,cursor, fieldNames)
 		currParcel = None

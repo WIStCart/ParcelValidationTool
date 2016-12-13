@@ -61,7 +61,7 @@ class Parcel:
 		self.generalErrors = []
 		
 	def writeErrors(self, row, cursor, fieldNames):
-		# Write all accumulated errors to their respective rows, then update the row within the cursor
+		#Write all accumulated errors to their respective rows, then update the row within the cursor
 		if len(self.addressErrors) > 0:
 			row[fieldNames.index("AddressElementErrors")] = str(self.addressErrors).strip('[]').replace("'","")
 		if len(self.generalErrors) > 0:
