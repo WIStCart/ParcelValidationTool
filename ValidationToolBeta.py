@@ -31,6 +31,7 @@ pinSkips = ["ALLEY","CANAL","CE","CONDO","CREEK","CTH","CTH C","CTH G","CTH H","
 "TOA","TOB","TOF","TOJ","TOL","TOM","TOWN","TRAIL","TRIBE","UNK","USH","WALK","WATER","WELL","WET","WPS","WVIC"]
 
 #lists for collecting parcelids and taxparcelids for checking for dups
+#Adding a few test comments...
 uniquePinList = []
 uniqueTaxparList = []
 
