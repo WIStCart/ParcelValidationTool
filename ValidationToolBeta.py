@@ -5,8 +5,6 @@ from Summary import Summary
 import os
 import re
 import csv
-# TODO:
-# 1) ...
 
 #Tool inputs
 in_fc = arcpy.GetParameterAsText(0)  #input feature class
@@ -31,7 +29,6 @@ pinSkips = ["ALLEY","CANAL","CE","CONDO","CREEK","CTH","CTH C","CTH G","CTH H","
 "TOA","TOB","TOF","TOJ","TOL","TOM","TOWN","TRAIL","TRIBE","UNK","USH","WALK","WATER","WELL","WET","WPS","WVIC"]
 
 #lists for collecting parcelids and taxparcelids for checking for dups
-#Adding a few test comments...
 uniquePinList = []
 uniqueTaxparList = []
 
@@ -50,10 +47,12 @@ arcpy.AddField_management(output_fc_temp,"AddressElementErrors", "TEXT", "", "",
 arcpy.AddField_management(output_fc_temp,"TaxrollElementErrors", "TEXT", "", "", 250)
 arcpy.AddField_management(output_fc_temp,"GeometricElementErrors", "TEXT", "", "", 250)
 
-#Create update cursor then iterate through records in feature class
+#Call all pre-cursor test functions
+
+
+#Create update cursor then use it to iterate through records in feature class
 arcpy.AddMessage("Testing the data for various attribute error types.")
-with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
-	
+with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:	
 	for row in cursor:
 		#Construct the Parcel object for the row
 		currParcel = Parcel(row, fieldNames)
@@ -70,7 +69,7 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		currParcel.writeErrors(row,cursor, fieldNames)
 		currParcel = None
 
-# Write all summary-type errors to file via Summary class
+# Write all summary-type errors to file via the Summary class
 summaryTxt = Summary()
 Summary.writeSummaryTxt(summaryTxt,outDirTxt,outName,totError)
 

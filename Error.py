@@ -16,17 +16,6 @@ class Error:
 		self.addressErrorCount = 0
 		self.taxErrorCount = 0
 
-	def testCheckNum(Error,Parcel):
-		if Parcel.addnum:
-			if Parcel.addnum.isdigit():
-				Parcel.addressErrors.append("All Digits")
-			else:
-				Parcel.addressErrors.append("Error")
-				Error.addressErrorCount += 1
-			return (Error, Parcel)
-		else:
-			Parcel.addressErrors.append("All Digits")
-			return (Error, Parcel)
 	#Check if text value is a valid number(Error object, Parcel object, field to test, type of error to classify this as, are <Null>s are considered errors?)  
 	def checkNumericTextValue(Error,Parcel,field,errorType,acceptNull): 
 		try:
@@ -45,30 +34,33 @@ class Error:
 					getattr(Parcel,errorType + "Errors").append("Null Found on " + field)
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 			return (Error, Parcel)
-		except: # using generic error handling because we don't know what errors to expect.
+		except: # using generic error handling because we don't know what errors to expect yet.
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the" + field + "field. Please manually inspect this field's value.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 
-	#Check if duplicates exist within an entire field(Error object, Parcel object, field to test, type of error to classify this as, are <Null>s are considered errors?)  
+	#Check if duplicates exist within an entire field(Error object, Parcel object, field to test, type of error to classify this as, are <Null>s are considered errors?, list of strings that are expected to be duplicates (to ignore), running list of strings to test against)  
 	def checkIsDuplicate(Error,Parcel,field,errorType,acceptNull,ignoreList,testList):
-		stringToTest = getattr(Parcel,field)
-		if stringToTest is not None:
-			if stringToTest in ignoreList:
-				pass
-			else:
-				if stringToTest in testList:
-					getattr(Parcel,errorType + "Errors").append("Appears to be a duplicate value in " + field)
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		try:
+			stringToTest = getattr(Parcel,field)
+			if stringToTest is not None:
+				if stringToTest in ignoreList:
+					pass
 				else:
-					testList.append(stringToTest)
-			return (Error, Parcel)
-		else:
-			if acceptNull == False:
-				pass
+					if stringToTest in testList:
+						getattr(Parcel,errorType + "Errors").append("Appears to be a duplicate value in " + field)
+						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					else:
+						testList.append(stringToTest)
+				return (Error, Parcel)
 			else:
-				getattr(Parcel,errorType + "Errors").append("Null Found on " + field)
-		return (Error, Parcel)
-		#test comment
+				if acceptNull == False:
+					pass
+				else:
+					getattr(Parcel,errorType + "Errors").append("Null Found on " + field)
+			return (Error, Parcel)
+		except: # using generic error handling because we don't know what errors to expect yet.
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the" + field + "field. Please manually inspect this field's value.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 
 	#Will contain get, set, display methods
 
