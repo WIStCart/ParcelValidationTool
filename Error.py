@@ -44,6 +44,25 @@ class Error:
 				getattr(Parcel,errorType + "Errors").append("Null Found on " + field)
 		return (Error, Parcel)
 
+	def checkIsDuplicate(Error,Parcel,field,errorType,acceptNull,ignoreList,testList):
+		stringToTest = getattr(Parcel,field)
+		if stringToTest is not None:
+			if stringToTest in ignoreList:
+				pass
+			else:
+				if stringToTest in testList:
+					getattr(Parcel,errorType + "Errors").append("Appears to be a duplicate value in " + field)
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				else:
+					testList.append(stringToTest)
+			return (Error, Parcel)
+		else:
+			if acceptNull:
+				pass
+			else:
+				getattr(Parcel,errorType + "Errors").append("Null Found on " + field)
+		return (Error, Parcel)
+
 	#Will contain get, set, display methods
 
 	#Any other total error report data will go here
