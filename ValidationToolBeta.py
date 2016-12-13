@@ -55,6 +55,7 @@ arcpy.AddField_management(output_fc_temp,"GeometricElementErrors", "TEXT", "", "
 #	Either call individual error checking methods (Error.GeomError.checkGeometry(Parcel)) or grouped methods in the parcel class (parcel.checkGeomErrors())
 #	Write out errors to record
 #	Del parcel object to conserve mem
+arcpy.AddMessage("Testing the data for various attribute error types.")
 with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 	
 	for row in cursor:
@@ -62,8 +63,10 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		#arcpy.AddMessage(currParcel)
 		#totError,currParcel = Error.testCheckNum(totError,currParcel)
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"addnum","address", False) 
-		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"parcelfips","general", False)
-		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"zip4","address", True)
+		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"parcelfips","general", True)
+		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"taxrollyear","tax", True)
+		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"zipcode","address", False)
+		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"zip4","address", False)
 		#arcpy.AddMessage(currParcel.addressErrors)
 		#arcpy.AddMessage(str(totError.addressErrorCount))
 		totError,currParcel = Error.checkIsDuplicate(totError,currParcel,"parcelid","general", True, pinSkips, uniquePinList)
