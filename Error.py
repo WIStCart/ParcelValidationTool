@@ -15,8 +15,25 @@ class Error:
 		self.geometricErrorCount = 0
 		self.addressErrorCount = 0
 		self.taxErrorCount = 0
+		self.attributeFileErrors = []
+		self.geometricFileErrors = []
 
-	#Check if text value is a valid number(Error object, Parcel object, field to test, type of error to classify this as, are <Null>s are considered errors?)  
+	#Check if the coordinate reference system is consistent with that of the parcel initiative (Error object, feature class)
+	def checkCRS(Error,featureClass):
+		try:
+			desc = arcpy.Describe(featureClass)
+			spatialReference = desc.spatialReference
+			# Test for the Polygon feature class against the parcel project's, shape type, projection name, and units.
+			if desc.shapeType != "Polygon":
+				Error.geometricFileErrors.append("The feature class should be of polygon type instead of: " + desc.shapeType)
+			if spatialReference.name != "NAD_1983_HARN_Wisconsin_TM":
+				Error.geometricFileErrors.append("The feature class should be 'NAD_1983_HARN_Wisconsin_TM' instead of: " + spatialReference.name + " Please follow this documentation: http://www.sco.wisc.edu/images/stories/publications/V2/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf to project native data to the Statewide Parcel CRS")
+			return Error
+		except: # using generic error handling because we don't know what errors to expect yet.
+			Error.geometricFileErrors.append("The feature class's coordinate reference system could not be validated. Please ensure that the feature class is projected to the Statewide Parcel CRS. This documentation may be of use in projecting the dataset: http://www.sco.wisc.edu/images/stories/publications/V2/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf.")
+			return Error
+
+	#Check if text value is a valid number(Error object, Parcel object, field to test, type of error to classify this as, are <Null>s are considered errors?)
 	def checkNumericTextValue(Error,Parcel,field,errorType,acceptNull): 
 		try:
 			stringToTest = getattr(Parcel,field)
@@ -33,10 +50,11 @@ class Error:
 				else:
 					getattr(Parcel,errorType + "Errors").append("Null Found on " + field)
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-			return (Error, Parcel)
+				return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the" + field + "field. Please manually inspect this field's value.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
 
 	#Check if duplicates exist within an entire field(Error object, Parcel object, field to test, type of error to classify this as, are <Null>s are considered errors?, list of strings that are expected to be duplicates (to ignore), running list of strings to test against)  
 	def checkIsDuplicate(Error,Parcel,field,errorType,acceptNull,ignoreList,testList):
@@ -57,10 +75,12 @@ class Error:
 					pass
 				else:
 					getattr(Parcel,errorType + "Errors").append("Null Found on " + field)
-			return (Error, Parcel)
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the" + field + "field. Please manually inspect this field's value.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
 
 	#Will contain get, set, display methods
 

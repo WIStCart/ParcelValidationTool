@@ -5,7 +5,7 @@ import arcpy
 class Summary:
 
 	def __init__(self):
-		pass # placeholder
+		pass #placeholder
 
 	def writeSummaryTxt(Summary,outDirTxt,outName,totError):
 		#Write general error report to .txt
@@ -20,3 +20,10 @@ class Summary:
 		Summary.errorSummaryFile.write("	Address Errors: " + str(totError.addressErrorCount) + "\n")
 		Summary.errorSummaryFile.write("	Tax Errors: " + str(totError.taxErrorCount) + "\n")
 		Summary.errorSummaryFile.write("* Within: " + outDirTxt + "\\" + outName  + "\n")
+		Summary.errorSummaryFile.write("************************************************************************\n")
+		Summary.errorSummaryFile.write("In-line errors - The following lines explain any broad geometric errors that were found while validating your parcel dataset."+ "\n")
+		if len(totError.geometricFileErrors) != 0:
+			for geometricErrorMessage in totError.geometricFileErrors:
+				Summary.errorSummaryFile.write("	General geometric error: " + str(geometricErrorMessage) + "\n")
+		else:
+			Summary.errorSummaryFile.write(str(len(totError.geometricFileErrors))  + "* No broad-level geometric errors found!" + "\n")
