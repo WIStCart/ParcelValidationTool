@@ -18,7 +18,7 @@ class Error:
 		self.taxErrorCount = 0
 		self.attributeFileErrors = []
 		self.geometricFileErrors = []
-		self.geometricPlacementErrors = ["A condition was found on this feature class that is indicative of a re-projection error. Please see the following documentation: http://www.sco.wisc.edu/images/stories/publications/V2/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf for advice on how to project native data to the Statewide Parcel CRS."]
+		self.geometricPlacementErrors = ["Several parcel geometries appear to be spatially misplaced when comparing them against last year's parcel geometries. This issue is indicative of a re-projection error. Please see the following documentation: http://www.sco.wisc.edu/images/stories/publications/V2/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf for advice on how to project native data to the Statewide Parcel CRS."]
 		#other class variables
 		self.recordIterationCount = 0;
 		self.recordTotalCount = int(arcpy.GetCount_management(featureClass).getOutput(0)) # Total number of records in the feature class
@@ -34,11 +34,14 @@ class Error:
 				self.geometricPlacementErrors = []
 			else:
 				self.nextEnvelopeInterval = self.nextEnvelopeInterval + self.checkEnvelopeInterval
+		self,Parcel = self.testParcelGeometry(Parcel)
 		self.recordIterationCount += 1
 		return (self, Parcel)
 	
 	# Will test the row against LTSB's feature service to identify if the feature is in the correct location.   
 	def testCountyEnvelope(self,Parcel):
+		# For sake of saving time while developing, am setting this function to auto-return "Valid" because it takes about 1 min to execute each of these tests.
+		'''
 		baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP/PARCELS/FeatureServer/0/query"
 		where = str(Parcel.parcelid)
 		query = "?f=json&where=UPPER(PARCELID)%20=%20UPPER(%27{}%27)&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=OBJECTID%2CPARCELID%2CTAXPARCELID%2CCONAME%2CPARCELSRC&outSR=3071&resultOffset=0&resultRecordCount=10000".format(where)
@@ -56,6 +59,12 @@ class Error:
 					return "Valid"
 				else:
 					return "Not Confirmed"
+		'''
+		return "Valid"
+
+	def testParcelGeometry(self,Parcel):
+
+		return self,Parcel
 
 	#Check if the coordinate reference system is consistent with that of the parcel initiative (Error object, feature class)
 	def checkCRS(Error,featureClass):

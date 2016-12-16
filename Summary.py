@@ -28,5 +28,5 @@ class Summary:
 		if len(totError.geometricFileErrors) != 0:
 			for geometricErrorMessage in totError.geometricFileErrors:
 				Summary.errorSummaryFile.write("	General geometric error: " + str(geometricErrorMessage) + "\n")
-		else:
-			Summary.errorSummaryFile.write(str(len(totError.geometricFileErrors))  + "* No broad-level geometric errors found!" + "\n")
+		if (len(totError.geometricFileErrors) == 0) and (len(totError.geometricPlacementErrors) == 0):
+			Summary.errorSummaryFile.write("	*No broad-level geometric errors found!" + "\n")

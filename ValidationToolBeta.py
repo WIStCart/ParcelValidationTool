@@ -62,6 +62,7 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		#Construct the Parcel object for the row
 		currParcel = Parcel(row, fieldNames)
 		#Execute in-cursor error tests
+		totError,currParcel = Error.checkGeometricQuality(totError,currParcel)
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"addnum","address", True) 
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"parcelfips","general", False)
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"taxrollyear","tax", False)
