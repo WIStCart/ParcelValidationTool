@@ -13,7 +13,7 @@ outName = arcpy.GetParameterAsText(2)  #output feature class name
 outDirTxt = arcpy.GetParameterAsText(3)  #output directory error summary .txt file
 
 #Run Original checks
-totError = Error()
+totError = Error(in_fc)
 
 #list of field names 
 fieldNames = ["OID@","SHAPE@","STATEID","PARCELID","TAXPARCELID","PARCELDATE","TAXROLLYEAR",
@@ -21,7 +21,7 @@ fieldNames = ["OID@","SHAPE@","STATEID","PARCELID","TAXPARCELID","PARCELDATE","T
 "STREETTYPE","SUFFIX","LANDMARKNAME","UNITTYPE","UNITID","PLACENAME","ZIPCODE","ZIP4","STATE","SCHOOLDIST",
 "SCHOOLDISTNO","IMPROVED","CNTASSDVALUE","LNDVALUE","IMPVALUE","FORESTVALUE","ESTFMKVALUE","NETPRPTA","GRSPRPTA",
 "PROPCLASS","AUXCLASS","ASSDACRES","DEEDACRES","GISACRES","CONAME","LOADDATE","PARCELFIPS","PARCELSRC",
-"SHAPE@LENGTH","SHAPE@AREA","GeneralElementErrors","AddressElementErrors","TaxrollElementErrors","GeometricElementErrors"]
+"SHAPE@LENGTH","SHAPE@AREA","SHAPE@XY","GeneralElementErrors","AddressElementErrors","TaxrollElementErrors","GeometricElementErrors"]
 
 #list of non-parcelid values found in field to ignore when checking for dups
 pinSkips = ["ALLEY","CANAL","CE","CONDO","CREEK","CTH","CTH C","CTH G","CTH H","CTH H","GAP","HYDRO","LAKE","LCE","MARSH",
@@ -57,6 +57,7 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		#Construct the Parcel object for the row
 		currParcel = Parcel(row, fieldNames)
 		#Execute in-cursor error tests
+		totError,currParcel = Error.checkGeometricQuality(totError,currParcel) 
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"addnum","address", False) 
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"parcelfips","general", True)
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"taxrollyear","tax", True)

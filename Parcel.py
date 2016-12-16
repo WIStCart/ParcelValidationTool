@@ -55,6 +55,7 @@ class Parcel:
 		self.parcelsrc = row[fieldNames.index("PARCELSRC")]
 		self.shapeLength = row[fieldNames.index("SHAPE@LENGTH")]
 		self.shapeArea = row[fieldNames.index("SHAPE@AREA")]
+		self.shapeXY = row[fieldNames.index("SHAPE@XY")]
 		self.geometricErrors = []
 		self.addressErrors = []
 		self.taxErrors = []

@@ -1,4 +1,5 @@
 import arcpy
+import math
 from Parcel import Parcel
 # TODO
 # 1) Write exceptions on the function itself, per function. 
@@ -10,13 +11,51 @@ from Parcel import Parcel
 
 class Error:
 
-	def __init__(self):
+	def __init__(self,featureClass):
 		self.generalErrorCount = 0
 		self.geometricErrorCount = 0
 		self.addressErrorCount = 0
 		self.taxErrorCount = 0
 		self.attributeFileErrors = []
 		self.geometricFileErrors = []
+		self.geometricPlacementErrors = ["A condition was found on this feature class that is indicative of a re-projection error. Please see the following documentation: http://www.sco.wisc.edu/images/stories/publications/V2/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf for advice on how to project native data to the Statewide Parcel CRS."]
+		#other class variables
+		self.recordIterationCount = 0;
+		self.recordTotalCount = int(arcpy.GetCount_management(featureClass).getOutput(0)) # Total number of records in the feature class
+		self.checkEnvelopeInterval = math.trunc(self.recordTotalCount / 10) # Interval value used to apply 10 total checks on records at evenly spaced intervals throughout the dataset.
+		self.nextEnvelopeInterval = self.checkEnvelopeInterval
+
+	# Test records throughout the dataset to ensure that polygons exist within an actual county envelope ("Waukesha" issue or the "Lake Michigan" issue). 
+	def checkGeometricQuality(self,Parcel):
+		if self.nextEnvelopeInterval == self.recordIterationCount:
+			countyEnvelope = self.testCountyEnvelope(Parcel)
+			if countyEnvelope == "Valid": # would mean that the "Waukesha" issue or the "Lake Michigan" issue does not exist in this dataset.
+				self.nextEnvelopeInterval = 4000000
+				self.geometricPlacementErrors = []
+			else:
+				self.nextEnvelopeInterval = self.nextEnvelopeInterval + self.checkEnvelopeInterval
+		self.recordIterationCount += 1
+		return (self, Parcel)
+	
+	# Will test the row against LTSB's feature service to identify if the feature is in the correct location.   
+	def testCountyEnvelope(self,Parcel):
+		baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP/PARCELS/FeatureServer/0/query"
+		where = str(Parcel.parcelid)
+		query = "?f=json&where=UPPER(PARCELID)%20=%20UPPER(%27{}%27)&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=OBJECTID%2CPARCELID%2CTAXPARCELID%2CCONAME%2CPARCELSRC&outSR=3071&resultOffset=0&resultRecordCount=10000".format(where)
+		fsURL = baseURL + query
+		arcpy.AddMessage(fsURL)
+		fs = arcpy.FeatureSet()
+		fs.load(fsURL)
+		with arcpy.da.UpdateCursor(fs,["SHAPE@XY"]) as cursorLTSB:
+			for rowLTSB in cursorLTSB:
+				v2x = round(rowLTSB[0][0],2)
+				v1x = round(Parcel.shapeXY[0],2)
+				v2y = round(rowLTSB[0][1],2)
+				v1y = round(Parcel.shapeXY[1],2)
+				if (v2x == v1x) and (v2y == v1y):
+					return "Valid"
+				else:
+					return "Not Confirmed"
 
 	#Check if the coordinate reference system is consistent with that of the parcel initiative (Error object, feature class)
 	def checkCRS(Error,featureClass):

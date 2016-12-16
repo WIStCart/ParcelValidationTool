@@ -19,9 +19,12 @@ class Summary:
 		Summary.errorSummaryFile.write("	Geometric Errors: " + str(totError.geometricErrorCount) + "\n")
 		Summary.errorSummaryFile.write("	Address Errors: " + str(totError.addressErrorCount) + "\n")
 		Summary.errorSummaryFile.write("	Tax Errors: " + str(totError.taxErrorCount) + "\n")
-		Summary.errorSummaryFile.write("* Within: " + outDirTxt + "\\" + outName  + "\n")
+		Summary.errorSummaryFile.write("* Within: " + outDirTxt + "\\" + outName  + "\n") 
 		Summary.errorSummaryFile.write("************************************************************************\n")
 		Summary.errorSummaryFile.write("In-line errors - The following lines explain any broad geometric errors that were found while validating your parcel dataset."+ "\n")
+		if len(totError.geometricPlacementErrors) != 0:
+			for geometricErrorMessage in totError.geometricPlacementErrors:
+				Summary.errorSummaryFile.write("	General geometric error: " + str(geometricErrorMessage) + "\n")
 		if len(totError.geometricFileErrors) != 0:
 			for geometricErrorMessage in totError.geometricFileErrors:
 				Summary.errorSummaryFile.write("	General geometric error: " + str(geometricErrorMessage) + "\n")
