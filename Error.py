@@ -41,18 +41,18 @@ class Error:
 				if stringToTest.isdigit():
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("Error on " + field)
+					getattr(Parcel,errorType + "Errors").append("Error on " + field.upper())
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return (Error, Parcel)
 			else:
-				if acceptNull == False:
+				if acceptNull:
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("Null Found on " + field)
+					getattr(Parcel,errorType + "Errors").append("Null Found on " + field.upper())
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the" + field + "field. Please manually inspect this field's value.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the" + field.upper() + "field. Please inspect this field's value.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
@@ -65,22 +65,47 @@ class Error:
 					pass
 				else:
 					if stringToTest in testList:
-						getattr(Parcel,errorType + "Errors").append("Appears to be a duplicate value in " + field)
+						getattr(Parcel,errorType + "Errors").append("Appears to be a duplicate value in " + field.upper())
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					else:
 						testList.append(stringToTest)
 				return (Error, Parcel)
 			else:
-				if acceptNull == False:
+				if acceptNull:
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("Null Found on " + field)
+					getattr(Parcel,errorType + "Errors").append("Null Found on " + field.upper())
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the" + field + "field. Please manually inspect this field's value.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please inspect this field's value.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
+
+	#Check to see if a domain string is within a list (good) otherwise report to user it isn't found..
+	def checkDomainString(Error,Parcel,field,errorType,acceptNull,testList):
+		try:
+			stringToTest = getattr(Parcel,field)
+			if stringToTest is not None:
+				if stringToTest in testList:
+					pass
+				else:
+					getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " not in acceptable domain list.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				return (Error, Parcel)
+			else:
+				if acceptNull:
+					pass
+				else:
+					getattr(Parcel,errorType + "Errors").append("Null Found on " + field.upper())
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				return (Error, Parcel)
+		except: # using generic error handling because we don't know what errors to expect yet.
+			arcpy.AddMessage("Hitting except statement")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
+
 
 	#Will contain get, set, display methods
 

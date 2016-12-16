@@ -28,6 +28,11 @@ pinSkips = ["ALLEY","CANAL","CE","CONDO","CREEK","CTH","CTH C","CTH G","CTH H","
 "MOUND","NIR","NOPID","OL","OTHER","OUT","PARK","PIER","POND","PVT","RIVER","ROAD","ROW","RR","RVR","RW","STATE","STH","TBD",
 "TOA","TOB","TOF","TOJ","TOL","TOM","TOWN","TRAIL","TRIBE","UNK","USH","WALK","WATER","WELL","WET","WPS","WVIC"]
 
+#testing prefix domain list
+prefixDomains = ["CTH", "STH", "USH", "W CTH", "S CTH", "E CTH", "N CTH", "W STH", "S STH", "E STH", "N STH", "W USH", "S USH", "E USH", "N USH", "N", "E", "S", "W"]
+
+#testing suffix domain list
+suffixDomains = ["N", "E", "S", "W"]
 #lists for collecting parcelids and taxparcelids for checking for dups
 uniquePinList = []
 uniqueTaxparList = []
@@ -57,13 +62,15 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		#Construct the Parcel object for the row
 		currParcel = Parcel(row, fieldNames)
 		#Execute in-cursor error tests
-		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"addnum","address", False) 
-		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"parcelfips","general", True)
-		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"taxrollyear","tax", True)
-		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"zipcode","address", False)
-		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"zip4","address", False)
-		totError,currParcel = Error.checkIsDuplicate(totError,currParcel,"parcelid","general", False, pinSkips, uniquePinList)
-		totError,currParcel = Error.checkIsDuplicate(totError,currParcel,"taxparcelid","general", False, pinSkips, uniqueTaxparList)
+		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"addnum","address", True) 
+		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"parcelfips","general", False)
+		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"taxrollyear","tax", False)
+		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"zipcode","address", True)
+		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"zip4","address", True)
+		totError,currParcel = Error.checkIsDuplicate(totError,currParcel,"parcelid","general", True, pinSkips, uniquePinList)
+		totError,currParcel = Error.checkIsDuplicate(totError,currParcel,"taxparcelid","general", True, pinSkips, uniqueTaxparList)
+		totError,currParcel = Error.checkDomainString(totError,currParcel,"prefix","address",True, prefixDomains)
+		totError,currParcel = Error.checkDomainString(totError,currParcel,"suffix","address",True, suffixDomains)
 		
 		#End of loop, finalize errors with the writeErrors function, then clear parcel
 		currParcel.writeErrors(row,cursor, fieldNames)
