@@ -63,7 +63,29 @@ class Error:
 		return "Valid"
 
 	def testParcelGeometry(self,Parcel):
-
+		# Test for null geometries or other oddities 
+		try:
+			geom = Parcel.shape
+			xCent = geom.centroid.X
+			yCent = geom.centroid.Y
+		except:
+			Parcel.geometricErrors.append("The error observed is indicative of a corrupt parcel geometry. See <SITE> for detail on how to troubleshoot.")
+			self.geometricErrorCount =+ 1
+		try:
+			areaP = Parcel.shapeArea
+			lengthP = Parcel.shapeLength
+			if areaP < 0.01:
+				Parcel.geometricErrors.append("Short sliver polygon: AREA = " + str(areaP))
+				self.geometricErrorCount =+ 1
+			if lengthP < 0.01:
+				Parcel.geometricErrors.append("Polygon below threshold size: LENGTH = " + str(lengthP))
+				self.geometricErrorCount =+ 1
+			if (areaP/lengthP) < 0.01:
+				Parcel.geometricErrors.append("Long sliver polygon: AREA/LENGTH = " + str(areaP/lengthP))
+				self.geometricErrorCount =+ 1				
+		except:
+			Parcel.geometricErrors.append("The error observed is indicative of a corrupt parcel geometry. See <SITE> for detail on how to troubleshoot.")
+			self.geometricErrorCount =+ 1
 		return self,Parcel
 
 	#Check if the coordinate reference system is consistent with that of the parcel initiative (Error object, feature class)
