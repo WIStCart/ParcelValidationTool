@@ -2,3 +2,5 @@
 TestData/
 TestData.gdb/
 .gdb
+# "Compiled" python code
+.pyc
