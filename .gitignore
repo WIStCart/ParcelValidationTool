@@ -1,6 +1,6 @@
 # Test Data (Geodatabases .gdb)
 TestData/
 TestData.gdb/
-.gdb
+*.gdb
 # "Compiled" python code
-.pyc
+*.pyc
