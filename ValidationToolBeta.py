@@ -33,6 +33,10 @@ prefixDomains = ["CTH", "STH", "USH", "W CTH", "S CTH", "E CTH", "N CTH", "W STH
 
 #testing suffix domain list
 suffixDomains = ["N", "E", "S", "W"]
+
+#taxroll years to test (past,expected,future1,future2)
+taxRollYears = ['2015','2016','2017','2018']
+
 #lists for collecting parcelids and taxparcelids for checking for dups
 uniquePinList = []
 uniqueTaxparList = []
@@ -65,13 +69,14 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		totError,currParcel = Error.checkGeometricQuality(totError,currParcel)
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"addnum","address", True) 
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"parcelfips","general", False)
-		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"taxrollyear","tax", False)
+		#totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"taxrollyear","tax", False)
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"zipcode","address", True)
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"zip4","address", True)
 		totError,currParcel = Error.checkIsDuplicate(totError,currParcel,"parcelid","general", True, pinSkips, uniquePinList)
 		totError,currParcel = Error.checkIsDuplicate(totError,currParcel,"taxparcelid","general", True, pinSkips, uniqueTaxparList)
 		totError,currParcel = Error.checkDomainString(totError,currParcel,"prefix","address",True, prefixDomains)
 		totError,currParcel = Error.checkDomainString(totError,currParcel,"suffix","address",True, suffixDomains)
+		totError,currParcel = Error.trYear(totError,currParcel,"taxrollyear","parcelid","tax",False,pinSkips,taxRollYears)
 		#End of loop, finalize errors with the writeErrors function, then clear parcel
 		currParcel.writeErrors(row,cursor, fieldNames)
 		currParcel = None

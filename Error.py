@@ -20,6 +20,11 @@ class Error:
 		self.geometricFileErrors = []
 		self.geometricPlacementErrors = ["Several parcel geometries appear to be spatially misplaced when comparing them against last year's parcel geometries. This issue is indicative of a re-projection error. Please see the following documentation: http://www.sco.wisc.edu/images/stories/publications/V2/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf for advice on how to project native data to the Statewide Parcel CRS."]
 		#other class variables
+		self.pinSkipCount = 0
+		self.trYearPast = 0
+		self.trYearExpected = 0
+		self.trYearFuture = 0
+		self.trYearOther = 0
 		self.recordIterationCount = 0;
 		self.recordTotalCount = int(arcpy.GetCount_management(featureClass).getOutput(0)) # Total number of records in the feature class
 		self.checkEnvelopeInterval = math.trunc(self.recordTotalCount / 10) # Interval value used to apply 10 total checks on records at evenly spaced intervals throughout the dataset.
@@ -171,11 +176,39 @@ class Error:
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
-			arcpy.AddMessage("Hitting except statement")
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
+	#Check to see if taxroll year provided is what expected, old, future or other value (which we plan to ask for explaination in submission form...)
+	def trYear(Error,Parcel,field,pinField,errorType,acceptNull,ignoreList,acceptYears):
+		try:
+			stringToTest = getattr(Parcel,field)
+			pinToTest = getattr(Parcel,pinField)
+			if stringToTest is not None:
+				if stringToTest == acceptYears[0]:
+					Error.trYearPast += 1
+				elif stringToTest == acceptYears[1]:
+					Error.trYearExpected += 1
+				elif stringToTest == acceptYears[2] or stringToTest == acceptYears[3]:
+					Error.trYearFuture += 1
+				else:
+					Error.trYearOther += 1
+				return (Error, Parcel)
+			else:
+				if acceptNull:
+					pass
+				else:
+					if pinToTest in ignoreList:
+						Error.pinSkipCount += 1
+					else:
+						getattr(Parcel,errorType + "Errors").append("Extra.....Null Found on " + field.upper() + " field and value is expected.")
+						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+			return (Error, Parcel)
+		except: # using generic error handling because we don't know what errors to expect yet.
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
 
 	#Will contain get, set, display methods
 
