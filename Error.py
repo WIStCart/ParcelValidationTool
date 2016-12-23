@@ -202,7 +202,7 @@ class Error:
 					if pinToTest in ignoreList:
 						Error.pinSkipCount += 1
 					else:
-						getattr(Parcel,errorType + "Errors").append("Extra.....Null Found on " + field.upper() + " field and value is expected.")
+						getattr(Parcel,errorType + "Errors").append("Null Found on " + field.upper() + " field and value is expected.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 			return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
@@ -210,6 +210,35 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
+
+
+
+	def streetNameCheck(Error,Parcel,field,siteAddField,errorType,acceptNull,stnamelist):
+		try:
+			stringToTest = getattr(Parcel,field)
+			siteAddToTest = getattr(Parcel,siteAddField)
+			if stringToTest is not None:
+				if stringToTest in stnamelist:
+					pass
+				else:
+					getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " does not appear in list created from V2 data. Please verify this value is correct.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				return(Error, Parcel)
+			else:
+				if siteAddToTest is not None and stringToTest is None:
+					getattr(Parcel,errorType + "Errors").append(field.upper() + " is Null, but " + siteAddField.upper() + " is populated.  Please ensure elements are in the appropriate field.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				return(Error, Parcel)
+				if acceptNull:
+					pass
+				else:
+					getattr(Parcel,errorType + "Errors").append("Null Found on " + field.upper() + " field and value is expected.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				return (Error, Parcel)
+		except: # using generic error handling because we don't know what errors to expect yet.
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
 	#Will contain get, set, display methods
 
 	#Any other total error report data will go here

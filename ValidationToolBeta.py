@@ -15,6 +15,9 @@ outDirTxt = arcpy.GetParameterAsText(3)  #output directory error summary .txt fi
 #Run Original checks
 totError = Error(in_fc)
 
+#reading in csv of StreetNames
+streetNames = [line.strip() for line in open('C:\WorkSpace\V3_Working\V3ValidationTool\V2_StreetName_Simplified.txt', 'r')]
+
 #list of field names 
 fieldNames = ["OID@","SHAPE@","STATEID","PARCELID","TAXPARCELID","PARCELDATE","TAXROLLYEAR",
 "OWNERNME1","OWNERNME2","PSTLADRESS","SITEADRESS","ADDNUMPREFIX","ADDNUM","ADDNUMSUFFIX","PREFIX","STREETNAME",
@@ -77,6 +80,7 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		totError,currParcel = Error.checkDomainString(totError,currParcel,"prefix","address",True, prefixDomains)
 		totError,currParcel = Error.checkDomainString(totError,currParcel,"suffix","address",True, suffixDomains)
 		totError,currParcel = Error.trYear(totError,currParcel,"taxrollyear","parcelid","tax",False,pinSkips,taxRollYears)
+		totError,currParcel = Error.streetNameCheck(totError,currParcel,"streetname","siteadd","address",True,streetNames)
 		#End of loop, finalize errors with the writeErrors function, then clear parcel
 		currParcel.writeErrors(row,cursor, fieldNames)
 		currParcel = None
