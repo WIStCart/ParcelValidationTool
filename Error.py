@@ -212,7 +212,7 @@ class Error:
 
 
 
-
+	#Check to see if street name provided is within a list created from V2.
 	def streetNameCheck(Error,Parcel,field,siteAddField,errorType,acceptNull,stnamelist):
 		try:
 			stringToTest = getattr(Parcel,field)
@@ -239,6 +239,35 @@ class Error:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
+
+
+
+	def zipCheck(Error,Parcel,field,errorType,acceptNull):
+		try:
+			stringToTest = getattr(Parcel,field)
+			if stringToTest is not None:
+				if len(stringToTest) == 5 and stringToTest[0] == '5':
+					pass
+				else:
+					getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " is either not 5 digits long or does not appear to be a Wisconsin zipcode.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				return(Error,Parcel)
+			else:
+				if acceptNull:
+					pass
+				else:
+					getattr(Parcel,errorType + "Errors").append("Null Found on " + field.upper() + " field and value is expected.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				return (Error, Parcel)
+		except: # using generic error handling because we don't know what errors to expect yet.
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
+
+
+
+
+
 	#Will contain get, set, display methods
 
 	#Any other total error report data will go here

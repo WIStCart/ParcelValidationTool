@@ -55,7 +55,7 @@ arcpy.FeatureClassToFeatureClass_conversion(in_fc,dynamic_workspace, "WORKING")
 #Adding new fields for error reporting.  We can change names, lenght, etc...
 arcpy.AddMessage("Adding Error Fields")
 arcpy.AddField_management(output_fc_temp,"GeneralElementErrors", "TEXT", "", "", 250)
-arcpy.AddField_management(output_fc_temp,"AddressElementErrors", "TEXT", "", "", 250)
+arcpy.AddField_management(output_fc_temp,"AddressElementErrors", "TEXT", "", "", 500)
 arcpy.AddField_management(output_fc_temp,"TaxrollElementErrors", "TEXT", "", "", 250)
 arcpy.AddField_management(output_fc_temp,"GeometricElementErrors", "TEXT", "", "", 250)
 
@@ -81,6 +81,7 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		totError,currParcel = Error.checkDomainString(totError,currParcel,"suffix","address",True, suffixDomains)
 		totError,currParcel = Error.trYear(totError,currParcel,"taxrollyear","parcelid","tax",False,pinSkips,taxRollYears)
 		totError,currParcel = Error.streetNameCheck(totError,currParcel,"streetname","siteadd","address",True,streetNames)
+		totError,currParcel = Error.zipCheck(totError,currParcel,"zipcode","address",True)
 		#End of loop, finalize errors with the writeErrors function, then clear parcel
 		currParcel.writeErrors(row,cursor, fieldNames)
 		currParcel = None
