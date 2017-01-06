@@ -26,6 +26,51 @@ fieldNames = ["OID@","SHAPE@","STATEID","PARCELID","TAXPARCELID","PARCELDATE","T
 "PROPCLASS","AUXCLASS","ASSDACRES","DEEDACRES","GISACRES","CONAME","LOADDATE","PARCELFIPS","PARCELSRC",
 "SHAPE@LENGTH","SHAPE@AREA","SHAPE@XY","GeneralElementErrors","AddressElementErrors","TaxrollElementErrors","GeometricElementErrors"]
 
+#bad characters dictionary
+fieldNamesBadChars = {
+"PARCELID": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")"],
+"TAXPARCELID": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")"],
+"PARCELDATE": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\-"],
+"TAXROLLYEAR": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',"\-"],
+"OWNERNME1": ["\n","\r"],
+"OWNERNME2": ["\n","\r"],
+"PSTLADRESS": ["\n","\r"],
+"SITEADRESS": ["\n","\r"],
+"ADDNUMPREFIX": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"],
+"ADDNUM": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"],
+"ADDNUMSUFFIX": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"],
+"PREFIX": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"],
+"STREETNAME": ["\n","\r","$","^","=","<",">","@","#","%","&","?","!","*","~","(",")"],
+"STREETTYPE": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"],
+"SUFFIX": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"],
+"LANDMARKNAME": ["\n","\r"],
+"UNITTYPE": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"],
+"UNITID": ["\n","\r","$","^","=","<",">","@","%","&","?","`","!","*","~","(",")","\\",'/',','],
+"PLACENAME": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"],
+"ZIPCODE": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"],
+"ZIP4": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"],
+"STATE": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"],
+"SCHOOLDIST": ["\n","\r","$","^","=","<",">","@","#","%","&","?","!","*","~","(",")","\\",'/',','],
+"SCHOOLDISTNO": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"],
+"IMPROVED": ["\n","\r","$","^","=","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"],
+"CNTASSDVALUE": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',',"\-"],
+"LNDVALUE": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',',"\-"],
+"IMPVALUE": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',',"\-"],
+"FORESTVALUE": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',',"\-"],
+"ESTFMKVALUE": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',',"\-"],
+"NETPRPTA": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',',"\-"],
+"GRSPRPTA": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',',"\-"],
+"PROPCLASS": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/','.',"\-"],
+"AUXCLASS": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/','.',"\-"],
+"ASSDACRES": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',',"\-"],
+"DEEDACRES": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',',"\-"],
+"GISACRES": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',',"\-"],
+"CONAME": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',',"\-"],
+"LOADDATE": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")",',','.','\-'],
+"PARCELFIPS": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"],
+"PARCELSRC": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"]
+}
+
 #list of non-parcelid values found in field to ignore when checking for dups
 pinSkips = ["ALLEY","CANAL","CE","CONDO","CREEK","CTH","CTH C","CTH G","CTH H","CTH H","GAP","HYDRO","LAKE","LCE","MARSH",
 "MOUND","NIR","NOPID","OL","OTHER","OUT","PARK","PIER","POND","PVT","RIVER","ROAD","ROW","RR","RVR","RW","STATE","STH","TBD",
@@ -54,10 +99,10 @@ arcpy.FeatureClassToFeatureClass_conversion(in_fc,dynamic_workspace, "WORKING")
 
 #Adding new fields for error reporting.  We can change names, lenght, etc...
 arcpy.AddMessage("Adding Error Fields")
-arcpy.AddField_management(output_fc_temp,"GeneralElementErrors", "TEXT", "", "", 250)
-arcpy.AddField_management(output_fc_temp,"AddressElementErrors", "TEXT", "", "", 500)
-arcpy.AddField_management(output_fc_temp,"TaxrollElementErrors", "TEXT", "", "", 250)
-arcpy.AddField_management(output_fc_temp,"GeometricElementErrors", "TEXT", "", "", 250)
+arcpy.AddField_management(output_fc_temp,"GeneralElementErrors", "TEXT", "", "", 1000)
+arcpy.AddField_management(output_fc_temp,"AddressElementErrors", "TEXT", "", "", 1000)
+arcpy.AddField_management(output_fc_temp,"TaxrollElementErrors", "TEXT", "", "", 1000)
+arcpy.AddField_management(output_fc_temp,"GeometricElementErrors", "TEXT", "", "", 1000)
 
 #Call all pre-cursor test functions
 totError = Error.checkCRS(totError, output_fc_temp)
@@ -83,6 +128,7 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		totError,currParcel = Error.streetNameCheck(totError,currParcel,"streetname","siteadd","address",True,streetNames)
 		totError,currParcel = Error.zipCheck(totError,currParcel,"zipcode","address",True)
 		totError,currParcel = Error.impCheck(totError,currParcel,"improved","impvalue","tax")
+		totError,currParcel = Error.badChars(totError,currParcel,fieldNames,fieldNamesBadChars,'general')
 		#End of loop, finalize errors with the writeErrors function, then clear parcel
 		currParcel.writeErrors(row,cursor, fieldNames)
 		currParcel = None

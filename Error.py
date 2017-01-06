@@ -1,6 +1,7 @@
 import arcpy
 import math
 from Parcel import Parcel
+import re
 # TODO
 # 1) Write exceptions on the function itself, per function. 
 #		a) Include errors in-line with the row (just like all other errors)      
@@ -286,8 +287,26 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
+	
+	#checking strings for unacceptable chars including /n, /r, etc...
+	def badChars(Error,Parcel,fieldNamesList,charDict,errorType):
+		try:
+			for f in fieldNamesList:
+				if f in charDict:
+					testRegex = str(charDict[f]).replace(",",'').replace("'","").replace('"','').replace(" ","")
+					stringToTest = str(getattr(Parcel,f.lower()))
+					if stringToTest is not None:
+						if re.search(testRegex,stringToTest) is not None:
+							getattr(Parcel,errorType + "Errors").append("Bad characters found in " + f.upper())
+							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+			return (Error, Parcel)
+		except:
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
 
-	#Adding just a test comment...
+
+	
 
 	#Will contain get, set, display methods
 
