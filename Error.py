@@ -305,6 +305,35 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
+	#checking propclass and auxclass for acceptable domains and duplicate values
+	def classOfPropCheck(Error,Parcel,field,domainList,errorType,acceptNull):
+		try:
+			stringToTest = getattr(Parcel,field)
+			testList = []
+			if stringToTest is not None:
+				checkVal = stringToTest.split(",")
+				for val in checkVal:
+					if val.strip() not in domainList:
+						getattr(Parcel,errorType + "Errors").append("A value provided in " + field.upper() + " field is not in acceptable domain list.")
+						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					elif val.strip() in testList:
+						getattr(Parcel,errorType + "Errors").append("Duplicate values exist in " + field.upper() + " field.")
+						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					else:
+						testList.append(val.strip())
+				return(Error,Parcel)
+			else:
+				if acceptNull:
+					pass
+				else:
+					getattr(Parcel,errorType + "Errors").append("Null Found on " + field.upper())
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				return(Error,Parcel)
+		except:
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
+
 
 	
 
