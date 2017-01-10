@@ -11,11 +11,12 @@ in_fc = arcpy.GetParameterAsText(0)  #input feature class
 outDir = arcpy.GetParameterAsText(1)  #output directory location
 outName = arcpy.GetParameterAsText(2)  #output feature class name
 outDirTxt = arcpy.GetParameterAsText(3)  #output directory error summary .txt file
+coName = arcpy.GetParameterAsText(4)  #name of county making submission
 
 #Run Original checks
-totError = Error(in_fc)
+totError = Error(in_fc,coName)
 
-#reading in csv of StreetNames
+#reading in txt file of StreetNames
 streetNames = [line.strip() for line in open('C:\WorkSpace\V3_Working\V3ValidationTool\V2_StreetName_Simplified.txt', 'r')]
 
 #list of field names 
@@ -92,6 +93,27 @@ copDomains = ['1','2','3','4','5','6','7','5M']
 auxDomins = ['W1','W2','W3','W4','W5','W6','W7','W8','X1','X2','X3','X4']
 
 
+#schooldist and schooldistno dictionaries
+reader = csv.reader(open('C:\WorkSpace\V3_Working\V3ValidationTool\school_district_codes.csv'))
+schoolDist_nameNo_dict = {}
+schoolDist_noName_dict = {}
+for row in reader:
+   k, v = row
+   schoolDist_noName_dict[k] = v
+   schoolDist_nameNo_dict[v] = k
+
+arcpy.AddMessage("School Dist Dictionaries created...")
+
+#CONAME and FIPS dictionaries
+reader = csv.reader(open('C:\WorkSpace\V3_Working\V3ValidationTool\CoNameFips.csv'))
+county_nameNo_dict = {}
+county_noName_dict = {}
+for row in reader:
+	k, v = row
+	county_nameNo_dict[k] = v
+	county_noName_dict[v] = k
+
+
 
 #lists for collecting parcelids and taxparcelids for checking for dups
 uniquePinList = []
@@ -133,12 +155,13 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		totError,currParcel = Error.checkDomainString(totError,currParcel,"prefix","address",True, prefixDomains)
 		totError,currParcel = Error.checkDomainString(totError,currParcel,"suffix","address",True, suffixDomains)
 		totError,currParcel = Error.trYear(totError,currParcel,"taxrollyear","parcelid","tax",False,pinSkips,taxRollYears)
-		totError,currParcel = Error.streetNameCheck(totError,currParcel,"streetname","siteadd","address",True,streetNames)
+		totError,currParcel = Error.streetNameCheck(totError,currParcel,"streetname","siteadress","address",True,streetNames)
 		totError,currParcel = Error.zipCheck(totError,currParcel,"zipcode","address",True)
 		totError,currParcel = Error.impCheck(totError,currParcel,"improved","impvalue","tax")
 		totError,currParcel = Error.badChars(totError,currParcel,fieldNames,fieldNamesBadChars,'general')
 		totError,currParcel = Error.classOfPropCheck(totError,currParcel,'propclass',copDomains,'tax',True)
 		totError,currParcel = Error.classOfPropCheck(totError,currParcel,'auxclass',auxDomins,'tax',True)
+		totError,currParcel = Error.matchContrib(totError,currParcel,"coname","parcelfips","parcelsrc",county_nameNo_dict,county_noName_dict,"general",False)
 		#End of loop, finalize errors with the writeErrors function, then clear parcel
 		currParcel.writeErrors(row,cursor, fieldNames)
 		currParcel = None

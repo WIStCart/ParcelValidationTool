@@ -12,7 +12,8 @@ import re
 
 class Error:
 
-	def __init__(self,featureClass):
+	def __init__(self,featureClass,coName):
+		self.coName = coName
 		self.generalErrorCount = 0
 		self.geometricErrorCount = 0
 		self.addressErrorCount = 0
@@ -26,6 +27,9 @@ class Error:
 		self.trYearExpected = 0
 		self.trYearFuture = 0
 		self.trYearOther = 0
+		self.coNameMiss = 0
+		self.fipsMiss = 0
+		self.srcMiss = 0
 		self.recordIterationCount = 0;
 		self.recordTotalCount = int(arcpy.GetCount_management(featureClass).getOutput(0)) # Total number of records in the feature class
 		self.checkEnvelopeInterval = math.trunc(self.recordTotalCount / 10) # Interval value used to apply 10 total checks on records at evenly spaced intervals throughout the dataset.
@@ -335,7 +339,52 @@ class Error:
 		return (Error, Parcel)
 
 
-	
+	def matchContrib(Error,Parcel,coNamefield,fipsfield,srcfield,coNameDict,coNumberDict,errorType,acceptNull):
+		try:
+			coNameToTest = getattr(Parcel,coNamefield)
+			fipsToTest = getattr(Parcel,fipsfield)
+			srcToTest = getattr(Parcel,srcfield)
+			if coNameToTest is not None:
+				if coNameToTest != Error.coName:
+					getattr(Parcel,errorType + "Errors").append("The value provided in " + coNamefield.upper() + " field does not match expected county name.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+			else:
+				if acceptNull:
+					pass
+				else:
+					Error.coNameMiss += 1
+			if fipsToTest is not None:
+				try: 
+					if fipsToTest != coNameDict[Error.coName + " COUNTY"]:
+						getattr(Parcel,errorType + "Errors").append("The value provided in " + fipsfield.upper() + " field does not match submitting county fips.")
+						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				except:
+					getattr(Parcel,errorType + "Errors").append("The value provided in " + srcfield.upper() + " field does not appear to meet required domains.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+			else:
+				if acceptNull:
+					pass
+				else:
+					Error.fipsMiss += 1
+			if srcToTest is not None:
+				try:
+					if srcToTest != coNumberDict[coNameDict[Error.coName + " COUNTY"]]:
+						getattr(Parcel,errorType + "Errors").append("The value provided in " + srcfield.upper() + " field does not match submitting county name.")
+						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				except:
+					getattr(Parcel,errorType + "Errors").append("The value provided in " + fipsfield.upper() + " field does not appear to meet required domains.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+			else:
+				if acceptNull:
+					pass
+				else:
+					Error.srcMiss += 1
+			return(Error,Parcel)
+		except:
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
+
 
 	#Will contain get, set, display methods
 
