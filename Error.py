@@ -338,7 +338,7 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
-
+	#checking CONAME, PARCELFIPS and PARCELSRC fields to ensure they match expected and meet domain requirements
 	def matchContrib(Error,Parcel,coNamefield,fipsfield,srcfield,coNameDict,coNumberDict,errorType,acceptNull):
 		try:
 			coNameToTest = getattr(Parcel,coNamefield)
@@ -384,6 +384,41 @@ class Error:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
+
+	#checking values provided in SCHOOLDISTNO and SCHOOLDIST field to ensure they are in our domain list and represent the same school dist (if both provided)
+	def schoolDistCheck(Error,Parcel,pinField,schDistField,schDistNoField,schNoNameDict,schNameNoDict,errorType,acceptNull):
+		schNo = getattr(Parcel,schDistNoField)
+		schNa = getattr(Parcel,schDistField)
+		pinToTest = getattr(Parcel,pinField)
+		if schNo is not None:
+			if len(schNo) != 4:
+				getattr(Parcel,errorType + "Errors").append("The value provided in " + schDistNoField.upper() + " is not expected length (4 digits).  Please correct.")
+				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+			if schNa is None:
+				if schNo not in schNoNameDict:
+					getattr(Parcel,errorType + "Errors").append("The value provided in " + schDistNoField.upper() + " is not within the acceptable domain list. Please verify value.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+			if schNa is not None:
+				try:
+					schNa = schNa.replace("SCHOOL DISTRICT", "").replace("SCHOOL DIST","").replace("SCHOOL DIST.", "").replace("SCH DIST", "").replace("SCHOOL", "").replace("SCH D OF", "").replace("SCH", "").replace("SD", "").strip()
+					if schNo != schNameNoDict[schNa] or schNa != schNoNameDict[schNo]:
+						getattr(Parcel,errorType + "Errors").append("The values provided in " + schDistNoField.upper() + " and " + schDistField.upper() + " field do not match. Please verify values are in acceptable domain list.")
+						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				except:
+					getattr(Parcel,errorType + "Errors").append("A value in " + schDistNoField.upper() + " or " + schDistField.upper() + " is not within the acceptable domain list.  Please correct.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+			return (Error,Parcel)
+		else:
+			if acceptNull:
+				pass
+			else:
+				if pinToTest in ignoreList:
+					pass
+				else:
+					getattr(Parcel,errorType + "Errors").append("Null Found on " + schDistNoField.upper() + " field and value is expected.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return(Error,Parcel)
+
 
 
 	#Will contain get, set, display methods

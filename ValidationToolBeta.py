@@ -87,10 +87,10 @@ suffixDomains = ["N", "E", "S", "W"]
 taxRollYears = ['2015','2016','2017','2018']
 
 #acceptable COP domains
-copDomains = ['1','2','3','4','5','6','7','5M']
+copDomains = ['1','2','3','4','5','6','7','5M','M']
 
 #acceptable AUXCOP domains
-auxDomins = ['W1','W2','W3','W4','W5','W6','W7','W8','X1','X2','X3','X4']
+auxDomins = ['W1','W2','W3','W4','W5','W6','W7','W8','X1','X2','X3','X4','M']
 
 
 #schooldist and schooldistno dictionaries
@@ -162,6 +162,7 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		totError,currParcel = Error.classOfPropCheck(totError,currParcel,'propclass',copDomains,'tax',True)
 		totError,currParcel = Error.classOfPropCheck(totError,currParcel,'auxclass',auxDomins,'tax',True)
 		totError,currParcel = Error.matchContrib(totError,currParcel,"coname","parcelfips","parcelsrc",county_nameNo_dict,county_noName_dict,"general",False)
+		totError,currParcel = Error.schoolDistCheck(totError,currParcel,"parcelid","schooldist","schooldistno",schoolDist_noName_dict,schoolDist_nameNo_dict,"tax",False)
 		#End of loop, finalize errors with the writeErrors function, then clear parcel
 		currParcel.writeErrors(row,cursor, fieldNames)
 		currParcel = None
