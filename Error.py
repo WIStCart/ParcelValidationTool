@@ -421,6 +421,8 @@ class Error:
 
 
 
+
+
 	#Will contain get, set, display methods
 
 	#Any other total error report data will go here

@@ -2,6 +2,7 @@ import arcpy
 from Parcel import Parcel
 from Error import Error
 from Summary import Summary
+from sys import exit
 import os
 import re
 import csv
@@ -26,6 +27,51 @@ fieldNames = ["OID@","SHAPE@","STATEID","PARCELID","TAXPARCELID","PARCELDATE","T
 "SCHOOLDISTNO","IMPROVED","CNTASSDVALUE","LNDVALUE","IMPVALUE","FORESTVALUE","ESTFMKVALUE","NETPRPTA","GRSPRPTA",
 "PROPCLASS","AUXCLASS","ASSDACRES","DEEDACRES","GISACRES","CONAME","LOADDATE","PARCELFIPS","PARCELSRC",
 "SHAPE@LENGTH","SHAPE@AREA","SHAPE@XY","GeneralElementErrors","AddressElementErrors","TaxrollElementErrors","GeometricElementErrors"]
+
+schemaReq = {
+	'STATEID':['String',100],
+	'PARCELID':['String',100],
+	'TAXPARCELID':['String',100],
+	'PARCELDATE':['String',25],
+	'TAXROLLYEAR':['String',10],
+	'OWNERNME1':['String',254],
+	'OWNERNME2':['String',254],
+	'PSTLADRESS':['String',200],
+	'SITEADRESS':['String',200],
+	'ADDNUMPREFIX':['String',50],
+	'ADDNUM':['String',50],
+	'ADDNUMSUFFIX':['String',50],
+	'PREFIX':['String',50],
+	'STREETNAME':['String',50],
+	'STREETTYPE':['String',50],
+	'SUFFIX':['String',50],
+	'LANDMARKNAME':['String',50],
+	'UNITTYPE':['String',50],
+	'UNITID':['String',50],
+	'PLACENAME':['String',100],
+	'ZIPCODE':['String',50],
+	'ZIP4':['String',50],
+	'STATE':['String',50],
+	'SCHOOLDIST':['String',50],
+	'SCHOOLDISTNO':['String',50],
+	'IMPROVED':['String',10],
+	'CNTASSDVALUE':['String',50],
+	'LNDVALUE':['String',50],
+	'IMPVALUE':['String',50],
+	'FORESTVALUE':['String',50],
+	'ESTFMKVALUE':['String',50],
+	'NETPRPTA':['String',50],
+	'GRSPRPTA':['String',50],
+	'PROPCLASS':['String',150],
+	'AUXCLASS':['String',150],
+	'ASSDACRES':['String',50],
+	'DEEDACRES':['String',50],
+	'GISACRES':['String',50],
+	'CONAME':['String',50],
+	'LOADDATE':['String',10],
+	'PARCELFIPS':['String',10],
+	'PARCELSRC':['String',50],
+}
 
 #bad characters dictionary
 fieldNamesBadChars = {
@@ -127,12 +173,48 @@ arcpy.Delete_management("in_memory")
 dynamic_workspace = "in_memory"
 arcpy.FeatureClassToFeatureClass_conversion(in_fc,dynamic_workspace, "WORKING")
 
+# Check feature class for all expected fields, note fields that don't match requirements or excess fields that need to be removed...
+arcpy.AddMessage("Checking for all fields")
+fieldList = arcpy.ListFields(output_fc_temp)
+fieldDictNames = {}
+missingFields = []
+excessFields = []
+var = True
+fieldListPass = ["OID","SHAPE","SHAPE_LENGTH","SHAPE_AREA","SHAPE_XY"]
+for field in fieldList:
+        fieldDictNames[field.name] = [field.type,field.length]
+
+for field in fieldDictNames:
+	if field.upper() not in fieldListPass:
+		if field not in schemaReq.keys():
+			excessFields.append(field)
+			var = False
+		elif fieldDictNames[field] != schemaReq[field]:
+			missingFields.append(field)
+			var = False
+
+if var == False:	
+	arcpy.AddMessage("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+	arcpy.AddMessage("A NUMBER OF FIELDS DO NOT MEET THE PARCEL SCHEMA REQUIREMENTS.\n")
+	if len(missingFields) > 0:
+		arcpy.AddMessage("THE PROBLEMATIC FIELDS INCLUDE: (" + str(missingFields).strip("[").strip("]").replace('u','') + ")\n")
+		arcpy.AddMessage("------->> PLEASE CHECK TO MAKE SURE THE NAMES, DATA TYPES, AND LENGTHS MATCH THE SCHEMA REQUIREMENTS.\n")
+	if len(excessFields) > 0:
+		arcpy.AddMessage("THE EXCESS FIELDS INCLUDE: (" + str(excessFields).strip("[").strip("]").replace('u','') + ")\n")
+		arcpy.AddMessage("------->> PLEASE REMOVED FIELDS THAT ARE NOT IN THE PARCEL ATTRIBUTE SCHEMA.\n")
+	arcpy.AddMessage("PLEASE MAKE NEEDED ALTERATIONS TO THESE FIELDS AND RUN THE TOOL AGAIN.\n")
+	arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+	exit()
+
 #Adding new fields for error reporting.  We can change names, lenght, etc...
 arcpy.AddMessage("Adding Error Fields")
 arcpy.AddField_management(output_fc_temp,"GeneralElementErrors", "TEXT", "", "", 1000)
 arcpy.AddField_management(output_fc_temp,"AddressElementErrors", "TEXT", "", "", 1000)
 arcpy.AddField_management(output_fc_temp,"TaxrollElementErrors", "TEXT", "", "", 1000)
 arcpy.AddField_management(output_fc_temp,"GeometricElementErrors", "TEXT", "", "", 1000)
+
+#Call all pre-cursor test functions
+totError = Error.checkCRS(totError, output_fc_temp)
 
 #Call all pre-cursor test functions
 totError = Error.checkCRS(totError, output_fc_temp)
