@@ -51,25 +51,28 @@ class Error:
 	# Will test the row against LTSB's feature service to identify if the feature is in the correct location.   
 	def testCountyEnvelope(self,Parcel):
 		# For sake of saving time while developing, am setting this function to auto-return "Valid" because it takes about 1 min to execute each of these tests.
-		'''
-		baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP/PARCELS/FeatureServer/0/query"
-		where = str(Parcel.parcelid)
-		query = "?f=json&where=UPPER(PARCELID)%20=%20UPPER(%27{}%27)&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=OBJECTID%2CPARCELID%2CTAXPARCELID%2CCONAME%2CPARCELSRC&outSR=3071&resultOffset=0&resultRecordCount=10000".format(where)
-		fsURL = baseURL + query
-		arcpy.AddMessage(fsURL)
-		fs = arcpy.FeatureSet()
-		fs.load(fsURL)
-		with arcpy.da.UpdateCursor(fs,["SHAPE@XY"]) as cursorLTSB:
-			for rowLTSB in cursorLTSB:
-				v2x = round(rowLTSB[0][0],2)
-				v1x = round(Parcel.shapeXY[0],2)
-				v2y = round(rowLTSB[0][1],2)
-				v1y = round(Parcel.shapeXY[1],2)
-				if (v2x == v1x) and (v2y == v1y):
-					return "Valid"
-				else:
-					return "Not Confirmed"
-		'''
+		'''try:
+			baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP/PARCELS/FeatureServer/0/query"
+			where = str(Parcel.parcelid)
+			query = "?f=json&where=UPPER(PARCELID)%20=%20UPPER(%27{}%27)&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=OBJECTID%2CPARCELID%2CTAXPARCELID%2CCONAME%2CPARCELSRC&outSR=3071&resultOffset=0&resultRecordCount=10000".format(where)
+			fsURL = baseURL + query
+			arcpy.AddMessage(fsURL)
+			fs = arcpy.FeatureSet()
+			fs.load(fsURL)
+			with arcpy.da.UpdateCursor(fs,["SHAPE@XY"]) as cursorLTSB:
+				for rowLTSB in cursorLTSB:
+					v2x = round(rowLTSB[0][0],2)
+					v1x = round(Parcel.shapeXY[0],2)
+					v2y = round(rowLTSB[0][1],2)
+					v1y = round(Parcel.shapeXY[1],2)
+					if (v2x == v1x) and (v2y == v1y):
+						return "Valid"
+					else:
+						return "Not Confirmed"
+			# Call it valid If the query returns no features (failure to return features would not be caused by a misalignment) 
+			return "Valid" 
+		except:
+			# Call it valid if an error happens (error would not be caused by a misalignment) '''
 		return "Valid"
 
 	def testParcelGeometry(self,Parcel):
@@ -79,22 +82,22 @@ class Error:
 			xCent = geom.centroid.X
 			yCent = geom.centroid.Y
 		except:
-			Parcel.geometricErrors.append("The error observed is indicative of a corrupt parcel geometry. See <SITE> for detail on how to troubleshoot.")
+			Parcel.geometricErrors.append("Corrupt Geometry: The feature's geometry could not be accessed.")
 			self.geometricErrorCount =+ 1
 		try:
 			areaP = Parcel.shapeArea
 			lengthP = Parcel.shapeLength
 			if areaP < 0.01:
-				Parcel.geometricErrors.append("Short sliver polygon: AREA = " + str(areaP))
+				Parcel.geometricErrors.append("Sliver Polygon: AREA")
 				self.geometricErrorCount =+ 1
 			if lengthP < 0.01:
-				Parcel.geometricErrors.append("Polygon below threshold size: LENGTH = " + str(lengthP))
+				Parcel.geometricErrors.append("Sliver Polygon: LENGTH")
 				self.geometricErrorCount =+ 1
 			if (areaP/lengthP) < 0.01:
-				Parcel.geometricErrors.append("Long sliver polygon: AREA/LENGTH = " + str(areaP/lengthP))
+				Parcel.geometricErrors.append("Sliver Polygon: AREA/LENGTH")
 				self.geometricErrorCount =+ 1				
 		except:
-			Parcel.geometricErrors.append("The error observed is indicative of a corrupt parcel geometry. See <SITE> for detail on how to troubleshoot.")
+			Parcel.geometricErrors.append("Corrupt Geometry: The feature's area and/or length could not be accessed.")
 			self.geometricErrorCount =+ 1
 		return self,Parcel
 
@@ -412,11 +415,8 @@ class Error:
 			if acceptNull:
 				pass
 			else:
-				if pinToTest in ignoreList:
-					pass
-				else:
-					getattr(Parcel,errorType + "Errors").append("Null Found on " + schDistNoField.upper() + " field and value is expected.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				getattr(Parcel,errorType + "Errors").append("Null Found on " + schDistNoField.upper() + " field and value is expected.")
+				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return(Error,Parcel)
 
 
