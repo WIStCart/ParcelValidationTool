@@ -6,6 +6,7 @@ from sys import exit
 import os
 import re
 import csv
+import _97V2dict
 
 #Tool inputs
 in_fc = arcpy.GetParameterAsText(0)  #input feature class
@@ -159,7 +160,51 @@ for row in reader:
 	county_nameNo_dict[k] = v
 	county_noName_dict[v] = k
 
-
+#dictionary for V3 completeness collection
+v3CompDict = {
+	'STATEID':0,
+	'PARCELID':0,
+	'TAXPARCELID':0,
+	'PARCELDATE':0,
+	'TAXROLLYEAR':0,
+	'OWNERNME1':0,
+	'OWNERNME2':0,
+	'PSTLADRESS':0,
+	'SITEADRESS':0,
+	'ADDNUMPREFIX':0,
+	'ADDNUM':0,
+	'ADDNUMSUFFIX':0,
+	'PREFIX':0,
+	'STREETNAME':0,
+	'STREETTYPE':0,
+	'SUFFIX':0,
+	'LANDMARKNAME':0,
+	'UNITTYPE':0,
+	'UNITID':0,
+	'PLACENAME':0,
+	'ZIPCODE':0,
+	'ZIP4':0,
+	'STATE':0,
+	'SCHOOLDIST':0,
+	'SCHOOLDISTNO':0,
+	'IMPROVED':0,
+	'CNTASSDVALUE':0,
+	'LNDVALUE':0,
+	'IMPVALUE':0,
+	'FORESTVALUE':0,
+	'ESTFMKVALUE':0,
+	'NETPRPTA':0,
+	'GRSPRPTA':0,
+	'PROPCLASS':0,
+	'AUXCLASS':0,
+	'ASSDACRES':0,
+	'DEEDACRES':0,
+	'GISACRES':0,
+	'CONAME':0,
+	'LOADDATE':0,
+	'PARCELFIPS':0,
+	'PARCELSRC':0,
+}
 
 #lists for collecting parcelids and taxparcelids for checking for dups
 uniquePinList = []
@@ -180,7 +225,7 @@ fieldDictNames = {}
 missingFields = []
 excessFields = []
 var = True
-fieldListPass = ["OID","SHAPE","SHAPE_LENGTH","SHAPE_AREA","SHAPE_XY"]
+fieldListPass = ["OID","OID@","SHAPE","SHAPE@","SHAPE_LENGTH","SHAPE_AREA","SHAPE_XY","SHAPE@LENGTH","SHAPE@AREA","SHAPE@XY","GENERALELEMENTERRORS","ADDRESSELEMENTERRORS","TAXROLLELEMENTERRORS","GEOMETRICELEMENTERRORS"]
 for field in fieldList:
         fieldDictNames[field.name] = [field.type,field.length]
 
@@ -244,10 +289,56 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		totError,currParcel = Error.classOfPropCheck(totError,currParcel,'propclass',copDomains,'tax',True)
 		totError,currParcel = Error.classOfPropCheck(totError,currParcel,'auxclass',auxDomins,'tax',True)
 		totError,currParcel = Error.matchContrib(totError,currParcel,"coname","parcelfips","parcelsrc",county_nameNo_dict,county_noName_dict,"general",False)
-		totError,currParcel = Error.schoolDistCheck(totError,currParcel,"parcelid","schooldist","schooldistno",schoolDist_noName_dict,schoolDist_nameNo_dict,"tax",False)
+		totError,currParcel = Error.schoolDistCheck(totError,currParcel,"parcelid","schooldist","schooldistno",schoolDist_noName_dict,schoolDist_nameNo_dict,"tax",pinSkips,False)
+		totError,currParcel = Error.fieldCompleteness(totError,currParcel,fieldNames,fieldListPass,v3CompDict)
 		#End of loop, finalize errors with the writeErrors function, then clear parcel
 		currParcel.writeErrors(row,cursor, fieldNames)
 		currParcel = None
+
+"""arcpy.AddMessage("STATEID: " + str(v3CompDict["STATEID"]))
+arcpy.AddMessage("PARCELID: " + str(v3CompDict["PARCELID"]))
+arcpy.AddMessage("TAXPARCELID: " + str(v3CompDict["TAXPARCELID"]))
+arcpy.AddMessage("PARCELDATE: " + str(v3CompDict["PARCELDATE"]))
+arcpy.AddMessage("TAXROLLYEAR: " + str(v3CompDict["TAXROLLYEAR"]))
+arcpy.AddMessage("OWNERNME1: " + str(v3CompDict["OWNERNME1"]))
+arcpy.AddMessage("OWNERNME2: " + str(v3CompDict["OWNERNME2"]))
+arcpy.AddMessage("PSTLADRESS: " + str(v3CompDict["PSTLADRESS"]))
+arcpy.AddMessage("SITEADRESS: " + str(v3CompDict["SITEADRESS"]))
+arcpy.AddMessage("ADDNUMPREFIX: " + str(v3CompDict["ADDNUMPREFIX"]))
+arcpy.AddMessage("ADDNUM: " + str(v3CompDict["ADDNUM"]))
+arcpy.AddMessage("ADDNUMSUFFIX: " + str(v3CompDict["ADDNUMSUFFIX"]))
+arcpy.AddMessage("PREFIX: " + str(v3CompDict["PREFIX"]))
+arcpy.AddMessage("STREETNAME: " + str(v3CompDict["STREETNAME"]))
+arcpy.AddMessage("STREETTYPE: " + str(v3CompDict["STREETTYPE"]))
+arcpy.AddMessage("SUFFIX: " + str(v3CompDict["SUFFIX"]))
+arcpy.AddMessage("LANDMARKNAME: " + str(v3CompDict["LANDMARKNAME"]))
+arcpy.AddMessage("UNITTYPE: " + str(v3CompDict["UNITTYPE"]))
+arcpy.AddMessage("UNITID: " + str(v3CompDict["UNITID"]))
+arcpy.AddMessage("PLACENAME: " + str(v3CompDict["PLACENAME"]))
+arcpy.AddMessage("ZIPCODE: " + str(v3CompDict["ZIPCODE"]))
+arcpy.AddMessage("ZIP4: " + str(v3CompDict["ZIP4"]))
+arcpy.AddMessage("STATE: " + str(v3CompDict["STATE"]))
+arcpy.AddMessage("SCHOOLDIST: " + str(v3CompDict["SCHOOLDIST"]))
+arcpy.AddMessage("SCHOOLDISTNO: " + str(v3CompDict["SCHOOLDISTNO"]))
+arcpy.AddMessage("IMPROVED: " + str(v3CompDict["IMPROVED"]))
+arcpy.AddMessage("CNTASSDVALUE: " + str(v3CompDict["CNTASSDVALUE"]))
+arcpy.AddMessage("LNDVALUE: " + str(v3CompDict["LNDVALUE"]))
+arcpy.AddMessage("IMPVALUE: " + str(v3CompDict["IMPVALUE"]))
+arcpy.AddMessage("FORESTVALUE: " + str(v3CompDict["FORESTVALUE"]))
+arcpy.AddMessage("ESTFMKVALUE: " + str(v3CompDict["ESTFMKVALUE"]))
+arcpy.AddMessage("NETPRPTA: " + str(v3CompDict["NETPRPTA"]))
+arcpy.AddMessage("GRSPRPTA: " + str(v3CompDict["GRSPRPTA"]))
+arcpy.AddMessage("PROPCLASS: " + str(v3CompDict["PROPCLASS"]))
+arcpy.AddMessage("AUXCLASS: " + str(v3CompDict["AUXCLASS"]))
+arcpy.AddMessage("ASSDACRES: " + str(v3CompDict["ASSDACRES"]))
+arcpy.AddMessage("DEEDACRES: " + str(v3CompDict["DEEDACRES"]))
+arcpy.AddMessage("GISACRES: " + str(v3CompDict["GISACRES"]))
+arcpy.AddMessage("CONAME: " + str(v3CompDict["CONAME"]))
+arcpy.AddMessage("LOADDATE: " + str(v3CompDict["LOADDATE"]))
+arcpy.AddMessage("PARCELFIPS: " + str(v3CompDict["PARCELFIPS"]))
+arcpy.AddMessage("PARCELSRC: " + str(v3CompDict["PARCELSRC"]))"""
+
+arcpy.AddMessage("PortageV2 Stats" + str(_97V2dict.porV2Dict))
 
 # Write all summary-type errors to file via the Summary class
 summaryTxt = Summary()

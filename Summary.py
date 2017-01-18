@@ -1,4 +1,5 @@
 import arcpy
+import _97V2dict
 # TODO:
 # 1) ...
 
@@ -31,8 +32,16 @@ class Summary:
 		Summary.errorSummaryFile.write("	Missing CONAME: " + str(totError.coNameMiss) + "\n")
 		Summary.errorSummaryFile.write("	Missing PARCELFIPS: " + str(totError.fipsMiss) + "\n")
 		Summary.errorSummaryFile.write("	Missing PARCELSRC: " + str(totError.srcMiss) + "\n\n")
-		Summary.errorSummaryFile.write("If any of the above values are greater than 0, please add missing values.  These 3 fields should be populated for all records submitted." + "\n\n")
-		Summary.errorSummaryFile.write("* Within: " + outDirTxt + "\\" + outName  + "\n") 
+		Summary.errorSummaryFile.write("If any of the above values are greater than 0, please add missing values.  These 3 fields should be populated for all records submitted.\n\n\n")
+		Summary.errorSummaryFile.write("BELOW IS A COMPARISON OF COMPLETENESS VALUES FROM YOUR PREVIOUS PARCEL SUBMISSION AND THIS CURRENT SUBMISSION.\n")
+		Summary.errorSummaryFile.write("-->If there is a large discrepancy between the values (mainly a large decrease in number of populated values, please ensure data wasn't missed/lost in processing.\n\n")
+		Summary.errorSummaryFile.write("				V2 Stats						V3 Stats						Difference \n")
+
+
+
+
+
+		Summary.errorSummaryFile.write("\n\n\n* Within: " + outDirTxt + "\\" + outName  + "\n") 
 		Summary.errorSummaryFile.write("************************************************************************\n")
 		Summary.errorSummaryFile.write("In-line errors - The following lines explain any broad geometric errors that were found while validating your parcel dataset."+ "\n")
 		if len(totError.geometricPlacementErrors) != 0:

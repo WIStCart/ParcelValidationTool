@@ -386,7 +386,7 @@ class Error:
 		return (Error, Parcel)
 
 	#checking values provided in SCHOOLDISTNO and SCHOOLDIST field to ensure they are in our domain list and represent the same school dist (if both provided)
-	def schoolDistCheck(Error,Parcel,pinField,schDistField,schDistNoField,schNoNameDict,schNameNoDict,errorType,acceptNull):
+	def schoolDistCheck(Error,Parcel,pinField,schDistField,schDistNoField,schNoNameDict,schNameNoDict,errorType,ignoreList,acceptNull):
 		schNo = getattr(Parcel,schDistNoField)
 		schNa = getattr(Parcel,schDistField)
 		pinToTest = getattr(Parcel,pinField)
@@ -417,6 +417,20 @@ class Error:
 				else:
 					getattr(Parcel,errorType + "Errors").append("Null Found on " + schDistNoField.upper() + " field and value is expected.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return(Error,Parcel)
+
+
+	def fieldCompleteness(Error,Parcel,fieldList,passList,v3Dict):
+		for field in fieldList:
+			if field.upper() in passList:
+				pass
+			else:
+				stringToTest = getattr(Parcel,field.lower())
+				if stringToTest is None:
+					pass
+				else:
+					if stringToTest is not None or stringToTest != '':
+						v3Dict[field] = v3Dict[field]+1
 		return(Error,Parcel)
 
 
