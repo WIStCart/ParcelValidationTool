@@ -18,6 +18,7 @@ class Error:
 		self.geometricErrorCount = 0
 		self.addressErrorCount = 0
 		self.taxErrorCount = 0
+		self.comparisonDict = {}
 		self.attributeFileErrors = []
 		self.geometricFileErrors = []
 		self.geometricPlacementErrors = ["Several parcel geometries appear to be spatially misplaced when comparing them against last year's parcel geometries. This issue is indicative of a re-projection error. Please see the following documentation: http://www.sco.wisc.edu/images/stories/publications/V2/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf for advice on how to project native data to the Statewide Parcel CRS."]
@@ -434,7 +435,13 @@ class Error:
 		return(Error,Parcel)
 
 
-
+	def fieldCompletenessComparison(Error,Parcel,fieldList,passList,currentStatDict,previousStatDict):
+		for field in fieldList:
+			if field.upper() in passList:
+				pass
+			else:
+				Error.comparisonDict[field] = currentStatDict[field] - previousStatDict[field]
+		return(Error,Parcel)
 
 
 	#Will contain get, set, display methods

@@ -1,5 +1,5 @@
 import arcpy
-import _97V2dict
+
 # TODO:
 # 1) ...
 
@@ -11,7 +11,7 @@ class Summary:
 	def writeSummaryTxt(Summary,outDirTxt,outName,totError):
 		#Write general error report to .txt
 		Summary.errorSummaryFile = open(outDirTxt + "/" + outName + "_ValidationSummary.txt","w")
-		arcpy.AddMessage("Creating Validation Summary here: " + outDirTxt + "/" + outName + "_ValidationSummary.txt")
+		("Creating Validation Summary here: " + outDirTxt + "/" + outName + "_ValidationSummary.txt")
 		Summary.errorSummaryFile.write(outDirTxt + "\\" + outName + "_ValidationSummary.txt" + "\n")
 		Summary.errorSummaryFile.write("Validation Summary Table: " + "\n")
 		Summary.errorSummaryFile.write("This validation summary table contains an overview of any errors found by the Parcel Validation Tool. Please review the contents of this file and make changes to your parcel dataset as necessary." + "\n\n")
@@ -34,13 +34,51 @@ class Summary:
 		Summary.errorSummaryFile.write("	Missing PARCELSRC: " + str(totError.srcMiss) + "\n\n")
 		Summary.errorSummaryFile.write("If any of the above values are greater than 0, please add missing values.  These 3 fields should be populated for all records submitted.\n\n\n")
 		Summary.errorSummaryFile.write("BELOW IS A COMPARISON OF COMPLETENESS VALUES FROM YOUR PREVIOUS PARCEL SUBMISSION AND THIS CURRENT SUBMISSION.\n")
-		Summary.errorSummaryFile.write("-->If there is a large discrepancy between the values (mainly a large decrease in number of populated values, please ensure data wasn't missed/lost in processing.\n\n")
-		Summary.errorSummaryFile.write("				V2 Stats						V3 Stats						Difference \n")
-
-
-
-
-
+		Summary.errorSummaryFile.write("-->If the value shown is a negative number greater than <insert number here>, please verify that all data was joined correctly and no data was lost during processing.\n")
+		Summary.errorSummaryFile.write("-->Note: This does not necessarily mean your data is incorrect, we just want to highlight large discrepancies that could indicate missing or incorrect data.\n\n")
+		Summary.errorSummaryFile.write("		FIELD   	DIFFERENCE\n")
+		Summary.errorSummaryFile.write("		------		----------\n")
+		Summary.errorSummaryFile.write("	   PARCELID: 	" + str(totError.comparisonDict["PARCELID"]) + '\n')
+		Summary.errorSummaryFile.write("	TAXPARCELID: 	" + str(totError.comparisonDict["TAXPARCELID"]) + '\n')
+		Summary.errorSummaryFile.write("	 PARCELDATE: 	" + str(totError.comparisonDict["PARCELDATE"]) + '\n')
+		Summary.errorSummaryFile.write("	TAXROLLYEAR: 	" + str(totError.comparisonDict["TAXROLLYEAR"]) + '\n')
+		Summary.errorSummaryFile.write("	  OWNERNME1: 	" + str(totError.comparisonDict["OWNERNME1"]) + '\n')
+		Summary.errorSummaryFile.write("	  OWNERNME2: 	" + str(totError.comparisonDict["OWNERNME2"]) + '\n')
+		Summary.errorSummaryFile.write("	 PSTLADRESS: 	" + str(totError.comparisonDict["PSTLADRESS"]) + '\n')
+		Summary.errorSummaryFile.write("	 SITEADRESS: 	" + str(totError.comparisonDict["SITEADRESS"]) + '\n')
+		Summary.errorSummaryFile.write("   ADDNUMPREFIX: 	" + str(totError.comparisonDict["ADDNUMPREFIX"]) + '\n')
+		Summary.errorSummaryFile.write("		 ADDNUM: 	" + str(totError.comparisonDict["ADDNUM"]) + '\n')
+		Summary.errorSummaryFile.write("   ADDNUMSUFFIX: 	" + str(totError.comparisonDict["ADDNUMSUFFIX"]) + '\n')
+		Summary.errorSummaryFile.write("		 PREFIX: 	" + str(totError.comparisonDict["PREFIX"]) + '\n')
+		Summary.errorSummaryFile.write("	 STREETNAME: 	" + str(totError.comparisonDict["STREETNAME"]) + '\n')
+		Summary.errorSummaryFile.write("	 STREETTYPE: 	" + str(totError.comparisonDict["STREETTYPE"]) + '\n')
+		Summary.errorSummaryFile.write("		 SUFFIX: 	" + str(totError.comparisonDict["SUFFIX"]) + '\n')
+		Summary.errorSummaryFile.write("   LANDMARKNAME: 	" + str(totError.comparisonDict["LANDMARKNAME"]) + '\n')
+		Summary.errorSummaryFile.write("	   UNITTYPE: 	" + str(totError.comparisonDict["UNITTYPE"]) + '\n')
+		Summary.errorSummaryFile.write("		 UNITID: 	" + str(totError.comparisonDict["UNITID"]) + '\n')
+		Summary.errorSummaryFile.write("	  PLACENAME: 	" + str(totError.comparisonDict["PLACENAME"]) + '\n')
+		Summary.errorSummaryFile.write("		ZIPCODE: 	" + str(totError.comparisonDict["ZIPCODE"]) + '\n')
+		Summary.errorSummaryFile.write("		   ZIP4: 	" + str(totError.comparisonDict["ZIP4"]) + '\n')
+		Summary.errorSummaryFile.write("		  STATE: 	" + str(totError.comparisonDict["STATE"]) + '\n')
+		Summary.errorSummaryFile.write("	 SCHOOLDIST: 	" + str(totError.comparisonDict["SCHOOLDIST"]) + '\n')
+		Summary.errorSummaryFile.write("   SCHOOLDISTNO: 	" + str(totError.comparisonDict["SCHOOLDISTNO"]) + '\n')
+		Summary.errorSummaryFile.write("	   IMPROVED: 	" + str(totError.comparisonDict["IMPROVED"]) + '\n')
+		Summary.errorSummaryFile.write("   CNTASSDVALUE: 	" + str(totError.comparisonDict["CNTASSDVALUE"]) + '\n')
+		Summary.errorSummaryFile.write("	   LNDVALUE: 	" + str(totError.comparisonDict["LNDVALUE"]) + '\n')
+		Summary.errorSummaryFile.write("	   IMPVALUE: 	" + str(totError.comparisonDict["IMPVALUE"]) + '\n')
+		Summary.errorSummaryFile.write("	FORESTVALUE: 	" + str(totError.comparisonDict["FORESTVALUE"]) + '\n')
+		Summary.errorSummaryFile.write("	ESTFMKVALUE: 	" + str(totError.comparisonDict["ESTFMKVALUE"]) + '\n')
+		Summary.errorSummaryFile.write("	   NETPRPTA: 	" + str(totError.comparisonDict["NETPRPTA"]) + '\n')
+		Summary.errorSummaryFile.write("	   GRSPRPTA: 	" + str(totError.comparisonDict["GRSPRPTA"]) + '\n')
+		Summary.errorSummaryFile.write("	  PROPCLASS: 	" + str(totError.comparisonDict["PROPCLASS"]) + '\n')
+		Summary.errorSummaryFile.write("	   AUXCLASS: 	" + str(totError.comparisonDict["AUXCLASS"]) + '\n')
+		Summary.errorSummaryFile.write("	  ASSDACRES: 	" + str(totError.comparisonDict["ASSDACRES"]) + '\n')
+		Summary.errorSummaryFile.write("	  DEEDACRES: 	" + str(totError.comparisonDict["DEEDACRES"]) + '\n')
+		Summary.errorSummaryFile.write("	   GISACRES: 	" + str(totError.comparisonDict["GISACRES"]) + '\n')
+		Summary.errorSummaryFile.write("		 CONAME: 	" + str(totError.comparisonDict["CONAME"]) + '\n')
+		Summary.errorSummaryFile.write("	   LOADDATE: 	" + str(totError.comparisonDict["LOADDATE"]) + '\n')
+		Summary.errorSummaryFile.write("	 PARCELFIPS: 	" + str(totError.comparisonDict["PARCELFIPS"]) + '\n')
+		Summary.errorSummaryFile.write("	  PARCELSRC: 	" + str(totError.comparisonDict["PARCELSRC"]) + '\n')
 		Summary.errorSummaryFile.write("\n\n\n* Within: " + outDirTxt + "\\" + outName  + "\n") 
 		Summary.errorSummaryFile.write("************************************************************************\n")
 		Summary.errorSummaryFile.write("In-line errors - The following lines explain any broad geometric errors that were found while validating your parcel dataset."+ "\n")

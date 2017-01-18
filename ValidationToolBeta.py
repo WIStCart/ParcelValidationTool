@@ -290,6 +290,7 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		totError,currParcel = Error.matchContrib(totError,currParcel,"coname","parcelfips","parcelsrc",county_nameNo_dict,county_noName_dict,"general",False)
 		totError,currParcel = Error.schoolDistCheck(totError,currParcel,"parcelid","schooldist","schooldistno",schoolDist_noName_dict,schoolDist_nameNo_dict,"tax",pinSkips,False)
 		totError,currParcel = Error.fieldCompleteness(totError,currParcel,fieldNames,fieldListPass,v3CompDict)
+		totError,currParcel = Error.fieldCompletenessComparison(totError,currParcel,fieldNames,fieldListPass,v3CompDict,_97V2dict.porV2Dict)
 		#End of loop, finalize errors with the writeErrors function, then clear parcel
 		currParcel.writeErrors(row,cursor, fieldNames)
 		currParcel = None
@@ -336,8 +337,6 @@ arcpy.AddMessage("CONAME: " + str(v3CompDict["CONAME"]))
 arcpy.AddMessage("LOADDATE: " + str(v3CompDict["LOADDATE"]))
 arcpy.AddMessage("PARCELFIPS: " + str(v3CompDict["PARCELFIPS"]))
 arcpy.AddMessage("PARCELSRC: " + str(v3CompDict["PARCELSRC"]))"""
-
-arcpy.AddMessage("PortageV2 Stats" + str(_97V2dict.porV2Dict))
 
 # Write all summary-type errors to file via the Summary class
 summaryTxt = Summary()
