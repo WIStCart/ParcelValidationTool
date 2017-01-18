@@ -14,12 +14,12 @@ outDir = arcpy.GetParameterAsText(1)  #output directory location
 outName = arcpy.GetParameterAsText(2)  #output feature class name
 outDirTxt = arcpy.GetParameterAsText(3)  #output directory error summary .txt file
 coName = arcpy.GetParameterAsText(4)  #name of county making submission
-
 #Run Original checks
 totError = Error(in_fc,coName)
-
+#Get the filepath of this script (for loading files relative to this path)  
+dir = os.path.dirname(__file__)
 #reading in txt file of StreetNames
-streetNames = [line.strip() for line in open('C:\WorkSpace\V3_Working\V3ValidationTool\V2_StreetName_Simplified.txt', 'r')]
+streetNames = [line.strip() for line in open(os.path.join(dir, 'V2_StreetName_Simplified.txt'), 'r')]
 
 #list of field names 
 fieldNames = ["OID@","SHAPE@","STATEID","PARCELID","TAXPARCELID","PARCELDATE","TAXROLLYEAR",
@@ -139,9 +139,8 @@ copDomains = ['1','2','3','4','5','6','7','5M','M']
 #acceptable AUXCOP domains
 auxDomins = ['W1','W2','W3','W4','W5','W6','W7','W8','X1','X2','X3','X4','M']
 
-
 #schooldist and schooldistno dictionaries
-reader = csv.reader(open('C:\WorkSpace\V3_Working\V3ValidationTool\school_district_codes.csv'))
+reader = csv.reader(open(os.path.join(dir, 'school_district_codes.csv')))
 schoolDist_nameNo_dict = {}
 schoolDist_noName_dict = {}
 for row in reader:
@@ -152,7 +151,7 @@ for row in reader:
 arcpy.AddMessage("School Dist Dictionaries created...")
 
 #CONAME and FIPS dictionaries
-reader = csv.reader(open('C:\WorkSpace\V3_Working\V3ValidationTool\CoNameFips.csv'))
+reader = csv.reader(open(os.path.join(dir, 'CoNameFips.csv')))
 county_nameNo_dict = {}
 county_noName_dict = {}
 for row in reader:
