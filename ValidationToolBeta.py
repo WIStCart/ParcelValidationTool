@@ -30,48 +30,48 @@ fieldNames = ["OID@","SHAPE@","STATEID","PARCELID","TAXPARCELID","PARCELDATE","T
 "SHAPE@LENGTH","SHAPE@AREA","SHAPE@XY","GeneralElementErrors","AddressElementErrors","TaxrollElementErrors","GeometricElementErrors"]
 
 schemaReq = {
-	'STATEID':['String',100],
-	'PARCELID':['String',100],
-	'TAXPARCELID':['String',100],
-	'PARCELDATE':['String',25],
-	'TAXROLLYEAR':['String',10],
-	'OWNERNME1':['String',254],
-	'OWNERNME2':['String',254],
-	'PSTLADRESS':['String',200],
-	'SITEADRESS':['String',200],
-	'ADDNUMPREFIX':['String',50],
-	'ADDNUM':['String',50],
-	'ADDNUMSUFFIX':['String',50],
-	'PREFIX':['String',50],
-	'STREETNAME':['String',50],
-	'STREETTYPE':['String',50],
-	'SUFFIX':['String',50],
-	'LANDMARKNAME':['String',50],
-	'UNITTYPE':['String',50],
-	'UNITID':['String',50],
-	'PLACENAME':['String',100],
-	'ZIPCODE':['String',50],
-	'ZIP4':['String',50],
-	'STATE':['String',50],
-	'SCHOOLDIST':['String',50],
-	'SCHOOLDISTNO':['String',50],
-	'IMPROVED':['String',10],
-	'CNTASSDVALUE':['String',50],
-	'LNDVALUE':['String',50],
-	'IMPVALUE':['String',50],
-	'FORESTVALUE':['String',50],
-	'ESTFMKVALUE':['String',50],
-	'NETPRPTA':['String',50],
-	'GRSPRPTA':['String',50],
-	'PROPCLASS':['String',150],
-	'AUXCLASS':['String',150],
-	'ASSDACRES':['String',50],
-	'DEEDACRES':['String',50],
-	'GISACRES':['String',50],
-	'CONAME':['String',50],
-	'LOADDATE':['String',10],
-	'PARCELFIPS':['String',10],
-	'PARCELSRC':['String',50],
+	'STATEID':[['String'],[100]],
+	'PARCELID':[['String'],[100]],
+	'TAXPARCELID':[['String'],[100]],
+	'PARCELDATE':[['String'],[25]],
+	'TAXROLLYEAR':[['String'],[10]],
+	'OWNERNME1':[['String'],[254]],
+	'OWNERNME2':[['String'],[254]],
+	'PSTLADRESS':[['String'],[200]],
+	'SITEADRESS':[['String'],[200]],
+	'ADDNUMPREFIX':[['String'],[50]],
+	'ADDNUM':[['String'],[50]],
+	'ADDNUMSUFFIX':[['String'],[50]],
+	'PREFIX':[['String'],[50]],
+	'STREETNAME':[['String'],[50]],
+	'STREETTYPE':[['String'],[50]],
+	'SUFFIX':[['String'],[50]],
+	'LANDMARKNAME':[['String'],[50]],
+	'UNITTYPE':[['String'],[50]],
+	'UNITID':[['String'],[50]],
+	'PLACENAME':[['String'],[100]],
+	'ZIPCODE':[['String'],[50]],
+	'ZIP4':[['String'],[50]],
+	'STATE':[['String'],[50]],
+	'SCHOOLDIST':[['String'],[50]],
+	'SCHOOLDISTNO':[['String'],[50]],
+	'IMPROVED':[['String'],[10]],
+	'CNTASSDVALUE':[['String','Double'],[50,8]],
+	'LNDVALUE':[['String','Double'],[50,8]],
+	'IMPVALUE':[['String','Double'],[50,8]],
+	'FORESTVALUE':[['String','Double'],[50,8]],
+	'ESTFMKVALUE':[['String','Double'],[50,8]],
+	'NETPRPTA':[['String','Double'],[50,8]],
+	'GRSPRPTA':[['String','Double'],[50,8]],
+	'PROPCLASS':[['String'],[150]],
+	'AUXCLASS':[['String'],[150]],
+	'ASSDACRES':[['String','Double'],[50,8]],
+	'DEEDACRES':[['String','Double'],[50,8]],
+	'GISACRES':[['String','Double'],[50,8]],
+	'CONAME':[['String'],[50]],
+	'LOADDATE':[['String'],[10]],
+	'PARCELFIPS':[['String'],[10]],
+	'PARCELSRC':[['String'],[50]],
 }
 
 #bad characters dictionary
@@ -224,16 +224,16 @@ fieldDictNames = {}
 missingFields = []
 excessFields = []
 var = True
-fieldListPass = ["OID","OID@","SHAPE","SHAPE@","SHAPE_LENGTH","SHAPE_AREA","SHAPE_XY","SHAPE@LENGTH","SHAPE@AREA","SHAPE@XY","GENERALELEMENTERRORS","ADDRESSELEMENTERRORS","TAXROLLELEMENTERRORS","GEOMETRICELEMENTERRORS"]
+fieldListPass = ["OID","OID@","SHAPE","SHAPE@","SHAPE_LENGTH","SHAPE_AREA","SHAPE_XY","SHAPE@LENGTH","SHAPE@AREA","SHAPE@XY","LONGITUDE","LATITUDE","GENERALELEMENTERRORS","ADDRESSELEMENTERRORS","TAXROLLELEMENTERRORS","GEOMETRICELEMENTERRORS"]
 for field in fieldList:
-        fieldDictNames[field.name] = [field.type,field.length]
+        fieldDictNames[field.name] = [[field.type],[field.length]]
 
 for field in fieldDictNames:
 	if field.upper() not in fieldListPass:
 		if field not in schemaReq.keys():
 			excessFields.append(field)
 			var = False
-		elif fieldDictNames[field] != schemaReq[field]:
+		elif fieldDictNames[field][0][0] not in schemaReq[field][0] or fieldDictNames[field][1][0] not in schemaReq[field][1]:
 			missingFields.append(field)
 			var = False
 

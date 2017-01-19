@@ -3,7 +3,7 @@ import math
 from Parcel import Parcel
 import re
 # TODO
-# 1) Write exceptions on the function itself, per function. 
+# 1) Write exceptions on the function itself per function. 
 #		a) Include errors in-line with the row (just like all other errors)      
 # 		b) try/catch/throw 
 # 		c) apply exceptions in last step of writing the function - to prevent from accidentally escaping errors that we can test for.
@@ -122,11 +122,14 @@ class Error:
 		try:
 			stringToTest = getattr(Parcel,field)
 			if stringToTest is not None:
-				if stringToTest.isdigit():
-					pass
-				else:
-					getattr(Parcel,errorType + "Errors").append("Error on " + field.upper())
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				try:
+					int(stringToTest)
+				except ValueError:
+					try:
+						float(stringToTest)
+					except ValueError:
+						getattr(Parcel,errorType + "Errors").append("Value in " + field.upper() + " doesn't appear to be a numeric value.")
+						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return (Error, Parcel)
 			else:
 				if acceptNull:
@@ -139,7 +142,6 @@ class Error:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the" + field.upper() + "field. Please inspect this field's value.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
-
 	#Check if duplicates exist within an entire field(Error object, Parcel object, field to test, type of error to classify this as, are <Null>s are considered errors?, list of strings that are expected to be duplicates (to ignore), running list of strings to test against)  
 	def checkIsDuplicate(Error,Parcel,field,errorType,acceptNull,ignoreList,testList):
 		try:
@@ -235,7 +237,7 @@ class Error:
 				return(Error, Parcel)
 			else:
 				if siteAddToTest is not None and stringToTest is None:
-					getattr(Parcel,errorType + "Errors").append(field.upper() + " is Null, but " + siteAddField.upper() + " is populated.  Please ensure elements are in the appropriate field.")
+					getattr(Parcel,errorType + "Errors").append(field.upper() + " is Null but " + siteAddField.upper() + " is populated.  Please ensure elements are in the appropriate field.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return(Error, Parcel)
 				if acceptNull:
@@ -279,7 +281,7 @@ class Error:
 	def impCheck(Error,Parcel,field,impValField,errorType):
 		try:
 			stringToTest = getattr(Parcel,field)
-			impvalue = getattr(Parcel,impValField)
+			impvalue = float(getattr(Parcel,impValField))
 			if stringToTest == None and impvalue == None:
 				pass
 			elif stringToTest == 'NO' and impvalue == 0:
@@ -289,6 +291,7 @@ class Error:
 			else:
 				getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " does not correspond with 'IMPVALUE' observed for this record.")
 				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				arcpy.AddMessage("Hitting else statement for some reason....")
 			return (Error, Parcel)
 		except:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
