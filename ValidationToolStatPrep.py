@@ -106,8 +106,8 @@ def runStatsOn(countyName):
 			#End of loop, clear parcel
 			currParcel = None
 	# Create a .csv and then write the dictionary to it  
-	fd = open(os.path.join(outDirTxt, outName+".txt"),'a')
-	statString = countyName+"|"+str(v3CompDict)
+	fd = open(os.path.join(outDirTxt, outName+".py"),'a')
+	statString = ((countyName.replace(" ","_"))+"LegacyDict = ")+str(v3CompDict)
 	fd.write(statString+'\n')
 	fd.close()
 	# testing code for validation tool (converting string back into usable dict):
