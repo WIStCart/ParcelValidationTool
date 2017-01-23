@@ -5,13 +5,12 @@ from sys import exit
 import os
 import re
 import csv
+import json
 
 #Tool inputs
 in_fc = arcpy.GetParameterAsText(0)  #input feature class
-outDir = arcpy.GetParameterAsText(1)  #output directory location
-outName = arcpy.GetParameterAsText(2)  #output feature class name
-outDirTxt = arcpy.GetParameterAsText(3)  #output directory error summary .txt file
-coName = arcpy.GetParameterAsText(4)  #name of county making submission
+outName = arcpy.GetParameterAsText(1)  #output feature class name
+outDirTxt = arcpy.GetParameterAsText(2)  #output directory error summary .txt file
 
 
 #list of field names
@@ -106,20 +105,20 @@ def runStatsOn(countyName):
 			totError,currParcel = Error.fieldCompleteness(totError,currParcel,fieldNames,fieldListPass,v3CompDict)
 			#End of loop, clear parcel
 			currParcel = None
-	# Will write outputs to .csv, here
-	arcpy.AddMessage(str(v3CompDict))
 	# Create a .csv and then write the dictionary to it  
-	fd = open(os.path.join(outDirTxt, outName+".csv"),'a')
-	fd.write(str(v3CompDict))
-	# Create a new line in the file so that the next record will be on the next subsequent line
-	fd.write('\n')
+	fd = open(os.path.join(outDirTxt, outName+".txt"),'a')
+	statString = countyName+"|"+str(v3CompDict)
+	fd.write(statString+'\n')
 	fd.close()
-	# Some more code for RH to test things out 
-	# Casting the dictionary to a string 
-	statString = str(v3CompDict)
-	# Appending the county name to the string
-	statStringWithCountyName = countyName + "|" + statString
-	
+	# testing code for validation tool (converting string back into usable dict):
+	'''statArray = statString.split("|")
+	reincarnatedString = (statArray[1].replace("'",'"'))
+	reincarnatedCounty = (statArray[0])
+	reincarnatedDict = json.loads(reincarnatedString) # REQUIRES import json
+	for value in reincarnatedDict:
+			arcpy.AddMessage(reincarnatedCounty )
+			arcpy.AddMessage(value)
+			arcpy.AddMessage(reincarnatedDict[value])'''
 	# Clear memory to free up space for other county processing
 	arcpy.Delete_management("in_memory")
 	
