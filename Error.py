@@ -281,17 +281,16 @@ class Error:
 	def impCheck(Error,Parcel,field,impValField,errorType):
 		try:
 			stringToTest = getattr(Parcel,field)
-			impvalue = float(getattr(Parcel,impValField))
+			impvalue = getattr(Parcel,impValField)
 			if stringToTest == None and impvalue == None:
 				pass
-			elif stringToTest == 'NO' and impvalue == 0:
+			elif stringToTest == 'NO' and float(impvalue) == 0:
 				pass
-			elif stringToTest == 'YES' and impvalue > 0:
+			elif stringToTest == 'YES' and float(impvalue) > 0:
 				pass
 			else:
 				getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " does not correspond with 'IMPVALUE' observed for this record.")
 				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-				arcpy.AddMessage("Hitting else statement for some reason....")
 			return (Error, Parcel)
 		except:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
@@ -419,8 +418,11 @@ class Error:
 			if acceptNull:
 				pass
 			else:
-				getattr(Parcel,errorType + "Errors").append("Null Found on " + schDistNoField.upper() + " field and value is expected.")
-				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				if pinToTest in ignoreList:
+					pass
+				else:
+					getattr(Parcel,errorType + "Errors").append("Null Found on " + schDistNoField.upper() + " field and value is expected.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return(Error,Parcel)
 
 
