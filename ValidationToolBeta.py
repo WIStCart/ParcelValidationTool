@@ -16,10 +16,36 @@ outDirTxt = arcpy.GetParameterAsText(3)  #output directory error summary .txt fi
 coName = arcpy.GetParameterAsText(4)  #name of county making submission
 #Run Original checks
 totError = Error(in_fc,coName)
+
 #Get the filepath of this script (for loading files relative to this path)  
 dir = os.path.dirname(__file__)
-#reading in txt file of StreetNames
+
+#street name list
 streetNames = [line.strip() for line in open(os.path.join(dir, 'V2_StreetName_Simplified.txt'), 'r')]
+
+#street types domain list
+streetTypes = [line.strip() for line in open(os.path.join(dir, 'V2_StreetType_Simplified.txt'), 'r')]
+
+#unitid domain list
+unitIdTypes = [line.strip() for line in open(os.path.join(dir, 'V2_UnitId_Simplified.txt'), 'r')]
+
+#unit type domain list
+unitTypes = [line.strip() for line in open(os.path.join(dir, 'V2_UnitType_Simplified.txt'), 'r')]
+
+#placename domain list
+placeNameDomains = [line.strip() for line in open(os.path.join(dir,'V2_PlacenameSummary_Simplified.txt'), 'r')]
+
+#taxroll years to test (past,expected,future1,future2)
+taxRollYears = [line.strip() for line in open(os.path.join(dir,'TaxRollYears.txt'), 'r')]
+
+#suffix domain list
+suffixDomains = [line.strip() for line in open(os.path.join(dir,'V2_SuffixDomains_Simplified.txt'), 'r')]
+
+#prefix domain list
+prefixDomains = [line.strip() for line in open(os.path.join(dir, 'V2_PrefixDomains_Simplified.txt'), 'r')]
+
+#list of non-parcelid values found in field to ignore when checking for dups (and use in other functions)
+pinSkips = [line.strip() for line in open(os.path.join(dir, 'V2_PinSkips.txt'), 'r')]
 
 #list of field names 
 fieldNames = ["OID@","SHAPE@","STATEID","PARCELID","TAXPARCELID","PARCELDATE","TAXROLLYEAR",
@@ -94,7 +120,7 @@ fieldNamesBadChars = {
 "LANDMARKNAME": ["\n","\r"],
 "UNITTYPE": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"],
 "UNITID": ["\n","\r","$","^","=","<",">","@","%","&","?","`","!","*","~","(",")","\\",'/',','],
-"PLACENAME": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"],
+"PLACENAME": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',',"\-"],
 "ZIPCODE": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"],
 "ZIP4": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"],
 "STATE": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"],
@@ -120,18 +146,18 @@ fieldNamesBadChars = {
 }
 
 #list of non-parcelid values found in field to ignore when checking for dups
-pinSkips = ["ALLEY","CANAL","CE","CONDO","CREEK","CTH","CTH C","CTH G","CTH H","CTH H","GAP","HYDRO","LAKE","LCE","MARSH",
-"MOUND","NIR","NOPID","OL","OTHER","OUT","PARK","PIER","POND","PVT","RIVER","ROAD","ROW","RR","RVR","RW","STATE","STH","TBD",
-"TOA","TOB","TOF","TOJ","TOL","TOM","TOWN","TRAIL","TRIBE","UNK","USH","WALK","WATER","WELL","WET","WPS","WVIC"]
+#pinSkips = ["ALLEY","CANAL","CE","CONDO","CREEK","CTH","CTH C","CTH G","CTH H","CTH H","GAP","HYDRO","LAKE","LCE","MARSH",
+#"MOUND","NIR","NOPID","OL","OTHER","OUT","PARK","PIER","POND","PVT","RIVER","ROAD","ROW","RR","RVR","RW","STATE","STH","TBD",
+#"TOA","TOB","TOF","TOJ","TOL","TOM","TOWN","TRAIL","TRIBE","UNK","USH","WALK","WATER","WELL","WET","WPS","WVIC"]
 
 #testing prefix domain list
-prefixDomains = ["CTH", "STH", "USH", "W CTH", "S CTH", "E CTH", "N CTH", "W STH", "S STH", "E STH", "N STH", "W USH", "S USH", "E USH", "N USH", "N", "E", "S", "W"]
+#prefixDomains = ["CTH", "STH", "USH", "W CTH", "S CTH", "E CTH", "N CTH", "W STH", "S STH", "E STH", "N STH", "W USH", "S USH", "E USH", "N USH", "N", "E", "S", "W"]
 
 #testing suffix domain list
-suffixDomains = ["N", "E", "S", "W"]
+#suffixDomains = ["N", "E", "S", "W"]
 
 #taxroll years to test (past,expected,future1,future2)
-taxRollYears = ['2015','2016','2017','2018']
+#taxRollYears = ['2015','2016','2017','2018']
 
 #acceptable COP domains
 copDomains = ['1','2','3','4','5','6','7','5M','M']
@@ -144,9 +170,9 @@ reader = csv.reader(open(os.path.join(dir, 'school_district_codes.csv')))
 schoolDist_nameNo_dict = {}
 schoolDist_noName_dict = {}
 for row in reader:
-   k, v = row
-   schoolDist_noName_dict[k] = v
-   schoolDist_nameNo_dict[v] = k
+	k,v = row
+	schoolDist_noName_dict[k] = v
+	schoolDist_nameNo_dict[v] = k
 
 arcpy.AddMessage("School Dist Dictionaries created...")
 
@@ -273,12 +299,25 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		totError,currParcel = Error.checkGeometricQuality(totError,currParcel)
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"addnum","address", True) 
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"parcelfips","general", False)
-		#totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"taxrollyear","tax", False)
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"zipcode","address", True)
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"zip4","address", True)
+		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"cntassdvalue","tax",True)
+		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"lndvalue","tax",True)
+		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"impvalue","tax",True)
+		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"forestvalue","tax",True)
+		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"estfmkvalue","tax",True)
+		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"netprpta","tax",True)
+		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"grsprpta","tax",True)
+		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"assdacres","tax",True)
+		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"deedacres","tax",True)
+		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"gisacres","tax",True)
 		totError,currParcel = Error.checkIsDuplicate(totError,currParcel,"parcelid","general", True, pinSkips, uniquePinList)
 		totError,currParcel = Error.checkIsDuplicate(totError,currParcel,"taxparcelid","general", True, pinSkips, uniqueTaxparList)
 		totError,currParcel = Error.checkDomainString(totError,currParcel,"prefix","address",True, prefixDomains)
+		totError,currParcel = Error.checkDomainString(totError,currParcel,"streettype","address",True,streetTypes)
+		totError,currParcel = Error.checkDomainString(totError,currParcel,"unittype","address",True,unitTypes)
+		totError,currParcel = Error.checkDomainString(totError,currParcel,"unitid","address",True,unitIdTypes)
+		totError,currParcel = Error.checkDomainString(totError,currParcel,"placename","general",True,placeNameDomains)
 		totError,currParcel = Error.checkDomainString(totError,currParcel,"suffix","address",True, suffixDomains)
 		totError,currParcel = Error.trYear(totError,currParcel,"taxrollyear","parcelid","tax",False,pinSkips,taxRollYears)
 		totError,currParcel = Error.streetNameCheck(totError,currParcel,"streetname","siteadress","address",True,streetNames)
@@ -295,48 +334,6 @@ with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		currParcel.writeErrors(row,cursor, fieldNames)
 		currParcel = None
 
-"""arcpy.AddMessage("STATEID: " + str(v3CompDict["STATEID"]))
-arcpy.AddMessage("PARCELID: " + str(v3CompDict["PARCELID"]))
-arcpy.AddMessage("TAXPARCELID: " + str(v3CompDict["TAXPARCELID"]))
-arcpy.AddMessage("PARCELDATE: " + str(v3CompDict["PARCELDATE"]))
-arcpy.AddMessage("TAXROLLYEAR: " + str(v3CompDict["TAXROLLYEAR"]))
-arcpy.AddMessage("OWNERNME1: " + str(v3CompDict["OWNERNME1"]))
-arcpy.AddMessage("OWNERNME2: " + str(v3CompDict["OWNERNME2"]))
-arcpy.AddMessage("PSTLADRESS: " + str(v3CompDict["PSTLADRESS"]))
-arcpy.AddMessage("SITEADRESS: " + str(v3CompDict["SITEADRESS"]))
-arcpy.AddMessage("ADDNUMPREFIX: " + str(v3CompDict["ADDNUMPREFIX"]))
-arcpy.AddMessage("ADDNUM: " + str(v3CompDict["ADDNUM"]))
-arcpy.AddMessage("ADDNUMSUFFIX: " + str(v3CompDict["ADDNUMSUFFIX"]))
-arcpy.AddMessage("PREFIX: " + str(v3CompDict["PREFIX"]))
-arcpy.AddMessage("STREETNAME: " + str(v3CompDict["STREETNAME"]))
-arcpy.AddMessage("STREETTYPE: " + str(v3CompDict["STREETTYPE"]))
-arcpy.AddMessage("SUFFIX: " + str(v3CompDict["SUFFIX"]))
-arcpy.AddMessage("LANDMARKNAME: " + str(v3CompDict["LANDMARKNAME"]))
-arcpy.AddMessage("UNITTYPE: " + str(v3CompDict["UNITTYPE"]))
-arcpy.AddMessage("UNITID: " + str(v3CompDict["UNITID"]))
-arcpy.AddMessage("PLACENAME: " + str(v3CompDict["PLACENAME"]))
-arcpy.AddMessage("ZIPCODE: " + str(v3CompDict["ZIPCODE"]))
-arcpy.AddMessage("ZIP4: " + str(v3CompDict["ZIP4"]))
-arcpy.AddMessage("STATE: " + str(v3CompDict["STATE"]))
-arcpy.AddMessage("SCHOOLDIST: " + str(v3CompDict["SCHOOLDIST"]))
-arcpy.AddMessage("SCHOOLDISTNO: " + str(v3CompDict["SCHOOLDISTNO"]))
-arcpy.AddMessage("IMPROVED: " + str(v3CompDict["IMPROVED"]))
-arcpy.AddMessage("CNTASSDVALUE: " + str(v3CompDict["CNTASSDVALUE"]))
-arcpy.AddMessage("LNDVALUE: " + str(v3CompDict["LNDVALUE"]))
-arcpy.AddMessage("IMPVALUE: " + str(v3CompDict["IMPVALUE"]))
-arcpy.AddMessage("FORESTVALUE: " + str(v3CompDict["FORESTVALUE"]))
-arcpy.AddMessage("ESTFMKVALUE: " + str(v3CompDict["ESTFMKVALUE"]))
-arcpy.AddMessage("NETPRPTA: " + str(v3CompDict["NETPRPTA"]))
-arcpy.AddMessage("GRSPRPTA: " + str(v3CompDict["GRSPRPTA"]))
-arcpy.AddMessage("PROPCLASS: " + str(v3CompDict["PROPCLASS"]))
-arcpy.AddMessage("AUXCLASS: " + str(v3CompDict["AUXCLASS"]))
-arcpy.AddMessage("ASSDACRES: " + str(v3CompDict["ASSDACRES"]))
-arcpy.AddMessage("DEEDACRES: " + str(v3CompDict["DEEDACRES"]))
-arcpy.AddMessage("GISACRES: " + str(v3CompDict["GISACRES"]))
-arcpy.AddMessage("CONAME: " + str(v3CompDict["CONAME"]))
-arcpy.AddMessage("LOADDATE: " + str(v3CompDict["LOADDATE"]))
-arcpy.AddMessage("PARCELFIPS: " + str(v3CompDict["PARCELFIPS"]))
-arcpy.AddMessage("PARCELSRC: " + str(v3CompDict["PARCELSRC"]))"""
 
 # Write all summary-type errors to file via the Summary class
 summaryTxt = Summary()

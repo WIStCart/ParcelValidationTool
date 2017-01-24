@@ -1,0 +1,8 @@
+N
+S
+E
+W
+NW
+SW
+NE
+SE
