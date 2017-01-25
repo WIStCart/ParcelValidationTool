@@ -15,7 +15,6 @@ class Error:
 		self.attributeFileErrors = []
 		self.geometricFileErrors = []
 		self.geometricPlacementErrors = ["Several parcel geometries appear to be spatially misplaced when comparing them against last year's parcel geometries. This issue is indicative of a re-projection error. Please see the following documentation: http://www.sco.wisc.edu/images/stories/publications/V2/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf for advice on how to project native data to the Statewide Parcel CRS."]
-		#other class variables
 		self.pinSkipCount = 0
 		self.trYearPast = 0
 		self.trYearExpected = 0
@@ -135,6 +134,7 @@ class Error:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the" + field.upper() + "field. Please inspect this field's value.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
+	
 	#Check if duplicates exist within an entire field(Error object, Parcel object, field to test, type of error to classify this as, are <Null>s are considered errors?, list of strings that are expected to be duplicates (to ignore), running list of strings to test against)  
 	def checkIsDuplicate(Error,Parcel,field,errorType,acceptNull,ignoreList,testList):
 		try:
@@ -214,8 +214,6 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
-
-
 	#Check to see if street name provided is within a list created from V2.
 	def streetNameCheck(Error,Parcel,field,siteAddField,errorType,acceptNull,stnamelist):
 		try:
@@ -244,7 +242,6 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
-
 	#verify that the values provided in the zip field are 5 digits in length and begin with a '5'.
 	def zipCheck(Error,Parcel,field,errorType,acceptNull):
 		try:
@@ -268,7 +265,6 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
-
 	#Verify that value in Improved field is correct based on value provided in Impvalue field...
 	#We may want/need to tweak the logic in here depending on how strictly we enforce the value of <Null> allowed in Impvalue field (i.e. Only for non-tax parcels or allow either 0 or <Null>)
 	def impCheck(Error,Parcel,field,impValField,errorType):
@@ -290,7 +286,6 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
-	
 	#checking strings for unacceptable chars including /n, /r, etc...
 	def badChars(Error,Parcel,fieldNamesList,charDict,errorType):
 		try:
@@ -440,8 +435,3 @@ class Error:
 			else:
 				Error.comparisonDict[field] = currentStatDict[field] - previousStatDict[field]
 		return(Error,Parcel)
-
-
-	#Will contain get, set, display methods
-
-	#Any other total error report data will go here
