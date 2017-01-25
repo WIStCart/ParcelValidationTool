@@ -1,4 +1,5 @@
-import arcpy
+import arcpy, collections
+from configparser import ConfigParser
 
 class Summary:
 
@@ -88,5 +89,34 @@ class Summary:
 		if (len(totError.geometricFileErrors) == 0) and (len(totError.geometricPlacementErrors) == 0):
 			Summary.errorSummaryFile.write("	*No broad-level geometric errors found!" + "\n")
 
-	def writeIniFile(self,inputDict,error):
-		arcpy.AddMessage("writing ini file")
+	def writeIniFile(self,inputDict,totError):
+		arcpy.AddMessage("Creating .ini file")
+		config = ConfigParser()
+		config.add_section('PARAMETERS')
+		for key in inputDict.keys():
+			config.set('PARAMETERS',key,inputDict[key])
+
+		if inputDict['isSearchable']:
+			config.add_section('ERROR COUNTS')
+			config.set('ERROR COUNTS','General',totError.generalErrorCount)
+			config.set('ERROR COUNTS','Geometric',totError.geometricErrorCount)
+			config.set('ERROR COUNTS','Address',totError.addressErrorCount)
+			config.set('ERROR COUNTS','Tax',totError.taxErrorCount)
+			config.add_section('PERCENT TAXROLL YEAR')
+			config.set('PERCENT TAXROLL YEAR','Previous',round((float(totError.trYearPast / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2))
+			config.set('PERCENT TAXROLL YEAR','Expected',round((float(totError.trYearExpected / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2))
+			config.set('PERCENT TAXROLL YEAR','Future',round((float(totError.trYearFuture / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2))
+			config.set('PERCENT TAXROLL YEAR','Other',round((float(totError.trYearOther / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2))
+			config.add_section('MISSING RECORDS')
+			config.set('MISSING RECORDS','CONAME',totError.coNameMiss)
+			config.set('MISSING RECORDS','PARCELFIPS',totError.fipsMiss)
+			config.set('MISSING RECORDS','PARCELSOURCE',totError.srcMiss)
+
+			config.add_section('COMPARISON COMPLETENESS')
+			for field in totError.comparisonDict.keys():
+				if field != 'state' or field != 'loaddate':
+					config.set('COMPARISON COMPLETENESS',field,totError.comparisonDict[field])
+
+		#Write out .ini file
+		with open(inputDict['outSummaryDir']+'/'+inputDict['county']+'_'+inputDict['outName']+'.ini','w') as configfile:
+			config.write(configfile)
