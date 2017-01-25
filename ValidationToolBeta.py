@@ -27,7 +27,7 @@ streetNames = [line.strip() for line in open(os.path.join(dir, 'V2_StreetName_Si
 streetTypes = [line.strip() for line in open(os.path.join(dir, 'V2_StreetType_Simplified.txt'), 'r')]
 
 #unitid domain list
-unitIdTypes = [line.strip() for line in open(os.path.join(dir, 'V2_UnitId_Simplified.txt'), 'r')]
+unitIdTypes = [line.strip() for line in open(os.path.join(dir, 'V2_UnitID_Simplified.txt'), 'r')]
 
 #unit type domain list
 unitTypes = [line.strip() for line in open(os.path.join(dir, 'V2_UnitType_Simplified.txt'), 'r')]
@@ -112,7 +112,7 @@ fieldNamesBadChars = {
 "SITEADRESS": ["\n","\r"],
 "ADDNUMPREFIX": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"],
 "ADDNUM": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"],
-"ADDNUMSUFFIX": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"],
+"ADDNUMSUFFIX": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")",',','.',"\-"],
 "PREFIX": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"],
 "STREETNAME": ["\n","\r","$","^","=","<",">","@","#","%","?","!","*","~","(",")"],
 "STREETTYPE": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',','.',"\-"],
@@ -166,7 +166,7 @@ copDomains = ['1','2','3','4','5','6','7','5M','M']
 auxDomins = ['W1','W2','W3','W4','W5','W6','W7','W8','X1','X2','X3','X4','M']
 
 #schooldist and schooldistno dictionaries
-reader = csv.reader(open(os.path.join(dir, 'school_district_codes.csv')))
+reader = csv.reader(open(os.path.join(dir, 'school_district_codes.csv'),'rU'))
 schoolDist_nameNo_dict = {}
 schoolDist_noName_dict = {}
 for row in reader:
