@@ -1,8 +1,5 @@
 import arcpy
 
-# TODO:
-# 1) ...
-
 class Summary:
 
 	def __init__(self):
@@ -90,3 +87,6 @@ class Summary:
 				Summary.errorSummaryFile.write("	General geometric error: " + str(geometricErrorMessage) + "\n")
 		if (len(totError.geometricFileErrors) == 0) and (len(totError.geometricPlacementErrors) == 0):
 			Summary.errorSummaryFile.write("	*No broad-level geometric errors found!" + "\n")
+
+	def writeIniFile(self,inputDict,error):
+		arcpy.AddMessage("writing ini file")

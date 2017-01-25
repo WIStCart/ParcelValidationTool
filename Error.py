@@ -2,13 +2,6 @@ import arcpy
 import math
 from Parcel import Parcel
 import re
-# TODO
-# 1) Write exceptions on the function itself per function. 
-#		a) Include errors in-line with the row (just like all other errors)      
-# 		b) try/catch/throw 
-# 		c) apply exceptions in last step of writing the function - to prevent from accidentally escaping errors that we can test for.
-#		d) For more: http://pro.arcgis.com/en/pro-app/arcpy/get-started/error-handling-with-python.htm
-#		e) About error codes: http://pro.arcgis.com/en/pro-app/tool-reference/appendices/understanding-geoprocessing-tool-errors-and-warnings.htm
 
 class Error:
 
