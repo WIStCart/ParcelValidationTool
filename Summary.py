@@ -96,7 +96,7 @@ class Summary:
 		for key in inputDict.keys():
 			config.set('PARAMETERS',key,inputDict[key])
 
-		if inputDict['isSearchable']:
+		if inputDict['isSearchable'] == 'true':
 			config.add_section('ERROR COUNTS')
 			config.set('ERROR COUNTS','General',totError.generalErrorCount)
 			config.set('ERROR COUNTS','Geometric',totError.geometricErrorCount)
@@ -116,7 +116,9 @@ class Summary:
 			for field in totError.comparisonDict.keys():
 				if field != 'state' or field != 'loaddate':
 					config.set('COMPARISON COMPLETENESS',field,totError.comparisonDict[field])
-
-		#Write out .ini file
-		with open(inputDict['outSummaryDir']+'/'+inputDict['county']+'_'+inputDict['outName']+'.ini','w') as configfile:
-			config.write(configfile)
+		try: 
+			#Write out .ini file
+			with open(inputDict['outSummaryDir']+'/'+inputDict['county']+'_'+inputDict['outName']+'.ini','w') as configfile:
+				config.write(configfile)
+		except:
+			arcpy.AddMessage("Error writing .ini file")
