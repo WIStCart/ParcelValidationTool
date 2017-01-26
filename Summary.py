@@ -14,7 +14,7 @@ class Summary:
 		Summary.errorSummaryFile.write("Validation Summary Table: " + "\n")
 		Summary.errorSummaryFile.write("This validation summary table contains an overview of any errors found by the Parcel Validation Tool. Please review the contents of this file and make changes to your parcel dataset as necessary." + "\n\n")
 		Summary.errorSummaryFile.write("************************************************************************\n")
-		Summary.errorSummaryFile.write("* In-line errors:  (Specific errors written in-line within output feature class: " + str(outDir + outName) + ")\n")
+		Summary.errorSummaryFile.write("* In-line errors:  (Specific errors written in-line within output feature class: " + str(outDirTxt + outName) + ")\n")
 		Summary.errorSummaryFile.write("************************************************************************\n")
 		Summary.errorSummaryFile.write("The following lines summarized the element-specific errors that were found while validating your parcel dataset.  The stats below are meant as a means of reviewing the output.  Please see the GeneralElementErrors, AddressElementErrors, TaxrollElementErrors, and GeometricElementErrors fields to address these errors individually.\n")
 		Summary.errorSummaryFile.write("	General Errors: " + str(totError.generalErrorCount) + "\n")
