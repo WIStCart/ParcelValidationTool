@@ -7,7 +7,7 @@ import LegacyCountyStats
 from externalDicts import *
 
 #Collect tool inputs
-inputNameList = ['isSearchable','isFinal','county','inFC','outDir','outName','outSummaryDir','exportModel','inExportTable','inExportGeometryFC','inXREFTable','tablePIN','geomPin','xmlPIN','xrefTablePIN','xrefGeomPIN','subName','subEmail','condoModel','cert','isNameRedact','redactPolicy','zoningGenType','zoningGenFC','zoningFarmType','zoningFarmFC','zoningShoreType','zoningShoreFC','zoningFloodType','zoningFloodFC','zoningAirType','zoningAirFC','isCOPDomainV3','copClass1','copClass2','copClass3','copClass4','copClass5','copClass5M','copClass6','copClass7','auxClassW1','auxClassW2','auxClassW3','auxClassW4','auxClassW5','auxClassW6','auxClassW7','auxClassW8','auxClassW9','auxClassX1','auxClassX2','auxClassX3','auxClassX4', 'STATEID','PARCELID','TAXPARCELID','PARCELDATE','TAXROLLYEAR','OWNERNME1','OWNERNME2','PSTLADRESS','SITEADRESS','ADDNUMPREFIX','ADDNUM','ADDNUMSUFFIX','PREFIX','STREETNAME','STREETTYPE','SUFFIX','LANDMARKNAME','UNITTYPE','UNITID','PLACENAME','ZIPCODE','ZIP4','STATE','SCHOOLDIST','SCHOOLDISTNO','IMPROVED','CNTASSDVALUE','LNDVALUE','IMPVALUE','FORESTVALU','ESTFMKVALUE','NETPRPTA','GRSPRPTA','PROPCLASS','AUXCLASS','ASSDACRES','DEEDACRES','GISACRES','CONAME','LOADDATE','PARCELFIPS','PARCELSRC']
+inputNameList = ['isSearchable','isFinal','county','inFC','outDir','outName','outSummaryDir','exportModel','inExportTable','inExportGeometryFC','inXREFTable','tablePIN','geomPin','xmlPIN','xrefTablePIN','xrefGeomPIN','subName','subEmail','condoModel','cert','isNameRedact','redactPolicy','zoningGenType','zoningGenFC','zoningFarmType','zoningFarmFC','zoningShoreType','zoningShoreFC','zoningFloodType','zoningFloodFC','zoningAirType','zoningAirFC','isCOPDomainV3','copClass1','copClass2','copClass3','copClass4','copClass5','copClass5M','copClass6','copClass7','auxClassW1','auxClassW2','auxClassW3','auxClassW4','auxClassW5','auxClassW6','auxClassW7','auxClassW8','auxClassW9','auxClassX1','auxClassX2','auxClassX3','auxClassX4','PARCELID','TAXPARCELID','PARCELDATE','TAXROLLYEAR','OWNERNME1','OWNERNME2','PSTLADRESS','SITEADRESS','ADDNUMPREFIX','ADDNUM','ADDNUMSUFFIX','PREFIX','STREETNAME','STREETTYPE','SUFFIX','LANDMARKNAME','UNITTYPE','UNITID','PLACENAME','ZIPCODE','ZIP4','STATE','SCHOOLDIST','SCHOOLDISTNO','IMPROVED','CNTASSDVALUE','LNDVALUE','IMPVALUE','FORESTVALU','ESTFMKVALUE','NETPRPTA','GRSPRPTA','PROPCLASS','AUXCLASS','ASSDACRES','DEEDACRES','GISACRES','CONAME','PARCELFIPS','PARCELSRC']
 inputDict = collections.OrderedDict()
 i = 0
 for inputName in inputNameList:
@@ -18,7 +18,7 @@ for inputName in inputNameList:
 #Create summary object
 summary = Summary()
 
-if inputDict['isSearchable']:
+if inputDict['isSearchable'] == 'true':
 
 	#Load files for current domain lists 
 	directory = os.path.dirname(__file__)
@@ -155,9 +155,9 @@ if inputDict['isSearchable']:
 
 	# Write all summary errors to file
 	Summary.writeSummaryTxt(summary,inputDict['outSummaryDir'],inputDict['outName'],totError)
-
+	arcpy.AddMessage(inputDict['isFinal'])
 	#Write the ini file if final
-	if inputDict['isFinal']:
+	if inputDict['isFinal'] == 'true':
 		summary.writeIniFile(inputDict,totError)
 
 	arcpy.AddMessage("General Errors: " + str(totError.generalErrorCount))
