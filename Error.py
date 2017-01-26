@@ -76,22 +76,22 @@ class Error:
 			yCent = geom.centroid.Y
 		except:
 			Parcel.geometricErrors.append("Corrupt Geometry: The feature's geometry could not be accessed.")
-			self.geometricErrorCount =+ 1
+			self.geometricErrorCount += 1
 		try:
 			areaP = Parcel.shapeArea
 			lengthP = Parcel.shapeLength
 			if areaP < 0.01:
 				Parcel.geometricErrors.append("Sliver Polygon: AREA")
-				self.geometricErrorCount =+ 1
+				self.geometricErrorCount += 1
 			if lengthP < 0.01:
 				Parcel.geometricErrors.append("Sliver Polygon: LENGTH")
-				self.geometricErrorCount =+ 1
+				self.geometricErrorCount += 1
 			if (areaP/lengthP) < 0.01:
 				Parcel.geometricErrors.append("Sliver Polygon: AREA/LENGTH")
-				self.geometricErrorCount =+ 1				
+				self.geometricErrorCount += 1				
 		except:
 			Parcel.geometricErrors.append("Corrupt Geometry: The feature's area and/or length could not be accessed.")
-			self.geometricErrorCount =+ 1
+			self.geometricErrorCount += 1
 		return self,Parcel
 
 	#Check if the coordinate reference system is consistent with that of the parcel initiative (Error object, feature class)
@@ -359,7 +359,7 @@ class Error:
 					Error.coNameMiss += 1
 			if fipsToTest is not None:
 				try: 
-					if fipsToTest != coNameDict[Error.coName + " COUNTY"]:
+					if fipsToTest != coNameDict[Error.coName]:
 						getattr(Parcel,errorType + "Errors").append("The value provided in " + fipsfield.upper() + " field does not match submitting county fips.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				except:
@@ -372,7 +372,7 @@ class Error:
 					Error.fipsMiss += 1
 			if srcToTest is not None:
 				try:
-					if srcToTest != coNumberDict[coNameDict[Error.coName + " COUNTY"]]:
+					if srcToTest != coNumberDict[coNameDict[Error.coName]]:
 						getattr(Parcel,errorType + "Errors").append("The value provided in " + srcfield.upper() + " field does not match submitting county name.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				except:
@@ -404,7 +404,7 @@ class Error:
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 			if schNa is not None:
 				try:
-					schNa = schNa.replace("SCHOOL DISTRICT", "").replace("SCHOOL DIST","").replace("SCHOOL DIST.", "").replace("SCH DIST", "").replace("SCHOOL", "").replace("SCH D OF", "").replace("SCH", "").replace("SD", "").strip()
+					schNa = schNa.replace("SCHOOL DISTRICT", "").replace("SCHOOL DISTIRCT", "").replace("SCHOOL DIST","").replace("SCHOOL DIST.", "").replace("SCH DIST", "").replace("SCHOOL", "").replace("SCH D OF", "").replace("SCH", "").replace("SD", "").strip()
 					if schNo != schNameNoDict[schNa] or schNa != schNoNameDict[schNo]:
 						getattr(Parcel,errorType + "Errors").append("The values provided in " + schDistNoField.upper() + " and " + schDistField.upper() + " field do not match. Please verify values are in acceptable domain list.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)

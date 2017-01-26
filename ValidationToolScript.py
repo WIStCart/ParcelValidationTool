@@ -40,7 +40,7 @@ if inputDict['isSearchable'] == 'true':
 		schoolDist_noName_dict[k] = v
 		schoolDist_nameNo_dict[v] = k
 
-	reader = csv.reader(open(os.path.join(directory, 'CoNameFips.csv'))) #CONAME and FIPS list
+	reader = csv.reader(open(os.path.join(directory, 'CoNameFips.csv'),'rU')) #CONAME and FIPS list
 	county_nameNo_dict = {}
 	county_noName_dict = {}
 	for row in reader:
