@@ -286,9 +286,6 @@ arcpy.AddField_management(output_fc_temp,"GeometricElementErrors", "TEXT", "", "
 #Call all pre-cursor test functions
 totError = Error.checkCRS(totError, output_fc_temp)
 
-#Call all pre-cursor test functions
-totError = Error.checkCRS(totError, output_fc_temp)
-
 #Create update cursor then use it to iterate through records in feature class
 arcpy.AddMessage("Testing the data for various attribute error types.")
 with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:	
