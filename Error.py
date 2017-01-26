@@ -311,14 +311,24 @@ class Error:
 			if stringToTest is not None:
 				checkVal = stringToTest.split(",")
 				for val in checkVal:
-					if val.strip() not in domainList:
-						getattr(Parcel,errorType + "Errors").append("A value provided in " + field.upper() + " field is not in acceptable domain list.")
-						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					elif val.strip() in testList:
-						getattr(Parcel,errorType + "Errors").append("Duplicate values exist in " + field.upper() + " field.")
-						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					if field == 'propclass':
+						if val.strip() not in domainList:
+							getattr(Parcel,errorType + "Errors").append("A value provided in " + field.upper() + " field is not in acceptable domain list.")
+							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+						elif val.strip() in testList:
+							getattr(Parcel,errorType + "Errors").append("Duplicate values exist in " + field.upper() + " field.")
+							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+						else:
+							testList.append(val.strip())
 					else:
-						testList.append(val.strip())
+						if val.strip() not in domainList:
+							getattr(Parcel,errorType + "Errors").append("A value provided in " + field.upper() + " field is not in AUXCLASS domain list. Please ensure mappings for these values are provided in the 'Explain/Certification' box of submission form.")
+							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+						elif val.strip() in testList:
+							getattr(Parcel,errorType + "Errors").append("Duplicate values exist in " + field.upper() + " field.")
+							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+						else:
+							testList.append(val.strip())
 				return(Error,Parcel)
 			else:
 				if acceptNull:
