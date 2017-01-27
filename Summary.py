@@ -23,7 +23,7 @@ class Summary:
 		Summary.errorSummaryFile.write("	Tax Errors: " + str(totError.taxErrorCount) + "\n")
 		Summary.errorSummaryFile.write("\n\n")
 		Summary.errorSummaryFile.write("************************************************************************\n")
-		Summary.errorSummaryFile.write("* Broad-level errors:")
+		Summary.errorSummaryFile.write("* Broad-level errors:\n")
 		Summary.errorSummaryFile.write("************************************************************************\n")
 		Summary.errorSummaryFile.write("The following lines explain any broad geometric errors that were found while validating your parcel dataset."+ "\n")
 		if len(totError.geometricPlacementErrors) != 0:
