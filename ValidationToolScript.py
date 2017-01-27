@@ -69,10 +69,15 @@ if inputDict['isSearchable'] == 'true':
 	fieldDictNames = {}
 	missingFields = []
 	excessFields = []
-	var = True
+	var = True	
 
 	for field in fieldList:
 	        fieldDictNames[field.name] = [[field.type],[field.length]]
+
+	#if error fields already exist, delete them prior to adding fields...
+	for field in fieldList:
+		if field.name == 'GeneralElementErrors':
+			arcpy.DeleteField_management(output_fc_temp,['GeneralElementErrors','AddressElementErrors','TaxrollElementErrors','GeometricElementErrors'])
 
 	for field in fieldDictNames:
 		if field.upper() not in fieldListPass:
