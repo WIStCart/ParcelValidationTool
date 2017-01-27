@@ -26,7 +26,7 @@ if inputDict['isSearchable'] == 'true':
 	streetTypes = [line.strip() for line in open(os.path.join(directory, 'V2_StreetType_Simplified.txt'), 'r')] #street types domain list
 	unitIdTypes = [line.strip() for line in open(os.path.join(directory, 'V2_UnitId_Simplified.txt'), 'r')] #unitid domain list
 	unitTypes = [line.strip() for line in open(os.path.join(directory, 'V2_UnitType_Simplified.txt'), 'r')] #unit type domain list
-	placeNameDomains = [line.strip() for line in open(os.path.join(directory,'V2_PlacenameSummary_Simplified.txt'), 'r')] #placename domain list
+	lsadDomains = [line.strip() for line in open(os.path.join(directory,'LSAD_Simplified.txt'), 'r')] #lsad domain list
 	taxRollYears = [line.strip() for line in open(os.path.join(directory,'TaxRollYears.txt'), 'r')] #taxroll years to test (past,expected,future1,future2)
 	suffixDomains = [line.strip() for line in open(os.path.join(directory,'V2_SuffixDomains_Simplified.txt'), 'r')] #suffix domain list
 	prefixDomains = [line.strip() for line in open(os.path.join(directory, 'V2_PrefixDomains_Simplified.txt'), 'r')] #prefix domain list
@@ -151,10 +151,9 @@ if inputDict['isSearchable'] == 'true':
 			totError,currParcel = Error.checkDomainString(totError,currParcel,"streettype","address",True,streetTypes)
 			totError,currParcel = Error.checkDomainString(totError,currParcel,"unittype","address",True,unitTypes)
 			totError,currParcel = Error.checkDomainString(totError,currParcel,"unitid","address",True,unitIdTypes)
-			totError,currParcel = Error.checkDomainString(totError,currParcel,"placename","general",True,placeNameDomains)
+			totError,currParcel = Error.checkDomainString(totError,currParcel,"placename","general",True,lsadDomains)
 			totError,currParcel = Error.checkDomainString(totError,currParcel,"suffix","address",True, suffixDomains)
 			totError,currParcel = Error.trYear(totError,currParcel,"taxrollyear","parcelid","tax",False,pinSkips,taxRollYears)
-			totError,currParcel = Error.streetNameCheck(totError,currParcel,"streetname","siteadress","address",True,streetNames)
 			totError,currParcel = Error.zipCheck(totError,currParcel,"zipcode","address",True)
 			totError,currParcel = Error.impCheck(totError,currParcel,"improved","impvalue","tax")
 			totError,currParcel = Error.badChars(totError,currParcel,fieldNames,fieldNamesBadChars,'general')

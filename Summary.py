@@ -94,7 +94,7 @@ class Summary:
 			Summary.errorSummaryFile.write("\n\n\n* Within: " + outDirTxt + "\\" + outName  + "\n") 
 			Summary.errorSummaryFile.write("************************************************************************\n")
 			Summary.errorSummaryFile.close()
-		except Exception as e::
+		except Exception as e:
 			arcpy.AddMessage("!!!!!!!!!!Error writing summary file!!!!!!!!!!")
 			arcpy.AddMessage(str(e))
 
@@ -131,6 +131,6 @@ class Summary:
 				config.write(configfile)
 			arcpy.AddMessage("Wrote .ini file to "+inputDict['outINIDir'])
 			arcpy.AddMessage("Please include this file with your submission")
-		except Exception as e::
+		except Exception as e:
 			arcpy.AddMessage("!!!!!!!!!!Error writing .ini file!!!!!!!!!!")
 			arcpy.AddMessage(str(e))

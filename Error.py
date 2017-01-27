@@ -165,20 +165,29 @@ class Error:
 	def checkDomainString(Error,Parcel,field,errorType,acceptNull,testList):
 		try:
 			stringToTest = getattr(Parcel,field)
-			if stringToTest is not None:
-				if stringToTest in testList:
-					pass
-				else:
-					getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " not in acceptable domain list.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-				return (Error, Parcel)
+			if field == 'placename':
+				if stringToTest is not None:
+					if any(substring in stringToTest for substring in testList):
+						pass
+					else:
+						getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " doesn't contain required LSAD descriptor.")
+						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					return (Error,Parcel)
 			else:
-				if acceptNull:
-					pass
+				if stringToTest is not None:
+					if stringToTest in testList:
+						pass
+					else:
+						getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " not in acceptable domain list.")
+						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					return (Error, Parcel)
 				else:
-					getattr(Parcel,errorType + "Errors").append("Null Found on " + field.upper())
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-				return (Error, Parcel)
+					if acceptNull:
+						pass
+					else:
+						getattr(Parcel,errorType + "Errors").append("Null Found on " + field.upper())
+						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
