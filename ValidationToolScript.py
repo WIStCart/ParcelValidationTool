@@ -1,4 +1,4 @@
-import arcpy,os,re,csv,collections
+import arcpy,os,re,csv,collections,urllib2
 from Parcel import Parcel
 from Error import Error
 from Summary import Summary
@@ -13,7 +13,23 @@ i = 0
 for inputName in inputNameList:
 	inputDict[inputName] = arcpy.GetParameterAsText(i)
 	i += 1
-	arcpy.AddMessage(inputName + "=" + inputDict[inputName])
+
+#Run version check
+inputDict['version'] = 'V1.0.0'
+try:
+	arcpy.AddMessage('Checking Tool Version...')
+	currVersion = urllib2.urlopen('http://www.sco.wisc.edu/parcels/tools/Validation/validation_version.txt').read()
+	if inputDict['version'] == currVersion:
+		arcpy.AddMessage('Tool up to date.')
+	else:
+		arcpy.AddMessage("!!!!!!!!!!Error tool not up to date!!!!!!!!!!")
+		arcpy.AddMessage("Please download the latest version of the tool at")
+		arcpy.AddMessage("http://www.sco.wisc.edu/parcels/tools/")
+		exit()
+except:
+	arcpy.AddMessage("!!!!!!!!!!Warning could not check version!!!!!!!!!!")
+	arcpy.AddMessage("Check the change log at http://www.sco.wisc.edu/parcels/tools/")
+	arcpy.AddMessage("to make sure the latest version of the tool is installed before submitting")
 
 #Create summary object
 summary = Summary()
