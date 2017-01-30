@@ -48,7 +48,7 @@ class Summary:
 			Summary.errorSummaryFile.write("	Missing PARCELSRC: " + str(totError.srcMiss) + "\n\n")
 			Summary.errorSummaryFile.write("If any of the above values are greater than 0, please add missing values.  These 3 fields should be populated for all records submitted.\n\n\n")
 			Summary.errorSummaryFile.write("BELOW IS A COMPARISON OF COMPLETENESS VALUES FROM YOUR PREVIOUS PARCEL SUBMISSION AND THIS CURRENT SUBMISSION.\n")
-			Summary.errorSummaryFile.write("-->If the value shown is a negative number greater than <insert number here>, please verify that all data was joined correctly and no data was lost during processing.\n")
+			Summary.errorSummaryFile.write("-->If the value shown is a seemingly large negative number, please verify that all data was joined correctly and no data was lost during processing.\n")
 			Summary.errorSummaryFile.write("-->Note: This does not necessarily mean your data is incorrect, we just want to highlight large discrepancies that could indicate missing or incorrect data.\n\n")
 			Summary.errorSummaryFile.write("		FIELD   	DIFFERENCE\n")
 			Summary.errorSummaryFile.write("		------		----------\n")
