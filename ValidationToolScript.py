@@ -185,20 +185,23 @@ if inputDict['isSearchable'] == 'true':
 			currParcel.writeErrors(row,cursor, fieldNames)
 			currParcel = None
 
-	# Write all summary errors to file
-	Summary.writeSummaryTxt(summary,inputDict['outSummaryDir'],inputDict['outName'],totError)
-	arcpy.AddMessage(inputDict['isFinal'])
+	
 	#Write the ini file if final
 	if inputDict['isFinal'] == 'true':
 		summary.writeIniFile(inputDict,totError)
+	if inputDict['isFinal'] == 'false':
+		# Write all summary errors to file
+		Summary.writeSummaryTxt(summary,inputDict['outSummaryDir'],inputDict['outName'],totError)
+
+		#Write feature class from memory back out to hard disk
+		arcpy.FeatureClassToFeatureClass_conversion(output_fc_temp,inputDict['outDir'],inputDict['outName'])
 
 	arcpy.AddMessage("General Errors: " + str(totError.generalErrorCount))
 	arcpy.AddMessage("Geometric Errors: " + str(totError.geometricErrorCount))
 	arcpy.AddMessage("Address Errors: " + str(totError.addressErrorCount))
 	arcpy.AddMessage("Tax Errors: " + str(totError.taxErrorCount))
 
-	#Write feature class from memory back out to hard disk
-	arcpy.FeatureClassToFeatureClass_conversion(output_fc_temp,inputDict['outDir'],inputDict['outName'])
+	
 #Export
 else:
 	totError = Error(inputDict['inExportGeometryFC'],inputDict['county'])
