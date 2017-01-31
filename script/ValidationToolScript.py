@@ -30,7 +30,7 @@ try:
 		arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 		arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 		exit()
-except:
+except Exception:
 	arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	arcpy.AddMessage("Check the change log at http://www.sco.wisc.edu/parcels/tools/")
 	arcpy.AddMessage("to make sure the latest version of the tool is installed before submitting")
@@ -40,19 +40,18 @@ summary = Summary()
 
 if inputDict['isSearchable'] == 'true':
 
-	#Load files for current domain lists 
-	directory = os.path.dirname(__file__)
-	streetNames = [line.strip() for line in open(os.path.join(directory, 'V2_StreetName_Simplified.txt'), 'r')] #street name list
-	streetTypes = [line.strip() for line in open(os.path.join(directory, 'V2_StreetType_Simplified.txt'), 'r')] #street types domain list
-	unitIdTypes = [line.strip() for line in open(os.path.join(directory, 'V2_UnitId_Simplified.txt'), 'r')] #unitid domain list
-	unitTypes = [line.strip() for line in open(os.path.join(directory, 'V2_UnitType_Simplified.txt'), 'r')] #unit type domain list
-	lsadDomains = [line.strip() for line in open(os.path.join(directory,'LSAD_Simplified.txt'), 'r')] #lsad domain list
-	taxRollYears = [line.strip() for line in open(os.path.join(directory,'TaxRollYears.txt'), 'r')] #taxroll years to test (past,expected,future1,future2)
-	suffixDomains = [line.strip() for line in open(os.path.join(directory,'V2_SuffixDomains_Simplified.txt'), 'r')] #suffix domain list
-	prefixDomains = [line.strip() for line in open(os.path.join(directory, 'V2_PrefixDomains_Simplified.txt'), 'r')] #prefix domain list
-	pinSkips = [line.strip() for line in open(os.path.join(directory, 'V2_PinSkips.txt'), 'r')] #list of non-parcelid values found in field to ignore when checking for dups (and use in other functions)
+	#Load files for current domain lists
+	streetNames = [line.strip() for line in open('..\data\V2_StreetName_Simplified.txt', 'r')] #street name list
+	streetTypes = [line.strip() for line in open('..\data\V2_StreetType_Simplified.txt','r')] #street types domain list
+	unitIdTypes = [line.strip() for line in open('..\data\V2_UnitId_Simplified.txt','r')] #unitid domain list
+	unitTypes = [line.strip() for line in open('..\data\V2_UnitType_Simplified.txt','r')] #unit type domain list
+	lsadDomains = [line.strip() for line in open('..\data\LSAD_Simplified.txt','r')] #lsad domain list
+	taxRollYears = [line.strip() for line in open('..\data\TaxRollYears.txt','r')] #taxroll years to test (past,expected,future1,future2)
+	suffixDomains = [line.strip() for line in open('..\data\V2_SuffixDomains_Simplified.txt','r')] #suffix domain list
+	prefixDomains = [line.strip() for line in open('..\data\V2_PrefixDomains_Simplified.txt','r')] #prefix domain list
+	pinSkips = [line.strip() for line in open('..\data\V2_PinSkips.txt','r')] #list of non-parcelid values found in field to ignore when checking for dups (and use in other functions)
 
-	reader = csv.reader(open(os.path.join(directory, 'school_district_codes.csv'),'rU')) #school district code list
+	reader = csv.reader(open('..\data\school_district_codes.csv','rU')) #school district code list
 	schoolDist_nameNo_dict = {}
 	schoolDist_noName_dict = {}
 	for row in reader:
@@ -60,7 +59,7 @@ if inputDict['isSearchable'] == 'true':
 		schoolDist_noName_dict[k] = v
 		schoolDist_nameNo_dict[v] = k
 
-	reader = csv.reader(open(os.path.join(directory, 'CoNameFips.csv'),'rU')) #CONAME and FIPS list
+	reader = csv.reader(open('..\data\CoNameFips.csv','rU')) #CONAME and FIPS list
 	county_nameNo_dict = {}
 	county_noName_dict = {}
 	for row in reader:
