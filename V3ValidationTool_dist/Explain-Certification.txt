@@ -1,0 +1,19 @@
+﻿***************************************************************************************************
+a) By typing my name in the line below, I hereby certify that this submission is complete (relative to the Element Occurrence Standard):
+
+
+
+
+b) Brief explanation of any unsolvable errors, missing data, or other issues with adhering to the submission standards here (if any):
+
+
+
+
+c) Below, please list the names of the “Other Layers” that will be included with your V3 submission (per Appendix E of the Submission Documentation):
+
+
+
+
+d) What URL do you wish to use for the ACCESSURL attribute? This would be the URL to a webpage where end-users of the statewide layer can view and/or download most current county parcel data. It may be the URL for a landing page for the county’s viewers/apps/open data download sites, or the URL for the county GIS web map that displays parcel data:
+
+
