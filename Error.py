@@ -14,7 +14,7 @@ class Error:
 		self.comparisonDict = {}
 		self.attributeFileErrors = []
 		self.geometricFileErrors = []
-		self.geometricPlacementErrors = ["Several parcel geometries appear to be spatially misplaced when comparing them against last year's parcel geometries. This issue is indicative of a re-projection error. Please see the following documentation: http://www.sco.wisc.edu/images/stories/publications/V2/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf for advice on how to project native data to the Statewide Parcel CRS."]
+		self.geometricPlacementErrors = ["Several parcel geometries appear to be spatially misplaced when comparing them against last year's parcel geometries. This issue is indicative of a re-projection error. Please see the following documentation: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf section #2, for advice on how to project native data to the Statewide Parcel CRS."]
 		self.pinSkipCount = 0
 		self.trYearPast = 0
 		self.trYearExpected = 0
@@ -44,7 +44,7 @@ class Error:
 	# Will test the row against LTSB's feature service to identify if the feature is in the correct location.   
 	def testCountyEnvelope(self,Parcel):
 		# For sake of saving time while developing, am setting this function to auto-return "Valid" because it takes about 1 min to execute each of these tests.
-		'''try:
+		try:
 			baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP/PARCELS/FeatureServer/0/query"
 			where = str(Parcel.parcelid)
 			query = "?f=json&where=UPPER(PARCELID)%20=%20UPPER(%27{}%27)&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=OBJECTID%2CPARCELID%2CTAXPARCELID%2CCONAME%2CPARCELSRC&outSR=3071&resultOffset=0&resultRecordCount=10000".format(where)
@@ -65,7 +65,8 @@ class Error:
 			# Call it valid If the query returns no features (failure to return features would not be caused by a misalignment) 
 			return "Valid" 
 		except:
-			# Call it valid if an error happens (error would not be caused by a misalignment) '''
+			# Call it valid if an error happens (error would not be caused by a misalignment)
+			return "Valid"
 		return "Valid"
 
 	def testParcelGeometry(self,Parcel):
