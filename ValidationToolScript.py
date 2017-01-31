@@ -22,12 +22,16 @@ try:
 	if inputDict['version'] == currVersion:
 		arcpy.AddMessage('Tool up to date.')
 	else:
+		arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+		arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 		arcpy.AddMessage("!!!!!!!!!!Error tool not up to date!!!!!!!!!!")
 		arcpy.AddMessage("Please download the latest version of the tool at")
 		arcpy.AddMessage("http://www.sco.wisc.edu/parcels/tools/")
+		arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+		arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 		exit()
 except:
-	arcpy.AddMessage("!!!!!!!!!!Warning could not check version!!!!!!!!!!")
+	arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	arcpy.AddMessage("Check the change log at http://www.sco.wisc.edu/parcels/tools/")
 	arcpy.AddMessage("to make sure the latest version of the tool is installed before submitting")
 
