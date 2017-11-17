@@ -1,6 +1,7 @@
 # Test Data (Geodatabases .gdb)
 TestData/
 TestData.gdb/
+TEST_DATASET_PARCELS_2017.gdb/
 #*.gdb
 # "Compiled" python code
 *.pyc

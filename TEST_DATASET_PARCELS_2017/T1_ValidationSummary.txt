@@ -1,0 +1,86 @@
+C:\00_SCO\02_GitHub\ParcelValidationTool\TEST_DATASET_PARCELS_2017\T1_ValidationSummary.txt
+Validation Summary Table: 
+This validation summary table contains an overview of any errors found by the Parcel Validation Tool. Please review the contents of this file and make changes to your parcel dataset as necessary.
+
+************************************************************************
+* In-line errors
+************************************************************************
+The following lines summarized the element-specific errors that were found while validating your parcel dataset.  The stats below are meant as a means of reviewing the output.  Please see the GeneralElementErrors, AddressElementErrors, TaxrollElementErrors, and GeometricElementErrors fields to address these errors individually.
+	General Errors: 6
+	Geometric Errors: 0
+	Address Errors: 4
+	Tax Errors: 3
+
+
+************************************************************************
+* Broad-level errors:
+************************************************************************
+The following lines explain any broad geometric errors that were found while validating your parcel dataset.
+	*No broad-level geometric errors found!
+
+
+Percentage of records with various Taxroll Years
+	Previous Taxroll Year: 0.0%
+	Expected Taxroll Year: 100.0%
+	Future Taxroll Years: 0.0%
+	Other Taxroll Years: 0.0%
+
+
+Records missing CONAME, PARCELFIPS, or PARCELSOURCE
+	Missing CONAME: 0
+	Missing PARCELFIPS: 3
+	Missing PARCELSRC: 3
+
+If any of the above values are greater than 0, please add missing values.  These 3 fields should be populated for all records submitted.
+
+
+BELOW IS A COMPARISON OF COMPLETENESS VALUES FROM YOUR PREVIOUS PARCEL SUBMISSION AND THIS CURRENT SUBMISSION.
+-->If the value shown is a seemingly large negative number, please verify that all data was joined correctly and no data was lost during processing.
+-->Note: This does not necessarily mean your data is incorrect, we just want to highlight large discrepancies that could indicate missing or incorrect data.
+
+          FIELD     DIFFERENCE
+         ------     ----------
+       PARCELID:  -19614
+    TAXPARCELID:  -19767
+     PARCELDATE:  -18927
+    TAXROLLYEAR:  -19614
+      OWNERNME1:  -19015
+      OWNERNME2:  -2845
+     PSTLADRESS:  -18857
+     SITEADRESS:  -8115
+   ADDNUMPREFIX:  -4586
+         ADDNUM:  -8081
+   ADDNUMSUFFIX:  -403
+         PREFIX:  -3137
+     STREETNAME:  -8115
+     STREETTYPE:  -6811
+         SUFFIX:  -37
+   LANDMARKNAME:  0
+       UNITTYPE:  -17
+         UNITID:  -31
+      PLACENAME:  -19620
+        ZIPCODE:  -8017
+           ZIP4:  0
+     SCHOOLDIST:  -19620
+   SCHOOLDISTNO:  -19620
+       IMPROVED:  -19013
+   CNTASSDVALUE:  -19015
+       LNDVALUE:  -19015
+       IMPVALUE:  -19015
+    FORESTVALUE:  0
+    ESTFMKVALUE:  -9412
+       NETPRPTA:  -19015
+       GRSPRPTA:  -19015
+      PROPCLASS:  -16709
+       AUXCLASS:  -3127
+      ASSDACRES:  -19015
+      DEEDACRES:  147
+       GISACRES:  -19611
+         CONAME:  -19614
+     PARCELFIPS:  -19617
+      PARCELSRC:  -19617
+
+
+
+* Within: C:\00_SCO\02_GitHub\ParcelValidationTool\TEST_DATASET_PARCELS_2017\T1
+************************************************************************
