@@ -2,6 +2,8 @@
 TestData/
 TestData.gdb/
 TEST_DATASET_PARCELS_2017.gdb/
+# Test Data Directory
+TEST_DATASET_PARCELS_2017/
 #*.gdb
 # "Compiled" python code
 *.pyc
