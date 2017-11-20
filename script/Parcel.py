@@ -1,7 +1,4 @@
 import arcpy
-# TODO:
-# 1) change the structure of the row to be fieldNames index (e.g. fieldNames.index("GeneralElementErrors")])
-# 2) ...
 
 #Parcel class defines a parcel record based on the attribute schema
 class Parcel:

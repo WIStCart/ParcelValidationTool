@@ -312,6 +312,28 @@ class Error:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + f.upper() + " field. Please manually inspect this field's value.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
+		
+	#checking strings for unacceptable chars including /n, /r, etc...
+	def reallyBadChars(Error,Parcel,fieldNamesList,charDict,errorType):
+		arcpy.AddMessage("Testing reallyBadChars()")
+		arcpy.AddMessage(str(getattr(Parcel,"ownernme1"))) # The most explicit way of accessing an attribute on parcel. We use the below example as a way of making the functions more flexible - with this strategy, they can test different character lists against different fields.
+		arcpy.AddMessage(str(getattr(Parcel,fieldNamesList[7].lower()))) # externalDicts.py/fieldNames is passed as fieldNamesList for this function (ownername1 is in the 8th position)
+		arcpy.AddMessage(str(Parcel.ownernme1)) # The another explicit way of accessing an attribute on parcel
+		try:
+			for f in fieldNamesList:
+				#arcpy.AddMessage(str(getattr(Parcel,f.lower()))) # similar to the above, access the attribute value of the fieldname "f"
+				if f in charDict:
+					testRegex = str(charDict[f]).replace(",",'').replace("'","").replace('"','').replace(" ","")
+					stringToTest = str(getattr(Parcel,f.lower()))
+					if stringToTest is not None:
+						if re.search(testRegex,stringToTest) is not None:
+							getattr(Parcel,errorType + "Errors").append("Bad characters found in " + f.upper())
+							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+			return (Error, Parcel)
+		except:
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + f.upper() + " field. Please manually inspect this field's value.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
 
 	#checking propclass and auxclass for acceptable domains and duplicate values
 	def classOfPropCheck(Error,Parcel,field,domainList,errorType,acceptNull):
