@@ -1,9 +1,8 @@
-# Test Data (Geodatabases .gdb)
-TestData.gdb/
+# Test Data .gdb
 TEST_DATASET_PARCELS_2017.gdb/
 # Test Data Directories
-TestData/
 TEST_DATASET_PARCELS_2017/
-#*.gdb
+# Any other .gdb
+*.gdb
 # "Compiled" python code
 *.pyc
