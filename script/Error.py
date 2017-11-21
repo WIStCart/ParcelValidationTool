@@ -30,6 +30,8 @@ class Error:
 
 	# Test records throughout the dataset to ensure that polygons exist within an actual county envelope ("Waukesha" issue or the "Lake Michigan" issue). 
 	def checkGeometricQuality(self,Parcel):
+		#arcpy.AddMessage(self.nextEnvelopeInterval)
+		#arcpy.AddMessage(self.recordIterationCount)
 		if self.nextEnvelopeInterval == self.recordIterationCount:
 			countyEnvelope = self.testCountyEnvelope(Parcel)
 			if countyEnvelope == "Valid": # would mean that the "Waukesha" issue or the "Lake Michigan" issue does not exist in this dataset.
@@ -43,7 +45,6 @@ class Error:
 	
 	# Will test the row against LTSB's feature service to identify if the feature is in the correct location.   
 	def testCountyEnvelope(self,Parcel):
-		# For sake of saving time while developing, am setting this function to auto-return "Valid" because it takes about 1 min to execute each of these tests.
 		try:
 			baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP/PARCELS/FeatureServer/0/query"
 			where = str(Parcel.parcelid)
@@ -59,8 +60,10 @@ class Error:
 					v2y = round(rowLTSB[0][1],2)
 					v1y = round(Parcel.shapeXY[1],2)
 					if (v2x == v1x) and (v2y == v1y):
+						arcpy.AddMessage("Parcel geometry validated.")
 						return "Valid"
 					else:
+						arcpy.AddMessage("Parcel geometry not yet validated, will attempt another record.")
 						return "Not Confirmed"
 			# Call it valid If the query returns no features (failure to return features would not be caused by a misalignment) 
 			return "Valid" 
