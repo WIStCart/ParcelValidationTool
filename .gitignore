@@ -1,18 +1,7 @@
-# Test Data .gdb
-TEST_DATASET_PARCELS_2017.gdb/
-TEST_DATASET_PARCELS_2017.gdb\
-
-# Test Data Directories
+TEST_DATASET_PARCELS_2017/TEST_DATASET_PARCELS_2017.gdb/
 TEST_DATASET_PARCELS_2017/
-TEST_DATASET_PARCELS_2017\
-
-# Any other .gdb
-*.gdb
 *.gdbtable
-*.atx
-*.freelist
-
-
-# "Compiled" python code
 *.pyc
-
+*.gdbtablx
+*.atx
+TEST_DATASET_PARCELS_2017/TEST_DATASET_PARCELS_2017.gdb/timestamps
