@@ -86,10 +86,11 @@ if inputDict['isSearchable'] == 'true':
 	dynamic_workspace = "in_memory"
 	arcpy.FeatureClassToFeatureClass_conversion(inputDict['inFC'],dynamic_workspace, "WORKING")
 
-	# Check feature class for all expected fields, note fields that don't match requirements or excess fields that need to be removed...
+
+	'''# Check feature class for all expected fields, note fields that don't match requirements or excess fields that need to be removed...
 	arcpy.AddMessage("Checking for all fields")
 	fieldList = arcpy.ListFields(output_fc_temp)
-	realFieldList = []
+	realFieldList = [] #I don't think this is used for anything?
 	fieldDictNames = {}
 	incorrectFields = []
 	excessFields = []
@@ -134,7 +135,7 @@ if inputDict['isSearchable'] == 'true':
 		arcpy.AddMessage("PLEASE MAKE NEEDED ALTERATIONS TO THESE FIELDS AND RUN THE TOOL AGAIN.\n")
 		arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 		exit()
-
+'''
 	#Adding new fields for error reporting.  We can change names, lenght, etc...
 	arcpy.AddMessage("Adding Error Fields")
 	arcpy.AddField_management(output_fc_temp,"GeneralElementErrors", "TEXT", "", "", 1000)
@@ -144,6 +145,7 @@ if inputDict['isSearchable'] == 'true':
 
 	#Call all pre-cursor test functions
 	totError = Error.checkCRS(totError, output_fc_temp)
+	totError = Error.checkSchema(totError, output_fc_temp, parcelSchemaReq, fieldListPass)
 
 	#Create update cursor then use it to iterate through records in feature class
 	arcpy.AddMessage("Testing the data for various attribute error types.")

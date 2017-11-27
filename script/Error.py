@@ -480,3 +480,58 @@ class Error:
 			else:
 				Error.comparisonDict[field] = currentStatDict[field] - previousStatDict[field]
 		return(Error,Parcel)
+
+
+	#checkSchemaFunction
+	def checkSchema(Error,inFc,schemaType,fieldPassLst):
+		fieldList = arcpy.ListFields(inFc)
+		realFieldList = []
+		fieldDictNames = {}
+		incorrectFields = []
+		excessFields = []
+		missingFields = []
+		var = True
+
+		arcpy.AddMessage("Checking for all appropriate fields in " + str(inFc) + "...")
+
+		for field in fieldList:
+			fieldDictNames[field.name] = [[field.type],[field.length]]
+
+		#if error fields already exits, delete them
+		if field.name == 'GeneralElementErrors':
+			arcpy.DeleteField_management(inFc, ['GeneralElementErrors','AddressElementErrors','TaxrollElementErrors','GeometricElementErrors'])
+
+		for field in fieldDictNames:
+			if field.upper() not in fieldPassLst:
+				if field not in schemaType.keys():
+					excessFields.append(field)
+					var = False
+				elif fieldDictNames[field][0][0] not in schemaType[field][0] or fieldDictNames[field][1][0] not in schemaType[field][1]:
+					incorrectFields.append(field)
+					var = False
+				else:
+					missingFields = [i for i in schemaType.keys() if i not in fieldDictNames.keys()]
+					if len(missingFields) > 0:
+						var = False
+
+		if var == False:	
+			arcpy.AddMessage("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			arcpy.AddMessage("   IMMEDIATE ERROR REQUIRING ATTENTION")
+			arcpy.AddMessage("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			arcpy.AddMessage("A NUMBER OF FIELDS DO NOT MEET THE PARCEL OR ZONING SCHEMA REQUIREMENTS.\n")
+			if len(incorrectFields) > 0:
+				arcpy.AddMessage("THE PROBLEMATIC FIELDS INCLUDE: (" + str(incorrectFields).strip("[").strip("]").replace('u','') + ")\n")
+				arcpy.AddMessage("------->> PLEASE CHECK TO MAKE SURE THE NAMES, DATA TYPES, AND LENGTHS MATCH THE SCHEMA REQUIREMENTS.\n")
+			if len(excessFields) > 0:
+				arcpy.AddMessage("THE EXCESS FIELDS INCLUDE: (" + str(excessFields).strip("[").strip("]").replace('u','') + ")\n")
+				arcpy.AddMessage("------->> PLEASE REMOVED FIELDS THAT ARE NOT IN THE PARCEL ATTRIBUTE SCHEMA.\n")
+			if len(missingFields) > 0:
+				arcpy.AddMessage("THE MISSING FIELDS INCLUDE: (" + str(missingFields).strip("[").strip("]").replace('u','') + ")\n")
+				arcpy.AddMessage("------->> PLEASE ADD FIELDS THAT ARE NOT IN THE PARCEL ATTRIBUTE SCHEMA.\n")
+			arcpy.AddMessage("PLEASE MAKE NEEDED ALTERATIONS TO THESE FIELDS AND RUN THE TOOL AGAIN.\n")
+			arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			exit()
+
+		return Error
+
+
