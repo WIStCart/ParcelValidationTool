@@ -338,6 +338,23 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
+	#checking taxparcelID and parcelID for redundancy
+	def checkRedundantID(Error,Parcel,taxField,parcelField,acceptNull,errorType):
+		try:
+			taxIDToTest = getattr(Parcel,taxField)
+			parcelIDToTest = getattr(Parcel,parcelField)
+			#check redundancy; if none, continue
+			if taxIDToTest == parcelIDToTest:
+				getattr(Parcel, errorType + "Errors").append("Redundant information in " + taxField.upper() + " and " + parcelField.upper() + " fields.")
+				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+			else:
+				pass
+			return (Error, Parcel)
+		except:
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + taxField.upper() + "or" + parcelField.upper() + " fields. Please inspect these fields' values.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
+
 	#checking propclass and auxclass for acceptable domains and duplicate values
 	def classOfPropCheck(Error,Parcel,field,domainList,errorType,acceptNull):
 		try:
