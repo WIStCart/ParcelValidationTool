@@ -11,7 +11,7 @@ fieldNames = ["OID@","SHAPE@","STATEID","PARCELID","TAXPARCELID","PARCELDATE","T
 fieldListPass = ["OID","OID@","SHAPE","SHAPE@","SHAPE_LENGTH","SHAPE_AREA","SHAPE_XY","SHAPE@LENGTH","SHAPE@AREA","SHAPE@XY","LONGITUDE","LATITUDE","GENERALELEMENTERRORS","ADDRESSELEMENTERRORS","TAXROLLELEMENTERRORS","GEOMETRICELEMENTERRORS"]
 
 #V3 schema requirements
-schemaReq = {
+parcelSchemaReq = {
 	'STATEID':[['String'],[100]],
 	'PARCELID':[['String'],[100]],
 	'TAXPARCELID':[['String'],[100]],
@@ -54,6 +54,15 @@ schemaReq = {
 	'LOADDATE':[['String'],[10]],
 	'PARCELFIPS':[['String'],[10]],
 	'PARCELSRC':[['String'],[50]],
+}
+
+#V3 zoning schema requirements
+zoneSchemaReq = {
+	'ZONINGFIPS':[['STRING'],[10]],
+	'JURISDICTION':[['STRING'],[100]],
+	'ZONINGCLASS':[['STRING'],[100]],
+	'DESCRIPTION':[['STRING'],[254]],
+	'LINK':[['STRING'],[254]]
 }
 
 #bad characters dictionary
