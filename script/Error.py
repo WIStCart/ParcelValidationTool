@@ -23,6 +23,7 @@ class Error:
 		self.coNameMiss = 0
 		self.fipsMiss = 0
 		self.srcMiss = 0
+		self.netMoreGrsCnt = 0
 		self.recordIterationCount = 0;
 		self.recordTotalCount = int(arcpy.GetCount_management(featureClass).getOutput(0)) # Total number of records in the feature class
 		self.checkEnvelopeInterval = math.trunc(self.recordTotalCount / 10) # Interval value used to apply 10 total checks on records at evenly spaced intervals throughout the dataset.
@@ -551,4 +552,25 @@ class Error:
 
 		return Error
 
+
+	#check for instances of net > gross
+	def netVsGross(Error,Parcel,netField,grsField,errorType):
+		try:
+			netIn = getattr(Parcel,netField)
+			grsIn = getattr(Parcel,grsField)
+			if netIn is not None and grsIn is not None:
+				if float(grsIn) > float(netIn):
+					pass
+				else:
+					getattr(Parcel,errorType + "Errors").append("The NET value is greater than the GROSS value.  See ValidationSummary.txt for further information.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					Error.netMoreGrsCnt += 1
+				return (Error,Parcel)
+			else:
+				pass
+			return (Error, Parcel)
+		except:
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the NETPRPTA or GRSPRPTA field.  Please manually inspect the values in these fields.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
 

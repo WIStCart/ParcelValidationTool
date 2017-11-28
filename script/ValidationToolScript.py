@@ -188,6 +188,7 @@ if inputDict['isSearchable'] == 'true':
 			totError,currParcel = Error.classOfPropCheck(totError,currParcel,'propclass',copDomains,'tax',True)
 			totError,currParcel = Error.classOfPropCheck(totError,currParcel,'auxclass',auxDomins,'tax',True)
 			totError,currParcel = Error.matchContrib(totError,currParcel,"coname","parcelfips","parcelsrc",county_nameNo_dict,county_noName_dict,"general",False)
+			totError,currParcel = Error.netVsGross(totError,currParcel,"netprpta","grsprpta","tax")
 			totError,currParcel = Error.schoolDistCheck(totError,currParcel,"parcelid","schooldist","schooldistno",schoolDist_noName_dict,schoolDist_nameNo_dict,"tax",pinSkips,False)
 			totError,currParcel = Error.fieldCompleteness(totError,currParcel,fieldNames,fieldListPass,v3CompDict)
 			totError,currParcel = Error.fieldCompletenessComparison(totError,currParcel,fieldNames,fieldListPass,v3CompDict,getattr(LegacyCountyStats, (inputDict['county'].replace(" ","_").replace(".",""))+"LegacyDict"))
@@ -211,7 +212,7 @@ if inputDict['isSearchable'] == 'true':
 	arcpy.AddMessage("Geometric Errors: " + str(totError.geometricErrorCount))
 	arcpy.AddMessage("Address Errors: " + str(totError.addressErrorCount))
 	arcpy.AddMessage("Tax Errors: " + str(totError.taxErrorCount))
-
+	
 	
 #Export
 else:
