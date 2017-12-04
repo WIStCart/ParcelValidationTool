@@ -185,9 +185,10 @@ if inputDict['isSearchable'] == 'true':
 			totError,currParcel = Error.badChars(totError,currParcel,fieldNames,fieldNamesBadChars,'general')
 			# EXAMPLE FUNCTION # totError,currParcel = Error.reallyBadChars(totError,currParcel,fieldNames,fieldNamesBadChars,'general')
 			totError,currParcel = Error.checkRedundantID(totError,currParcel,'taxparcelid','parcelid',True,'general')
-			totError,currParcel = Error.postalCheck(totError,currParcel,'pstladress','general',pinSkips, 'taxrollyear','parcelid')
-			totError,currParcel = Error.auxPropCheck(totError,currParcel,'propclass','auxclass','taxrollyear','parcelid', pinSkips, 'general', 'tax', copDomains, auxDomins, True)			
+			totError,currParcel = Error.postalCheck(totError,currParcel,'pstladress','general',pinSkips, 'taxrollyear','parcelid')		
+			totError,currParcel = Error.auxPropCheck(totError,currParcel,'propclass','auxclass','taxrollyear','parcelid', pinSkips,'tax', copDomains, auxDomains)
 			totError,currParcel = Error.matchContrib(totError,currParcel,"coname","parcelfips","parcelsrc",county_nameNo_dict,county_noName_dict,"general",False)
+			totError,currParcel = Error.netVsGross(totError,currParcel,"netprpta","grsprpta","tax")
 			totError,currParcel = Error.schoolDistCheck(totError,currParcel,"parcelid","schooldist","schooldistno",schoolDist_noName_dict,schoolDist_nameNo_dict,"tax",pinSkips,False)
 			totError,currParcel = Error.fieldCompleteness(totError,currParcel,fieldNames,fieldListPass,v3CompDict)
 			totError,currParcel = Error.fieldCompletenessComparison(totError,currParcel,fieldNames,fieldListPass,v3CompDict,getattr(LegacyCountyStats, (inputDict['county'].replace(" ","_").replace(".",""))+"LegacyDict"))
@@ -211,7 +212,7 @@ if inputDict['isSearchable'] == 'true':
 	arcpy.AddMessage("Geometric Errors: " + str(totError.geometricErrorCount))
 	arcpy.AddMessage("Address Errors: " + str(totError.addressErrorCount))
 	arcpy.AddMessage("Tax Errors: " + str(totError.taxErrorCount))
-
+	
 	
 #Export
 else:

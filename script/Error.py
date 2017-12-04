@@ -23,6 +23,7 @@ class Error:
 		self.coNameMiss = 0
 		self.fipsMiss = 0
 		self.srcMiss = 0
+		self.netMoreGrsCnt = 0
 		self.recordIterationCount = 0;
 		self.recordTotalCount = int(arcpy.GetCount_management(featureClass).getOutput(0)) # Total number of records in the feature class
 		self.checkEnvelopeInterval = math.trunc(self.recordTotalCount / 10) # Interval value used to apply 10 total checks on records at evenly spaced intervals throughout the dataset.
@@ -355,6 +356,49 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
+	#Check for PROP/AUX value existing when expected and then check existing values for dups and for values not in expected domain lists...(Makes classOfPropCheck fcn obsolete)
+	def auxPropCheck(Error,Parcel,propField,auxField,yearField,pinField,ignoreList,errorType,copDomainList,auxDomainList):
+		try:
+			year = getattr(Parcel,yearField)
+			pinToTest = getattr(Parcel,pinField)
+			copToTest = getattr(Parcel,propField)
+			auxToTest = getattr(Parcel,auxField)
+			testListCop = []
+			testListAux = []
+			if year <= 2017:
+				if pinToTest in ignoreList:
+					pass
+			if copToTest is None and auxToTest is None:
+				getattr(Parcel,errorType + "Errors").append("Both the " + propField.upper() + " and " + auxField.upper() + " field are <Null> and a value is expected.")
+				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+			if copToTest is not None:
+				checkVal = copToTest.split(",")
+				for val in checkVal:
+					if val.strip() not in copDomainList:
+						getattr(Parcel,errorType + "Errors").append("A value provided in " + propField.upper() + " field is not in acceptable domain list.")
+						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					elif val.strip() in testListCop:
+						getattr(Parcel,errorType + "Errors").append("Duplicate values exist in " + propField.upper() + " field.")
+						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					else:
+						testListCop.append(val.strip())
+			if auxToTest is not None:
+				checkAuxVal = auxToTest.split(",")
+				for val in checkAuxVal:
+					if val.strip() not in auxDomainList:
+						getattr(Parcel,errorType + "Errors").append("A value provided in " + auxField.upper() + " field is not in acceptable domain list.")
+						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					elif val.strip() in testListAux:
+						getattr(Parcel,errorType + "Errors").append("Duplicate values exist in " + auxField.upper() + " field.")
+						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					else:
+						testListAux.append(val.strip())
+			return(Error, Parcel)
+		except:
+			getattr(Parcel,errorType + "Errors").append("!!!!!!An unknown issue occurred with the " + propField.upper() + " and/or " + auxField.upper() + " field. Please manually inspect these field's value.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
+
 	#checking propclass and auxclass for acceptable domains and duplicate values
 	def classOfPropCheck(Error,Parcel,field,domainList,errorType,acceptNull):
 		try:
@@ -552,6 +596,7 @@ class Error:
 
 		return Error
 
+
 	#check for valid postal address
 	def postalCheck (Error,Parcel,PostalAd,errorType,ignoreList,taxYear,pinField):
 		address = getattr(Parcel, PostalAd)
@@ -572,4 +617,26 @@ class Error:
 			else:
 				pass
 			return(Error, Parcel)
-			
+
+
+	#check for instances of net > gross
+	def netVsGross(Error,Parcel,netField,grsField,errorType):
+		try:
+			netIn = getattr(Parcel,netField)
+			grsIn = getattr(Parcel,grsField)
+			if netIn is not None and grsIn is not None:
+				if float(grsIn) > float(netIn):
+					pass
+				else:
+					getattr(Parcel,errorType + "Errors").append("The NETPRPTA value is greater than the GRSPRPTA value.  See Validation_and_Submission_Tool_Guide.pdf for further information.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					Error.netMoreGrsCnt += 1
+				return (Error,Parcel)
+			else:
+				pass
+			return (Error, Parcel)
+		except:
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the NETPRPTA or GRSPRPTA field.  Please manually inspect the values in these fields.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
+
