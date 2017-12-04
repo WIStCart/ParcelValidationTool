@@ -358,6 +358,7 @@ class Error:
 	#checking propclass and auxclass for acceptable domains and duplicate values
 	def classOfPropCheck(Error,Parcel,field,domainList,errorType,acceptNull):
 		try:
+			arcpy.AddMessage("hello")
 			stringToTest = getattr(Parcel,field)
 			testList = []
 			if stringToTest is not None:
@@ -551,4 +552,24 @@ class Error:
 
 		return Error
 
-
+	#check for valid postal address
+	def postalCheck (Error,Parcel,PostalAd,errorType,ignoreList,taxYear,pinField):
+		address = getattr(Parcel, PostalAd)
+		adcheck = address[:5]
+		year = getattr(Parcel, taxYear)
+		pinToTest = getattr(Parcel, pinField)
+		if year == '2017' or year == '2016' or year == '2015':
+			if pinToTest in ignoreList:
+				pass
+			elif 'UNAVAILABLE' in address or 'ADDRESS' in address or 'ADDDRESS' in address or 'UNKNOWN' in address or '00000' in address:
+				arcpy.AddMessage(address)
+				getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " contains an incomplete or false address.")
+				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+			elif not re.search("\d", adcheck):
+				arcpy.AddMessage(adcheck)
+				getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " contains an incomplete or false address.")
+				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+			else:
+				pass
+			return(Error, Parcel)
+			
