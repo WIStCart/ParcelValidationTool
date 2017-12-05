@@ -399,6 +399,27 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
+	#checking ESTFMKVALUE field against PROPCLASS field for erroneous null values when PROPCLASS of 4 is present with another value
+ 	def fairMarketCheck(Error,Parcel,propClass,estFmkValue,errorType):
+ 		try:
+			propClassTest = str(getattr(Parcel,propClass)).replace(" ","")
+			estFmkValueTest = getattr(Parcel,estFmkValue)
+			if estFmkValueTest is None:
+				if re.search('4,', propClassTest) is not None:
+					getattr(Parcel, errorType + "Errors").append("Unexpected information in " + estFmkValue.upper() + " field based off value in  " + propClass.upper() + " field.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				elif re.search(',4', propClassTest) is not None:
+					getattr(Parcel, errorType + "Errors").append("Unexpected information in " + estFmkValue.upper() + " field based off value in  " + propClass.upper() + " field.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				else:
+					pass
+				return(Error,Parcel)
+
+ 		except:
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + propClass.upper() + "or" + estFmkValue.upper() + " field. Please manually inspect this field's value.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
+
 	#checking propclass and auxclass for acceptable domains and duplicate values
 	def classOfPropCheck(Error,Parcel,field,domainList,errorType,acceptNull):
 		try:
