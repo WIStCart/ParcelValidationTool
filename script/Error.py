@@ -599,24 +599,29 @@ class Error:
 
 	#check for valid postal address
 	def postalCheck (Error,Parcel,PostalAd,errorType,ignoreList,taxYear,pinField):
-		address = getattr(Parcel, PostalAd)
-		adcheck = address[:5]
+		address = getattr(Parcel,PostalAd)
 		year = getattr(Parcel, taxYear)
-		pinToTest = getattr(Parcel, pinField)
-		if year == '2017' or year == '2016' or year == '2015':
-			if pinToTest in ignoreList:
-				pass
-			elif 'UNAVAILABLE' in address or 'ADDRESS' in address or 'ADDDRESS' in address or 'UNKNOWN' in address or '00000' in address:
-				arcpy.AddMessage(address)
-				getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " contains an incomplete or false address.")
-				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-			elif not re.search("\d", adcheck):
-				arcpy.AddMessage(adcheck)
-				getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " contains an incomplete or false address.")
-				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-			else:
-				pass
-			return(Error, Parcel)
+		pinToTest = getattr(Parcel,pinField)
+		arcpy.AddMessage(pinToTest)
+		if address is None:
+			pass
+		else:
+			adcheck = address[:5]
+			if year == '2017' or year == '2016' or year == '2015':
+				if pinToTest in ignoreList or 'PO BOX' in address:
+					pass
+				elif 'UNAVAILABLE' in address or 'ADDRESS' in address or 'ADDDRESS' in address or 'UNKNOWN' in address or '00000' in address or 'CONDO' in address or 'CONDOR' in address or 'PHASE' in address or 'NULL' in address or 'NONE' in address or 'MAIL EXEMPT' in address:
+					arcpy.AddMessage(address)
+					getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " contains an incomplete or false address.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				elif not re.search("\d", adcheck):
+					arcpy.AddMessage(adcheck)
+					getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " contains an incomplete or false address.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				else:
+					pass
+		return(Error,Parcel)
+
 
 
 	#check for instances of net > gross
