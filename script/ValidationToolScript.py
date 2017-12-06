@@ -46,13 +46,13 @@ if inputDict['isSearchable'] == 'true':
 
 	#Load files for current domain lists
 	streetNames = [line.strip() for line in open(os.path.join(base, '..\data\V2_StreetName_Simplified.txt'), 'r')] #street name list
-	streetTypes = [line.strip() for line in open(os.path.join(base, '..\data\V2_StreetType_Simplified.txt'), 'r')] #street types domain list
-	unitIdTypes = [line.strip() for line in open(os.path.join(base, '..\data\V2_UnitId_Simplified.txt'),'r')] #unitid domain list
-	unitTypes = [line.strip() for line in open(os.path.join(base, '..\data\V2_UnitType_Simplified.txt'),'r')] #unit type domain list
+	streetTypes = [line.strip() for line in open(os.path.join(base, '..\data\V3_StreetType_Simplified.txt'), 'r')] #street types domain list
+	unitIdTypes = [line.strip() for line in open(os.path.join(base, '..\data\V3_UnitId_Simplified.txt'),'r')] #unitid domain list
+	unitTypes = [line.strip() for line in open(os.path.join(base, '..\data\V3_UnitType_Simplified.txt'),'r')] #unit type domain list
 	lsadDomains = [line.strip() for line in open(os.path.join(base, '..\data\LSAD_Simplified.txt'),'r')] #lsad domain list
 	taxRollYears = [line.strip() for line in open(os.path.join(base, '..\data\TaxRollYears.txt'),'r')] #taxroll years to test (past,expected,future1,future2)
-	suffixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V2_SuffixDomains_Simplified.txt'),'r')] #suffix domain list
-	prefixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V2_PrefixDomains_Simplified.txt'),'r')] #prefix domain list
+	suffixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V3_SuffixDomains_Simplified.txt'),'r')] #suffix domain list
+	prefixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V3_PrefixDomains_Simplified.txt'),'r')] #prefix domain list
 	pinSkips = [line.strip() for line in open(os.path.join(base, '..\data\V2_PinSkips.txt'),'r')] #list of non-parcelid values found in field to ignore when checking for dups (and use in other functions)
 
 	reader = csv.reader(open(os.path.join(base, '..\data\school_district_codes.csv'),'rU')) #school district code list
@@ -187,6 +187,7 @@ if inputDict['isSearchable'] == 'true':
 			totError,currParcel = Error.checkRedundantID(totError,currParcel,'taxparcelid','parcelid',True,'general')
 			totError,currParcel = Error.postalCheck(totError,currParcel,'pstladress','general',pinSkips, 'taxrollyear','parcelid')		
 			totError,currParcel = Error.auxPropCheck(totError,currParcel,'propclass','auxclass','taxrollyear','parcelid', pinSkips,'tax', copDomains, auxDomains)
+			totError,currParcel = Error.fairMarketCheck(totError,currParcel,'propclass','estfmkvalue','general')
 			totError,currParcel = Error.matchContrib(totError,currParcel,"coname","parcelfips","parcelsrc",county_nameNo_dict,county_noName_dict,"general",False)
 			totError,currParcel = Error.netVsGross(totError,currParcel,"netprpta","grsprpta","tax")
 			totError,currParcel = Error.schoolDistCheck(totError,currParcel,"parcelid","schooldist","schooldistno",schoolDist_noName_dict,schoolDist_nameNo_dict,"tax",pinSkips,False)
