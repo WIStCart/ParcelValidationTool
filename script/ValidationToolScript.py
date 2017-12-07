@@ -53,7 +53,7 @@ if inputDict['isSearchable'] == 'true':
 	taxRollYears = [line.strip() for line in open(os.path.join(base, '..\data\TaxRollYears.txt'),'r')] #taxroll years to test (past,expected,future1,future2)
 	suffixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V3_SuffixDomains_Simplified.txt'),'r')] #suffix domain list
 	prefixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V3_PrefixDomains_Simplified.txt'),'r')] #prefix domain list
-	pinSkips = [line.strip() for line in open(os.path.join(base, '..\data\V2_PinSkips.txt'),'r')] #list of non-parcelid values found in field to ignore when checking for dups (and use in other functions)
+	pinSkips = [line.strip() for line in open(os.path.join(base, '..\data\V3_PinSkips.txt'),'r')] #list of non-parcelid values found in field to ignore when checking for dups (and use in other functions)
 
 	reader = csv.reader(open(os.path.join(base, '..\data\school_district_codes.csv'),'rU')) #school district code list
 	schoolDist_nameNo_dict = {}
