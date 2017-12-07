@@ -45,7 +45,7 @@ base = os.path.dirname(os.path.abspath(__file__))
 if inputDict['isSearchable'] == 'true':
 
 	#Load files for current domain lists
-	streetNames = [line.strip() for line in open(os.path.join(base, '..\data\V2_StreetName_Simplified.txt'), 'r')] #street name list
+	streetNames = [line.strip() for line in open(os.path.join(base, '..\data\V3_StreetName_Simplified.txt'), 'r')] #street name list
 	streetTypes = [line.strip() for line in open(os.path.join(base, '..\data\V3_StreetType_Simplified.txt'), 'r')] #street types domain list
 	unitIdTypes = [line.strip() for line in open(os.path.join(base, '..\data\V3_UnitId_Simplified.txt'),'r')] #unitid domain list
 	unitTypes = [line.strip() for line in open(os.path.join(base, '..\data\V3_UnitType_Simplified.txt'),'r')] #unit type domain list
