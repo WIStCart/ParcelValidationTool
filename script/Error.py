@@ -581,8 +581,9 @@ class Error:
 			fieldDictNames[field.name] = [[field.type],[field.length]]
 
 		#if error fields already exits, delete them
-		if field.name == 'GeneralElementErrors':
-			arcpy.DeleteField_management(inFc, ['GeneralElementErrors','AddressElementErrors','TaxrollElementErrors','GeometricElementErrors'])
+		for field in fieldList:
+			if field.name == 'GeneralElementErrors':
+				arcpy.DeleteField_management(inFc, ['GeneralElementErrors','AddressElementErrors','TaxrollElementErrors','GeometricElementErrors'])
 
 		for field in fieldDictNames:
 			if field.upper() not in fieldPassLst:

@@ -136,16 +136,18 @@ if inputDict['isSearchable'] == 'true':
 		arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 		exit()
 '''
+	
+
+	#Call all pre-cursor test functions
+	totError = Error.checkCRS(totError, output_fc_temp)
+	totError = Error.checkSchema(totError, output_fc_temp, parcelSchemaReq, fieldListPass)
+
 	#Adding new fields for error reporting.  We can change names, lenght, etc...
 	arcpy.AddMessage("Adding Error Fields")
 	arcpy.AddField_management(output_fc_temp,"GeneralElementErrors", "TEXT", "", "", 1000)
 	arcpy.AddField_management(output_fc_temp,"AddressElementErrors", "TEXT", "", "", 1000)
 	arcpy.AddField_management(output_fc_temp,"TaxrollElementErrors", "TEXT", "", "", 1000)
 	arcpy.AddField_management(output_fc_temp,"GeometricElementErrors", "TEXT", "", "", 1000)
-
-	#Call all pre-cursor test functions
-	totError = Error.checkCRS(totError, output_fc_temp)
-	totError = Error.checkSchema(totError, output_fc_temp, parcelSchemaReq, fieldListPass)
 
 	#Create update cursor then use it to iterate through records in feature class
 	arcpy.AddMessage("Testing the data for various attribute error types.")
