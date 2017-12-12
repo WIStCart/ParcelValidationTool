@@ -390,7 +390,7 @@ class Error:
 			if year is not None:
 				if int(year) <=2017:
 					if pinToTest in ignoreList:
-						arcpy.AddMessage('Pin in IGNORE')
+						#arcpy.AddMessage('Pin in IGNORE')
 						pass
 			if copToTest is None and auxToTest is None:
 				getattr(Parcel,errorType + "Errors").append("Both the " + propField.upper() + " and " + auxField.upper() + " field are <Null> and a value is expected.")
@@ -656,19 +656,19 @@ class Error:
 					if pinToTest in ignoreList or 'PO BOX' in address:
 						pass
 					elif 'UNAVAILABLE' in address or 'ADDRESS' in address or 'ADDDRESS' in address or 'UNKNOWN' in address or '00000' in address or 'CONDO' in address or 'CONDOR' in address or 'PHASE' in address or 'NULL' in address or 'NONE' in address or 'MAIL EXEMPT' in address or 'TAX EX' in address or 'TOWN CLERK' in address or 'UNASSIGNED' in address or 'N/A' in address:
-						arcpy.AddMessage(address)
+						#arcpy.AddMessage(address)
 						getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " contains an incomplete or false address.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					elif not re.search("\d", adcheck):
-						arcpy.AddMessage(adcheck)
+						#arcpy.AddMessage(adcheck)
 						getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " contains an incomplete or false address.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					elif 'HWY' in adcheck or 'RT ' in adcheck:
-						arcpy.AddMessage(adcheck)
+						#arcpy.AddMessage(adcheck)
 						getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " contains an incomplete or false address.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					elif ',' in commacheck:
-						arcpy.AddMessage(commacheck)
+						#arcpy.AddMessage(commacheck)
 						getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " contains an incomplete or false address.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					else:
