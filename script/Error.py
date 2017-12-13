@@ -305,22 +305,24 @@ class Error:
 	#We may want/need to tweak the logic in here depending on how strictly we enforce the value of <Null> allowed in Impvalue field (i.e. Only for non-tax parcels or allow either 0 or <Null>)
 	def impCheck(Error,Parcel,field,impValField,errorType):
 		try:
-			stringToTest = getattr(Parcel,field)
-			impvalue = getattr(Parcel,impValField)
-			if stringToTest == None and impvalue == None:
+			imprTest = getattr(Parcel,field)
+			impValue = getattr(Parcel,impValField)
+			if imprTest == None and impValue == None:
 				pass
-			elif (stringToTest == None and impvalue != None) or (stringToTest != None and impvalue == None):
+			elif (imprTest == None and impValue is not None) or (imprTest is not None and impValue is None):
 				getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " doesn't correspond with 'IMPVALUE' for this record - please verify.")
 				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-			elif stringToTest == 'NO' and float(impvalue) == 0:
-				pass
-			elif stringToTest == 'YES' and float(impvalue) > 0:
-				pass
-			return (Error, Parcel)
+			elif (imprTest.upper() == 'NO' and float(impValue) <>  0):
+				getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " doesn't correspond with 'IMPVALUE' for this record - please verify.")
+				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+			elif (imprTest.upper() == 'YES' and float(impValue) <= 0):
+				getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " doesn't correspond with 'IMPVALUE' for this record - please verify.")
+				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCounty") + 1)
+			return (Error,Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occured with the " + field.upper() + " field. Please manually inspect this field's value.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-		return (Error, Parcel)
+		return (Error,Parcel)
 
 	#checking strings for unacceptable chars including /n, /r, etc...
 	def badChars(Error,Parcel,fieldNamesList,charDict,errorType):
