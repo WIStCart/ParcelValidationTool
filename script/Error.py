@@ -389,7 +389,7 @@ class Error:
 			auxToTest = getattr(Parcel,auxField)
 			testListCop = []
 			testListAux = []
-			if pinToTest in ignoreList:
+			if pinToTest in ignoreList or pinToTest is None:
 				pass
 			else:
 				if year is not None and int(year) > 2017:
