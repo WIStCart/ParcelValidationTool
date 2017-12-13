@@ -102,17 +102,39 @@ class Error:
 	#Check if the coordinate reference system is consistent with that of the parcel initiative (Error object, feature class)
 	def checkCRS(Error,featureClass):
 		try:
+			var = True
+			shape = True
+			coord = True
 			desc = arcpy.Describe(featureClass)
 			spatialReference = desc.spatialReference
 			# Test for the Polygon feature class against the parcel project's, shape type, projection name, and units.
 			if desc.shapeType != "Polygon":
-				Error.geometricFileErrors.append("The feature class should be of polygon type instead of: " + desc.shapeType)
+				#Error.geometricFileErrors.append("The feature class should be of polygon type instead of: " + desc.shapeType)
+				var = False
+				shape = False
 			if spatialReference.name != "NAD_1983_HARN_Wisconsin_TM":
-				Error.geometricFileErrors.append("The feature class should be 'NAD_1983_HARN_Wisconsin_TM' instead of: " + spatialReference.name + " Please follow this documentation: http://www.sco.wisc.edu/images/stories/publications/V2/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf to project native data to the Statewide Parcel CRS")
-			return Error
+				#Error.geometricFileErrors.append("The feature class should be 'NAD_1983_HARN_Wisconsin_TM' instead of: " + spatialReference.name + " Please follow this documentation: http://www.sco.wisc.edu/images/stories/publications/V2/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf to project native data to the Statewide Parcel CRS")
+				var = False
+				coord = False
+			#return Error
+			if var == False:
+				arcpy.AddMessage("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+				arcpy.AddMessage("   IMMEDIATE ERROR REQUIRING ATTENTION")
+				arcpy.AddMessage("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+				if shape == False:
+					arcpy.AddMessage("THE FEATURE CLASS SHOULD BE OF POLYGON TYPE INSTEAD OF: " + desc.shapeType.upper() + "\n")
+					arcpy.AddMessage("PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
+					arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+					exit()
+				if coord == False:
+					arcpy.AddMessage("THE FEATURE CLASS SHOULD BE 'NAD_1983_HARN_Wisconsin_TM' INSTEAD OF: " + spatialReference.name + "\n")
+					arcpy.AddMessage("PLEASE FOLLOW THIS DOCUMENTATION: http://www.sco.wisc.edu/images/stories/publications/V2/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf TO PROJECT NATIVE DATA TO THE STATEWIDE PARCEL CRS\n")
+					arcpy.AddMessage("PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
+					arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+					exit()
 		except: # using generic error handling because we don't know what errors to expect yet.
-			Error.geometricFileErrors.append("The feature class's coordinate reference system could not be validated. Please ensure that the feature class is projected to the Statewide Parcel CRS. This documentation may be of use in projecting the dataset: http://www.sco.wisc.edu/images/stories/publications/V2/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf.")
-			return Error
+			arcpy.AddMessage("The feature class's coordinate reference system could not be validated. Please ensure that the feature class is projected to the Statewide Parcel CRS. This documentation may be of use in projecting the dataset: http://www.sco.wisc.edu/images/stories/publications/V2/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf.")
+			exit()
 
 	#Check if text value is a valid number(Error object, Parcel object, field to test, type of error to classify this as, are <Null>s are considered errors?)
 	def checkNumericTextValue(Error,Parcel,field,errorType,acceptNull): 
@@ -283,22 +305,24 @@ class Error:
 	#We may want/need to tweak the logic in here depending on how strictly we enforce the value of <Null> allowed in Impvalue field (i.e. Only for non-tax parcels or allow either 0 or <Null>)
 	def impCheck(Error,Parcel,field,impValField,errorType):
 		try:
-			stringToTest = getattr(Parcel,field)
-			impvalue = getattr(Parcel,impValField)
-			if stringToTest == None and impvalue == None:
+			imprTest = getattr(Parcel,field)
+			impValue = getattr(Parcel,impValField)
+			if imprTest == None and impValue == None:
 				pass
-			elif (stringToTest == None and impvalue != None) or (stringToTest != None and impvalue == None):
+			elif (imprTest == None and impValue is not None) or (imprTest is not None and impValue is None):
 				getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " doesn't correspond with 'IMPVALUE' for this record - please verify.")
 				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-			elif stringToTest == 'NO' and float(impvalue) == 0:
-				pass
-			elif stringToTest == 'YES' and float(impvalue) > 0:
-				pass
-			return (Error, Parcel)
+			elif (imprTest.upper() == 'NO' and float(impValue) <>  0):
+				getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " doesn't correspond with 'IMPVALUE' for this record - please verify.")
+				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+			elif (imprTest.upper() == 'YES' and float(impValue) <= 0):
+				getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " doesn't correspond with 'IMPVALUE' for this record - please verify.")
+				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCounty") + 1)
+			return (Error,Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occured with the " + field.upper() + " field. Please manually inspect this field's value.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-		return (Error, Parcel)
+		return (Error,Parcel)
 
 	#checking strings for unacceptable chars including /n, /r, etc...
 	def badChars(Error,Parcel,fieldNamesList,charDict,errorType):
@@ -368,7 +392,7 @@ class Error:
 			if year is not None:
 				if int(year) <=2017:
 					if pinToTest in ignoreList:
-						arcpy.AddMessage('Pin in IGNORE')
+						#arcpy.AddMessage('Pin in IGNORE')
 						pass
 			if copToTest is None and auxToTest is None:
 				getattr(Parcel,errorType + "Errors").append("Both the " + propField.upper() + " and " + auxField.upper() + " field are <Null> and a value is expected.")
@@ -618,8 +642,6 @@ class Error:
 			arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 			exit()
 
-		return Error
-
 
 	#check for valid postal address
 	def postalCheck (Error,Parcel,PostalAd,errorType,ignoreList,taxYear,pinField):
@@ -648,9 +670,8 @@ class Error:
 						getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " may contain an incomplete or false address. Please verify values in the Postal Address field, and update the address or set to <Null> if necessary.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					elif ',' in firstCharCheck:
-						arcpy.AddMessage(commacheck)
+						arcpy.AddMessage(firstCharCheck)
 						getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " may contain an incomplete or false address. Please verify values in the Postal Address field, and update the address or set to <Null> if necessary.")
-						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					else:
 						pass
 		return(Error,Parcel)

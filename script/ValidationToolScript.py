@@ -17,7 +17,7 @@ for inputName in inputNameList:
 	i += 1
 
 #Run version check
-inputDict['version'] = 'V1.0.1'
+inputDict['version'] = 'V2.0.0'
 try:
 	arcpy.AddMessage('Checking Tool Version...')
 	currVersion = urllib2.urlopen('http://www.sco.wisc.edu/parcels/tools/Validation/validation_version.txt').read()
@@ -139,8 +139,8 @@ if inputDict['isSearchable'] == 'true':
 	
 
 	#Call all pre-cursor test functions
-	totError = Error.checkCRS(totError, output_fc_temp)
-	totError = Error.checkSchema(totError, output_fc_temp, parcelSchemaReq, fieldListPass)
+	Error.checkCRS(totError, output_fc_temp)
+	Error.checkSchema(totError, output_fc_temp, parcelSchemaReq, fieldListPass)
 
 	#Adding new fields for error reporting.  We can change names, lenght, etc...
 	arcpy.AddMessage("Adding Error Fields")
