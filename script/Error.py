@@ -389,36 +389,36 @@ class Error:
 			auxToTest = getattr(Parcel,auxField)
 			testListCop = []
 			testListAux = []
-			if year is not None:
-				if int(year) <=2017:
-					if pinToTest in ignoreList:
-						#arcpy.AddMessage('Pin in IGNORE')
-						pass
-			if copToTest is None and auxToTest is None:
-				getattr(Parcel,errorType + "Errors").append("Both the " + propField.upper() + " and " + auxField.upper() + " field are <Null> and a value is expected.")
-				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-			if copToTest is not None:
-				checkVal = copToTest.split(",")
-				for val in checkVal:
-					if val.strip() not in copDomainList:
-						getattr(Parcel,errorType + "Errors").append("A value provided in " + propField.upper() + " field is not in acceptable domain list.")
-						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					elif val.strip() in testListCop:
-						getattr(Parcel,errorType + "Errors").append("Duplicate values exist in " + propField.upper() + " field.")
-						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					else:
-						testListCop.append(val.strip())
-			if auxToTest is not None:
-				checkAuxVal = auxToTest.split(",")
-				for val in checkAuxVal:
-					if val.strip() not in auxDomainList:
-						getattr(Parcel,errorType + "Errors").append("A value provided in " + auxField.upper() + " field is not in acceptable domain list.")
-						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					elif val.strip() in testListAux:
-						getattr(Parcel,errorType + "Errors").append("Duplicate values exist in " + auxField.upper() + " field.")
-						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					else:
-						testListAux.append(val.strip())
+			if pinToTest in ignoreList:
+				pass
+			else:
+				if year is not None and int(year) > 2017:
+					pass
+				if copToTest is None and auxToTest is None:
+					getattr(Parcel,errorType + "Errors").append("Both the " + propField.upper() + " and " + auxField.upper() + " field are <Null> and a value is expected.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				if copToTest is not None:
+					checkVal = copToTest.split(",")
+					for val in checkVal:
+						if val.strip() not in copDomainList:
+							getattr(Parcel,errorType + "Errors").append("A value provided in " + propField.upper() + " field is not in acceptable domain list.")
+							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+						elif val.strip() in testListCop:
+							getattr(Parcel,errorType + "Errors").append("Duplicate values exist in " + propField.upper() + " field.")
+							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+						else:
+							testListCop.append(val.strip())
+				if auxToTest is not None:
+					checkAuxVal = auxToTest.split(",")
+					for val in checkAuxVal:
+						if val.strip() not in auxDomainList:
+							getattr(Parcel,errorType + "Errors").append("A value provided in " + auxField.upper() + " field is not in acceptable domain list.")
+							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+						elif val.strip() in testListAux:
+							getattr(Parcel,errorType + "Errors").append("Duplicate values exist in " + auxField.upper() + " field.")
+							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+						else:
+							testListAux.append(val.strip())
 			return(Error, Parcel)
 		except:
 			getattr(Parcel,errorType + "Errors").append("!!!!!!An unknown issue occurred with the " + propField.upper() + " and/or " + auxField.upper() + " field. Please manually inspect these field's value.")
