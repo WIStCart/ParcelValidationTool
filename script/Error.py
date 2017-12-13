@@ -369,7 +369,9 @@ class Error:
 			taxIDToTest = getattr(Parcel,taxField)
 			parcelIDToTest = getattr(Parcel,parcelField)
 			#check redundancy; if none, continue
-			if taxIDToTest == parcelIDToTest:
+			if taxIDToTest is None and parcelIDToTest is None:
+				pass
+			elif taxIDToTest == parcelIDToTest:
 				getattr(Parcel, errorType + "Errors").append("Redundant information in " + taxField.upper() + " and " + parcelField.upper() + " fields.")
 				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 			else:
