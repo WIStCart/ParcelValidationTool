@@ -218,7 +218,7 @@ if inputDict['isSearchable'] == 'true':
 	arcpy.AddMessage("Tax Errors: " + str(totError.taxErrorCount))
 	
 	
-#Export
+'''#Export
 else:
 	totError = Error(inputDict['inExportGeometryFC'],inputDict['county'])
-	summary.writeIniFile(inputDict,totError)
+	summary.writeIniFile(inputDict,totError)'''
