@@ -686,7 +686,7 @@ class Error:
 			netIn = getattr(Parcel,netField)
 			grsIn = getattr(Parcel,grsField)
 			if netIn is not None and grsIn is not None:
-				if float(grsIn) > float(netIn):
+				if float(grsIn) >= float(netIn):
 					pass
 				else:
 					getattr(Parcel,errorType + "Errors").append("The NETPRPTA value is greater than the GRSPRPTA value.  See Validation_and_Submission_Tool_Guide.pdf for further information.")
