@@ -137,3 +137,19 @@ class Summary:
 		except Exception as e:
 			arcpy.AddMessage("!!!!!!!!!!Error writing .ini file!!!!!!!!!!")
 			arcpy.AddMessage(str(e))
+
+	def explainCertComplete(self,inFile):
+		fhand = open(inFile, 'r')
+		count = 0
+		for line in fhand:
+			if len(line.strip()) <> 0:
+				count += 1
+		if count < 8:
+			arcpy.AddMessage("\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			arcpy.AddMessage("   IMMEDIATE ISSUE REQUIRING ATTENTION")
+			arcpy.AddMessage("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+			arcpy.AddMessage("IT DOESN'T APPEAR THAT YOU FULLY FILLED OUT THE EXPLAIN/CERTIFY FILE REQUIRED FOR SUBMISSION.\n\n")
+			arcpy.AddMessage("PLEASE FILL OUT THIS FILE IN IT'S ENTIRETY AND RE-RUN THE TOOL IN FINAL MODE.")
+			arcpy.AddMessage("\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+			arcpy.AddMessage("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			exit()
