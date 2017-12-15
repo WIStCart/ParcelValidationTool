@@ -448,7 +448,7 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
-	#checking propclass and auxclass for acceptable domains and duplicate values
+	# FUNCTION NO LONGER USED. checking propclass and auxclass for acceptable domains and duplicate values
 	def classOfPropCheck(Error,Parcel,field,domainList,errorType,acceptNull):
 		try:
 			arcpy.AddMessage("hello")
