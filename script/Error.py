@@ -536,39 +536,38 @@ class Error:
 		return (Error, Parcel)
 
 	#checking values provided in SCHOOLDISTNO and SCHOOLDIST field to ensure they are in our domain list and represent the same school dist (if both provided)
-	def schoolDistCheck(Error,Parcel,pinField,schDistField,schDistNoField,schNoNameDict,schNameNoDict,errorType,ignoreList,acceptNull):
-		schNo = getattr(Parcel,schDistNoField)
-		schNa = getattr(Parcel,schDistField)
-		pinToTest = getattr(Parcel,pinField)
-		if schNo is not None:
-			if len(schNo) != 4:
-				getattr(Parcel,errorType + "Errors").append("The value provided in " + schDistNoField.upper() + " is not expected length (4 digits).  Please correct.")
-				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-			if schNa is None:
-				if schNo not in schNoNameDict:
-					getattr(Parcel,errorType + "Errors").append("The value provided in " + schDistNoField.upper() + " is not within the acceptable domain list. Please verify value.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-			if schNa is not None:
+	def schoolDistCheck(Error,Parcel,pinField,schDistField,schDistNoField,schNoNameDict,schNameNoDict,errorType,ignoreList):
+		try:
+			schNo = getattr(Parcel,schDistNoField)
+			schNa = getattr(Parcel,schDistField)
+			pinToTest = getattr(Parcel,pinField)
+			if schNo is not None and schNa is not None:
+				schNa = schNa.replace("SCHOOL DISTRICT", "").replace("SCHOOL DISTIRCT", "").replace("SCHOOL DIST","").replace("SCHOOL DIST.", "").replace("SCH DIST", "").replace("SCHOOL", "").replace("SCH D OF", "").replace("SCH", "").replace("SD", "").strip()
 				try:
-					schNa = schNa.replace("SCHOOL DISTRICT", "").replace("SCHOOL DISTIRCT", "").replace("SCHOOL DIST","").replace("SCHOOL DIST.", "").replace("SCH DIST", "").replace("SCHOOL", "").replace("SCH D OF", "").replace("SCH", "").replace("SD", "").strip()
 					if schNo != schNameNoDict[schNa] or schNa != schNoNameDict[schNo]:
 						getattr(Parcel,errorType + "Errors").append("The values provided in " + schDistNoField.upper() + " and " + schDistField.upper() + " field do not match. Please verify values are in acceptable domain list.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				except:
-					getattr(Parcel,errorType + "Errors").append("A value in " + schDistNoField.upper() + " or " + schDistField.upper() + " is not within the acceptable domain list.  Please correct.")
+					getattr(Parcel,errorType + "Errors").append("One or both of the values in the SCHOOLDISTNO field or SCHOOLDIST field are not in the acceptable domain list. Please verify values.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				return (Error,Parcel)
+			if schNo is None and schNa is not None:
+				schNa = schNa.replace("SCHOOL DISTRICT", "").replace("SCHOOL DISTIRCT", "").replace("SCHOOL DIST","").replace("SCHOOL DIST.", "").replace("SCH DIST", "").replace("SCHOOL", "").replace("SCH D OF", "").replace("SCH", "").replace("SD", "").strip()
+				if schNa not in schNameNoDict:
+					getattr(Parcel,errorType + "Errors").append("The value provided in " + schDistField.upper() + " is not within the acceptable domain list. Please verify value.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+			if schNa is None and schNo is not None:
+				if schNo not in schNoNameDict or len(schNo) != 4:
+					getattr(Parcel,errorType + "Errors").append("The value provided in " + schDistNoField.upper() + " is not within the acceptable domain list or is not 4 digits long as expected. Please verify value.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+			if schNo is None and schNa is None and pinToTest not in ignoreList:
+				getattr(Parcel,errorType + "Errors").append("Both the " + schDistNoField.upper() + " &  the " + schDistField.upper() + " are <Null> and a value is expected.")
+				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 			return (Error,Parcel)
-		else:
-			if acceptNull:
-				pass
-			else:
-				if pinToTest in ignoreList:
-					pass
-				else:
-					getattr(Parcel,errorType + "Errors").append("Null Found on " + schDistNoField.upper() + " field and value is expected.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-		return(Error,Parcel)
-
+		except:
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + schDistField.upper() + " or " + schDistNoField.upper() + " field. Please manually inspect this field's value.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
 
 	def fieldCompleteness(Error,Parcel,fieldList,passList,v3Dict):
 		for field in fieldList:
