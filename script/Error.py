@@ -656,23 +656,23 @@ class Error:
 			firstCharCheck = address[:1]
 			if year is not None:
 				if int(year) <= 2017:
-					if pinToTest in ignoreList or 'PO BOX' in address or 'P.O. BOX' in address or 'POBOX' in address or '%' in firstCharCheck:
+					if pinToTest in ignoreList or 'PO BOX' in address or 'P.O. BOX' in address or 'POBOX' in address or 'P O BOX' in address or 'GENERAL DELIVERY' in address or '%' in firstCharCheck:
 						pass
 					elif 'UNAVAILABLE' in address or 'ADDRESS' in address or 'ADDDRESS' in address or 'UNKNOWN' in address or ' 00000' in address or 'CONDO' in address or 'CONDOR' in address or 'PHASE' in address or 'NULL' in address or 'NONE' in address or 'MAIL EXEMPT' in address or 'TAX EX' in address or 'TOWN CLERK' in address or 'UNASSIGNED' in address or 'N/A' in address:
 						arcpy.AddMessage(address)
-						getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " may contain an incomplete or false address. Please verify values in the Postal Address field, and update the address or set to <Null> if necessary.")
+						getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " may contain an incomplete or false address. Please verify values in the Postal Address field and update the address or set to <Null> if necessary.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					elif not re.search("\d", adcheck):
 						arcpy.AddMessage(adcheck)
-						getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " may contain an incomplete or false address. Please verify values in the Postal Address field, and update the address or set to <Null> if necessary.")
+						getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " may contain an incomplete or false address. Please verify values in the Postal Address field and update the address or set to <Null> if necessary.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					elif 'HWY' in adcheck or 'RT ' in adcheck:
 						arcpy.AddMessage(adcheck)
-						getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " may contain an incomplete or false address. Please verify values in the Postal Address field, and update the address or set to <Null> if necessary.")
+						getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " may contain an incomplete or false address. Please verify values in the Postal Address field and update the address or set to <Null> if necessary.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					elif ',' in firstCharCheck:
 						arcpy.AddMessage(firstCharCheck)
-						getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " may contain an incomplete or false address. Please verify values in the Postal Address field, and update the address or set to <Null> if necessary.")
+						getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " may contain an incomplete or false address. Please verify values in the Postal Address field and update the address or set to <Null> if necessary.")
 					else:
 						pass
 		return(Error,Parcel)
