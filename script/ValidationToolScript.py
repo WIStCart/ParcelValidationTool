@@ -13,8 +13,11 @@ inputNameList = ['isSearchable','isFinal','county','inFC','outDir','outName','ou
 inputDict = collections.OrderedDict()
 i = 0
 for inputName in inputNameList:
-	inputDict[inputName] = arcpy.GetParameterAsText(i)
-	i += 1
+    if inputName == 'isSearchable':
+        inputDict[inputName] = 'true' # this parameter is no longer a user input because all data is searchable format 
+    else:
+        inputDict[inputName] = arcpy.GetParameterAsText(i)
+        i += 1
 
 #Run version check
 inputDict['version'] = 'V2.0.0'
