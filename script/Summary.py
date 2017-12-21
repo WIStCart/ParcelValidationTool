@@ -153,3 +153,15 @@ class Summary:
 			arcpy.AddMessage("\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 			arcpy.AddMessage("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 			exit()
+
+	def fieldConstraints(self,totError):
+		if totError.coNameMiss > 0 or totError.fipsMiss > 0 or totError.srcMiss > 0:
+			arcpy.AddMessage("\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			arcpy.AddMessage("   IMMEDIATE ISSUE REQUIRING ATTENTION")
+			arcpy.AddMessage("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+			arcpy.AddMessage("ONE OF THE FOLLOWING FIELDS: CONAME, PARCELSRC or PARCELFIPS ARE NOT FULLY POPULATED.\n\n")
+			arcpy.AddMessage("THESE FIELDS SHOULD BE POPULATED FOR EVERY RECORD IN THE SUMBITTED PARCEL FEATURE CLASS.\n\n")
+			arcpy.AddMessage("PLEASE ENSURE THESE FIELDS ARE POPULATED FOR ALL RECORDS AND RE-RUN THE TOOL IN FINAL MODE.")
+			arcpy.AddMessage("\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+			arcpy.AddMessage("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			exit()

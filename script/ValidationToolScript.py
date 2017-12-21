@@ -207,6 +207,7 @@ if inputDict['isSearchable'] == 'true':
 	#Write the ini file if final
 	if inputDict['isFinal'] == 'true':
 		summary.explainCertComplete(inputDict['inCert'])
+		summary.fieldConstraints(totError)
 		summary.writeIniFile(inputDict,totError)
 	if inputDict['isFinal'] == 'false':
 		# Write all summary errors to file
