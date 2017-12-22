@@ -658,6 +658,7 @@ class Error:
 				if int(year) <= 2017:
 					if pinToTest in ignoreList or 'PO BOX' in address or 'P.O. BOX' in address or 'POBOX' in address or 'P O BOX' in address or 'P. O.' in address or 'GENERAL DELIVERY' in address or 'C/O' in address or 'CANADA' in address or 'ATTN' in address or '%' in firstCharCheck:
 						pass
+						#consider just adding 'BOX' as opposed to all iterations of PO BOX based off all the misspellings we've seen
 					elif 'UNAVAILABLE' in address or 'ADDRESS' in address or 'ADDDRESS' in address or 'UNKNOWN' in address or ' 00000' in address or 'PHASE' in address or 'NULL' in address or 'NONE' in address or 'MAIL EXEMPT' in address or 'TAX EX' in address or 'TOWN CLERK' in address or 'UNASSIGNED' in address or 'N/A' in address:
 						#arcpy.AddMessage(address)
 						getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " may contain an incomplete or false address. Please verify values in the Postal Address field and update the address or set to <Null> if necessary.")
