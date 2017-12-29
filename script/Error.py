@@ -667,7 +667,7 @@ class Error:
 						#arcpy.AddMessage(adcheck)
 						getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " may contain an incomplete or false address. Please verify values in the Postal Address field and update the address or set to <Null> if necessary.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					elif 'HWY' in adcheck or 'RT ' in adcheck:
+					elif 'HWY' in address[:4] or ('RT ' in adcheck and 'BOX' not in address):
 						#arcpy.AddMessage(adcheck)
 						getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " may contain an incomplete or false address. Please verify values in the Postal Address field and update the address or set to <Null> if necessary.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
