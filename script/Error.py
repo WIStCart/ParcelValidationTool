@@ -646,37 +646,26 @@ class Error:
 
 	#check for valid postal address
 	def postalCheck (Error,Parcel,PostalAd,errorType,ignoreList,taxYear,pinField):
-		address = getattr(Parcel,PostalAd)
-		year = getattr(Parcel, taxYear)
-		pinToTest = getattr(Parcel,pinField)
-		if address is None:
-			pass
-		else:
-			adcheck = address[:6]
-			firstCharCheck = address[:1]
-			if year is not None:
-				if int(year) <= 2017:
-					if pinToTest in ignoreList or 'PO BOX' in address or 'P.O. BOX' in address or 'POBOX' in address or 'P O BOX' in address or 'P. O.' in address or 'GENERAL DELIVERY' in address or 'C/O' in address or 'CANADA' in address or 'ATTN' in address or '%' in firstCharCheck:
-						pass
-						#consider just adding 'BOX' as opposed to all iterations of PO BOX based off all the misspellings we've seen
-					elif 'UNAVAILABLE' in address or 'ADDRESS' in address or 'ADDDRESS' in address or 'UNKNOWN' in address or ' 00000' in address or 'PHASE' in address or 'NULL' in address or 'NONE' in address or 'MAIL EXEMPT' in address or 'TAX EX' in address or 'TOWN CLERK' in address or 'UNASSIGNED' in address or 'N/A' in address:
+		try:
+			address = getattr(Parcel,PostalAd)
+			year = getattr(Parcel, taxYear)
+			pinToTest = getattr(Parcel,pinField)
+			if address is None:
+				pass
+			else:
+				if year is not None:
+					if int(year) <= 2017:
+						if 'UNAVAILABLE' in address or 'ADDRESS' in address or 'ADDDRESS' in address or 'UNKNOWN' in address or ' 00000' in address or 'PHASE' in address or 'NULL' in address or 'NONE' in address or 'MAIL EXEMPT' in address or 'TAX EX' in address or 'UNASSIGNED' in address or 'N/A' in address:
 						#arcpy.AddMessage(address)
-						getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " may contain an incomplete or false address. Please verify values in the Postal Address field and update the address or set to <Null> if necessary.")
-						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					elif not re.search("\d", adcheck):
-						#arcpy.AddMessage(adcheck)
-						getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " may contain an incomplete or false address. Please verify values in the Postal Address field and update the address or set to <Null> if necessary.")
-						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					elif 'HWY' in address[:4] or ('RT ' in adcheck and 'BOX' not in address):
-						#arcpy.AddMessage(adcheck)
-						getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " may contain an incomplete or false address. Please verify values in the Postal Address field and update the address or set to <Null> if necessary.")
-						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					elif ',' in firstCharCheck:
-						#arcpy.AddMessage(firstCharCheck)
-						getattr(Parcel,errorType + "Errors").append("A value provided in " + PostalAd.upper() + " may contain an incomplete or false address. Please verify values in the Postal Address field and update the address or set to <Null> if necessary.")
-					else:
-						pass
-		return(Error,Parcel)
+							getattr(Parcel,errorType + "Errors").append("A value provided in the " + PostalAd.upper() + " field may contain an incomplete address. Please verify the value is correct or set to <Null> if complete address is unknown.")
+							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+						else:
+							pass
+			return(Error,Parcel)
+		except:
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the PSTLADRESS field.  Please manually inspect this field.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
 
 
 
