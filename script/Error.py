@@ -629,7 +629,7 @@ class Error:
 			arcpy.AddMessage("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 			arcpy.AddMessage("   IMMEDIATE ERROR REQUIRING ATTENTION")
 			arcpy.AddMessage("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
-			arcpy.AddMessage("A NUMBER OF FIELDS DO NOT MEET THE PARCEL OR ZONING SCHEMA REQUIREMENTS.\n")
+			arcpy.AddMessage("CERTAIN FIELDS DO NOT MEET THE PARCEL SCHEMA REQUIREMENTS.\n")
 			if len(incorrectFields) > 0:
 				arcpy.AddMessage("THE PROBLEMATIC FIELDS INCLUDE: (" + str(incorrectFields).strip("[").strip("]").replace('u','') + ")\n")
 				arcpy.AddMessage("------->> PLEASE CHECK TO MAKE SURE THE NAMES, DATA TYPES, AND LENGTHS MATCH THE SCHEMA REQUIREMENTS.\n")

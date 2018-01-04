@@ -99,6 +99,7 @@ class Summary:
 			arcpy.AddMessage(str(e))
 
 	def writeIniFile(self,inputDict,totError):
+		arcpy.AddMessage("\n")
 		arcpy.AddMessage("Creating .ini file")
 		config = ConfigParser()
 		config.add_section('PARAMETERS')
@@ -132,8 +133,13 @@ class Summary:
 				with open(inputDict['inCert'],'r') as certFile:
 					for line in certFile:
 						configFile.write(line)
+			arcpy.AddMessage("\n")
 			arcpy.AddMessage("Wrote .ini file to "+inputDict['outINIDir'])
+			arcpy.AddMessage("\n")
 			arcpy.AddMessage("SUBMISSIONS WITHOUT .ini WILL NOT BE ACCEPTED!")
+			arcpy.AddMessage("\n\n")
+			arcpy.AddMessage("------>  .ini FILE CREATION COMPLETE!  GREAT WORK!!  <------")
+			arcpy.AddMessage("\n\n")
 		except Exception as e:
 			arcpy.AddMessage("!!!!!!!!!!Error writing .ini file!!!!!!!!!!")
 			arcpy.AddMessage(str(e))
