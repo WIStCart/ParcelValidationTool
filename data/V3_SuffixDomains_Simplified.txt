@@ -6,3 +6,5 @@ S
 SE
 SW
 W
+LOWER
+UPPER

@@ -239,7 +239,7 @@ class Error:
 				if acceptNull:
 					pass
 				else:
-					if pinToTest in ignoreList:
+					if pinToTest in ignoreList or pinToTest is None:
 						Error.pinSkipCount += 1
 					else:
 						getattr(Parcel,errorType + "Errors").append("Null Found on " + field.upper() + " field and value is expected.")
@@ -560,7 +560,7 @@ class Error:
 				if schNo not in schNoNameDict or len(schNo) != 4:
 					getattr(Parcel,errorType + "Errors").append("The value provided in " + schDistNoField.upper() + " is not within the acceptable domain list or is not 4 digits long as expected. Please verify value.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-			if schNo is None and schNa is None and pinToTest not in ignoreList:
+			if schNo is None and schNa is None and pinToTest not in ignoreList and pinToTest is not None:
 				getattr(Parcel,errorType + "Errors").append("Both the " + schDistNoField.upper() + " &  the " + schDistField.upper() + " are <Null> and a value is expected.")
 				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 			return (Error,Parcel)
