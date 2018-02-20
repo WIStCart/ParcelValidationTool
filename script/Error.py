@@ -391,11 +391,9 @@ class Error:
 			auxToTest = getattr(Parcel,auxField)
 			testListCop = []
 			testListAux = []
-			if pinToTest in ignoreList or pinToTest is None:
+			if (pinToTest in ignoreList) or (pinToTest is None) or (year is not None and int(year) > 2017):
 				pass
 			else:
-				if year is not None and int(year) > 2017:
-					pass
 				if copToTest is None and auxToTest is None:
 					getattr(Parcel,errorType + "Errors").append("Both the " + propField.upper() + " and " + auxField.upper() + " field are <Null> and a value is expected.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
@@ -536,11 +534,12 @@ class Error:
 		return (Error, Parcel)
 
 	#checking values provided in SCHOOLDISTNO and SCHOOLDIST field to ensure they are in our domain list and represent the same school dist (if both provided)
-	def schoolDistCheck(Error,Parcel,pinField,schDistField,schDistNoField,schNoNameDict,schNameNoDict,errorType,ignoreList):
+	def schoolDistCheck(Error,Parcel,pinField,schDistField,schDistNoField,schNoNameDict,schNameNoDict,errorType,ignoreList,yearField):
 		try:
 			schNo = getattr(Parcel,schDistNoField)
 			schNa = getattr(Parcel,schDistField)
 			pinToTest = getattr(Parcel,pinField)
+			year = getattr(Parcel,yearField)
 			if schNo is not None and schNa is not None:
 				schNa = schNa.replace("SCHOOL DISTRICT", "").replace("SCHOOL DISTIRCT", "").replace("SCHOOL DIST","").replace("SCHOOL DIST.", "").replace("SCH DIST", "").replace("SCHOOL", "").replace("SCH D OF", "").replace("SCH", "").replace("SD", "").strip()
 				try:
@@ -560,7 +559,7 @@ class Error:
 				if schNo not in schNoNameDict or len(schNo) != 4:
 					getattr(Parcel,errorType + "Errors").append("The value provided in " + schDistNoField.upper() + " is not within the acceptable domain list or is not 4 digits long as expected. Please verify value.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-			if schNo is None and schNa is None and pinToTest not in ignoreList and pinToTest is not None:
+			if schNo is None and schNa is None and pinToTest not in ignoreList and pinToTest is not None and (year is not None and int(year) <= 2017):
 				getattr(Parcel,errorType + "Errors").append("Both the " + schDistNoField.upper() + " &  the " + schDistField.upper() + " are <Null> and a value is expected.")
 				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 			return (Error,Parcel)
