@@ -1,2 +1,4 @@
 # "Compiled" python code
 *.pyc
+*.lock
+TEST_DATASET_PARCELS_2018/
