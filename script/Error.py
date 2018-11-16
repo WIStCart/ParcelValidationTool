@@ -29,7 +29,7 @@ class Error:
 		self.checkEnvelopeInterval = math.trunc(self.recordTotalCount / 10) # Interval value used to apply 10 total checks on records at evenly spaced intervals throughout the dataset.
 		self.nextEnvelopeInterval = self.checkEnvelopeInterval
 
-	# Test records throughout the dataset to ensure that polygons exist within an actual county envelope ("Waukesha" issue or the "Lake Michigan" issue). 
+	# Test records throughout the dataset to ensure that polygons exist within an actual county envelope ("Waukesha" issue or the "Lake Michigan" issue).
 	def checkGeometricQuality(self,Parcel):
 		#arcpy.AddMessage(self.nextEnvelopeInterval)
 		#arcpy.AddMessage(self.recordIterationCount)
@@ -43,8 +43,8 @@ class Error:
 		self,Parcel = self.testParcelGeometry(Parcel)
 		self.recordIterationCount += 1
 		return (self, Parcel)
-	
-	# Will test the row against LTSB's feature service to identify if the feature is in the correct location.   
+
+	# Will test the row against LTSB's feature service to identify if the feature is in the correct location.
 	def testCountyEnvelope(self,Parcel):
 		try:
 			baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP/PARCELS/FeatureServer/0/query"
@@ -66,15 +66,15 @@ class Error:
 					else:
 						arcpy.AddMessage("Parcel geometry not yet validated, will attempt another record.")
 						return "Not Confirmed"
-			# Call it valid If the query returns no features (failure to return features would not be caused by a misalignment) 
-			return "Valid" 
+			# Call it valid If the query returns no features (failure to return features would not be caused by a misalignment)
+			return "Valid"
 		except:
 			# Call it valid if an error happens (error would not be caused by a misalignment)
 			return "Valid"
 		return "Valid"
 
 	def testParcelGeometry(self,Parcel):
-		# Test for null geometries or other oddities 
+		# Test for null geometries or other oddities
 		try:
 			geom = Parcel.shape
 			xCent = geom.centroid.X
@@ -93,7 +93,7 @@ class Error:
 				self.geometricErrorCount += 1
 			if (areaP/lengthP) < 0.01:
 				Parcel.geometricErrors.append("Sliver Polygon: AREA/LENGTH")
-				self.geometricErrorCount += 1				
+				self.geometricErrorCount += 1
 		except:
 			Parcel.geometricErrors.append("Corrupt Geometry: The feature's area and/or length could not be accessed.")
 			self.geometricErrorCount += 1
@@ -137,7 +137,7 @@ class Error:
 			exit()
 
 	#Check if text value is a valid number(Error object, Parcel object, field to test, type of error to classify this as, are <Null>s are considered errors?)
-	def checkNumericTextValue(Error,Parcel,field,errorType,acceptNull): 
+	def checkNumericTextValue(Error,Parcel,field,errorType,acceptNull):
 		try:
 			stringToTest = getattr(Parcel,field)
 			if stringToTest is not None:
@@ -161,8 +161,8 @@ class Error:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the" + field.upper() + "field. Please inspect this field's value.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
-	
-	#Check if duplicates exist within an entire field(Error object, Parcel object, field to test, type of error to classify this as, are <Null>s are considered errors?, list of strings that are expected to be duplicates (to ignore), running list of strings to test against)  
+
+	#Check if duplicates exist within an entire field(Error object, Parcel object, field to test, type of error to classify this as, are <Null>s are considered errors?, list of strings that are expected to be duplicates (to ignore), running list of strings to test against)
 	def checkIsDuplicate(Error,Parcel,field,errorType,acceptNull,ignoreList,testList):
 		try:
 			stringToTest = getattr(Parcel,field)
@@ -340,7 +340,7 @@ class Error:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + f.upper() + " field. Please manually inspect this field's value.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
-		
+
 	#checking strings for unacceptable chars including /n, /r, etc...
 	def reallyBadChars(Error,Parcel,fieldNamesList,charDict,errorType):
 		arcpy.AddMessage("Testing reallyBadChars()")
@@ -502,7 +502,7 @@ class Error:
 				else:
 					Error.coNameMiss += 1
 			if fipsToTest is not None:
-				try: 
+				try:
 					if fipsToTest != coNameDict[Error.coName]:
 						getattr(Parcel,errorType + "Errors").append("The value provided in " + fipsfield.upper() + " field does not match submitting county fips.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
@@ -541,7 +541,7 @@ class Error:
 			pinToTest = getattr(Parcel,pinField)
 			year = getattr(Parcel,yearField)
 			if schNo is not None and schNa is not None:
-				schNa = schNa.replace("SCHOOL DISTRICT", "").replace("SCHOOL DISTIRCT", "").replace("SCHOOL DIST","").replace("SCHOOL DIST.", "").replace("SCH DIST", "").replace("SCHOOL", "").replace("SCH D OF", "").replace("SCH", "").replace("SD", "").strip()
+				'''schNa = schNa.replace("SCHOOL DISTRICT", "").replace("SCHOOL DISTIRCT", "").replace("SCHOOL DIST","").replace("SCHOOL DIST.", "").replace("SCH DIST", "").replace("SCHOOL", "").replace("SCH D OF", "").replace("SCH", "").replace("SD", "").strip()'''
 				try:
 					if schNo != schNameNoDict[schNa] or schNa != schNoNameDict[schNo]:
 						getattr(Parcel,errorType + "Errors").append("The values provided in " + schDistNoField.upper() + " and " + schDistField.upper() + " field do not match. Please verify values are in acceptable domain list.")
@@ -551,7 +551,7 @@ class Error:
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return (Error,Parcel)
 			if schNo is None and schNa is not None:
-				schNa = schNa.replace("SCHOOL DISTRICT", "").replace("SCHOOL DISTIRCT", "").replace("SCHOOL DIST","").replace("SCHOOL DIST.", "").replace("SCH DIST", "").replace("SCHOOL", "").replace("SCH D OF", "").replace("SCH", "").replace("SD", "").strip()
+				'''schNa = schNa.replace("SCHOOL DISTRICT", "").replace("SCHOOL DISTIRCT", "").replace("SCHOOL DIST","").replace("SCHOOL DIST.", "").replace("SCH DIST", "").replace("SCHOOL", "").replace("SCH D OF", "").replace("SCH", "").replace("SD", "").strip()'''
 				if schNa not in schNameNoDict:
 					getattr(Parcel,errorType + "Errors").append("The value provided in " + schDistField.upper() + " is not within the acceptable domain list. Please verify value.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
@@ -624,7 +624,7 @@ class Error:
 					if len(missingFields) > 0:
 						var = False
 
-		if var == False:	
+		if var == False:
 			arcpy.AddMessage("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 			arcpy.AddMessage("   IMMEDIATE ERROR REQUIRING ATTENTION")
 			arcpy.AddMessage("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
