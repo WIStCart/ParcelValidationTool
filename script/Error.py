@@ -310,6 +310,28 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
+	#verify that the values provided in the zip4 field is 4 characters long 
+	def zip4Check(Error,Parcel,field,errorType,acceptNull):
+		try:
+			stringToTest = getattr(Parcel, field)
+			if stringToTest is not None:
+				if len(stringToTest) == 4:
+					pass
+				else:
+					getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " is not 4 digits long.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				return (Error, Parcel)
+			else:
+				if acceptNull:
+					pass
+				return (Error, Parcel)
+		except:
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return(Error, Parcel)
+
+	
+	
 	#Verify that value in Improved field is correct based on value provided in Impvalue field...
 	#We may want/need to tweak the logic in here depending on how strictly we enforce the value of <Null> allowed in Impvalue field (i.e. Only for non-tax parcels or allow either 0 or <Null>)
 	def impCheck(Error,Parcel,field,impValField,errorType):
