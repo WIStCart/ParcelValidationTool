@@ -14,7 +14,7 @@ inputDict = collections.OrderedDict()
 i = 0
 for inputName in inputNameList:
     if inputName == 'isSearchable':
-        inputDict[inputName] = 'true' # this parameter is no longer a user input because all data is searchable format 
+        inputDict[inputName] = 'true' # this parameter is no longer a user input because all data is searchable format
     else:
         inputDict[inputName] = arcpy.GetParameterAsText(i)
         i += 1
@@ -50,8 +50,8 @@ if inputDict['isSearchable'] == 'true':
 	#Load files for current domain lists
 	streetNames = [line.strip() for line in open(os.path.join(base, '..\data\V3_StreetName_Simplified.txt'), 'r')] #street name list
 	streetTypes = [line.strip() for line in open(os.path.join(base, '..\data\V3_StreetType_Simplified.txt'), 'r')] #street types domain list
-	unitIdTypes = [line.strip() for line in open(os.path.join(base, '..\data\V3_UnitId_Simplified.txt'),'r')] #unitid domain list
-	unitTypes = [line.strip() for line in open(os.path.join(base, '..\data\V3_UnitType_Simplified.txt'),'r')] #unit type domain list
+	unitIdTypes = [line.strip() for line in open(os.path.join(base, '..\data\V4_UnitId_Simplified.txt'),'r')] #unitid domain list
+	unitTypes = [line.strip() for line in open(os.path.join(base, '..\data\V4_UnitType_Simplified.txt'),'r')] #unit type domain list
 	lsadDomains = [line.strip() for line in open(os.path.join(base, '..\data\LSAD_Simplified.txt'),'r')] #lsad domain list
 	taxRollYears = [line.strip() for line in open(os.path.join(base, '..\data\TaxRollYears.txt'),'r')] #taxroll years to test (past,expected,future1,future2)
 	suffixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V3_SuffixDomains_Simplified.txt'),'r')] #suffix domain list
@@ -98,7 +98,7 @@ if inputDict['isSearchable'] == 'true':
 	incorrectFields = []
 	excessFields = []
 	missingFields = []
-	var = True	
+	var = True
 
 	for field in fieldList:
 	    fieldDictNames[field.name] = [[field.type],[field.length]]
@@ -121,7 +121,7 @@ if inputDict['isSearchable'] == 'true':
 				if len(missingFields) > 0:
 					var = False
 
-	if var == False:	
+	if var == False:
 		arcpy.AddMessage("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 		arcpy.AddMessage("   IMMEDIATE ERROR REQUIRING ATTENTION")
 		arcpy.AddMessage("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
@@ -139,7 +139,7 @@ if inputDict['isSearchable'] == 'true':
 		arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 		exit()
 '''
-	
+
 
 	#Call all pre-cursor test functions
 	Error.checkCRS(totError, output_fc_temp)
@@ -154,14 +154,14 @@ if inputDict['isSearchable'] == 'true':
 
 	#Create update cursor then use it to iterate through records in feature class
 	arcpy.AddMessage("Testing the data for various attribute error types.")
-	with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:	
+	with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		for row in cursor:
 			#Construct the Parcel object for the row
 			currParcel = Parcel(row, fieldNames)
 
 			#Execute in-cursor error tests
 			totError,currParcel = Error.checkGeometricQuality(totError,currParcel)
-			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"addnum","address", True) 
+			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"addnum","address", True)
 			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"parcelfips","general", False)
 			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"zipcode","address", True)
 			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"zip4","address", True)
@@ -190,7 +190,7 @@ if inputDict['isSearchable'] == 'true':
 			totError,currParcel = Error.badChars(totError,currParcel,fieldNames,fieldNamesBadChars,'general')
 			# EXAMPLE FUNCTION # totError,currParcel = Error.reallyBadChars(totError,currParcel,fieldNames,fieldNamesBadChars,'general')
 			totError,currParcel = Error.checkRedundantID(totError,currParcel,'taxparcelid','parcelid',True,'general')
-			totError,currParcel = Error.postalCheck(totError,currParcel,'pstladress','general',pinSkips,'taxrollyear','parcelid')		
+			totError,currParcel = Error.postalCheck(totError,currParcel,'pstladress','general',pinSkips,'taxrollyear','parcelid')
 			totError,currParcel = Error.auxPropCheck(totError,currParcel,'propclass','auxclass','taxrollyear','parcelid', pinSkips,'tax', copDomains, auxDomains)
 			# PROPCLASS of 4,5, or 5m should not contain an ESTFMKVALUE, thus this function is not applied # totError,currParcel = Error.fairMarketCheck(totError,currParcel,'propclass','estfmkvalue','general')
 			totError,currParcel = Error.matchContrib(totError,currParcel,"coname","parcelfips","parcelsrc",county_nameNo_dict,county_noName_dict,"general",False)
@@ -203,7 +203,7 @@ if inputDict['isSearchable'] == 'true':
 			currParcel.writeErrors(row,cursor, fieldNames)
 			currParcel = None
 
-	
+
 	#Write the ini file if final
 	if inputDict['isFinal'] == 'true':
 		summary.explainCertComplete(inputDict['inCert'])
@@ -220,8 +220,8 @@ if inputDict['isSearchable'] == 'true':
 	arcpy.AddMessage("Geometric Errors: " + str(totError.geometricErrorCount))
 	arcpy.AddMessage("Address Errors: " + str(totError.addressErrorCount))
 	arcpy.AddMessage("Tax Errors: " + str(totError.taxErrorCount))
-	
-	
+
+
 '''#Export
 else:
 	totError = Error(inputDict['inExportGeometryFC'],inputDict['county'])

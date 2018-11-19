@@ -200,6 +200,15 @@ class Error:
 						getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " doesn't contain required LSAD descriptor.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					return (Error,Parcel)
+
+			elif field == 'unitid' or field == 'unittype':
+				if (stringToTest is None) or (stringToTest in testList):
+					#arcpy.AddMessage("This value is <Null>... or exists in our list...")
+					pass
+				else:
+					getattr(Parcel,errorType + "Errors").append("The value in the " + field.upper() + " does not appear to be in a list created from V4 data.  Please verify this value is appropriately placed in this field.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				return (Error,Parcel)
 			else:
 				if stringToTest is not None:
 					if stringToTest in testList:
