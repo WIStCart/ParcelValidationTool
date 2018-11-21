@@ -58,7 +58,7 @@ if inputDict['isSearchable'] == 'true':
 	prefixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V3_PrefixDomains_Simplified.txt'),'r')] #prefix domain list
 	pinSkips = [line.strip() for line in open(os.path.join(base, '..\data\V3_PinSkips.txt'),'r')] #list of non-parcelid values found in field to ignore when checking for dups (and use in other functions)
 
-	reader = csv.reader(open(os.path.join(base, '..\data\school_district_codes.csv'),'rU')) #school district code list
+	reader = csv.reader(open(os.path.join(base, '..\data\school_district_codes.csv'),'rU')) #school district code list (csv has been updated for V5/2018 school districts)
 	schoolDist_nameNo_dict = {}
 	schoolDist_noName_dict = {}
 	for row in reader:
