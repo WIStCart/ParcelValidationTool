@@ -48,7 +48,7 @@ base = os.path.dirname(os.path.abspath(__file__))
 if inputDict['isSearchable'] == 'true':
 
 	#Load files for current domain lists
-	streetNames = [line.strip() for line in open(os.path.join(base, '..\data\V3_StreetName_Simplified.txt'), 'r')] #street name list
+	#streetNames = [line.strip() for line in open(os.path.join(base, '..\data\V3_StreetName_Simplified.txt'), 'r')] #street name list
 	streetTypes = [line.strip() for line in open(os.path.join(base, '..\data\V3_StreetType_Simplified.txt'), 'r')] #street types domain list
 	unitIdTypes = [line.strip() for line in open(os.path.join(base, '..\data\V4_UnitId_Simplified.txt'),'r')] #unitid domain list
 	unitTypes = [line.strip() for line in open(os.path.join(base, '..\data\V4_UnitType_Simplified.txt'),'r')] #unit type domain list
@@ -184,7 +184,7 @@ if inputDict['isSearchable'] == 'true':
 			totError,currParcel = Error.checkDomainString(totError,currParcel,"placename","general",True,lsadDomains)
 			totError,currParcel = Error.checkDomainString(totError,currParcel,"suffix","address",True, suffixDomains)
 			totError,currParcel = Error.trYear(totError,currParcel,"taxrollyear","parcelid","tax",False,pinSkips,taxRollYears)
-			totError,currParcel = Error.streetNameCheck(totError,currParcel,"streetname","siteadress","address",True,streetNames)
+			totError,currParcel = Error.streetNameCheck(totError,currParcel,"streetname","siteadress","address",True,stNameDict,inputDict['county'])
 			totError,currParcel = Error.zipCheck(totError,currParcel,"zipcode","address",True)
 			totError,currParcel = Error.zip4Check(totError,currParcel,"zip4","address",True)
 			totError,currParcel = Error.impCheck(totError,currParcel,"improved","impvalue","tax")

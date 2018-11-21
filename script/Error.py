@@ -260,15 +260,16 @@ class Error:
 		return (Error, Parcel)
 
 	#Check to see if street name provided is within a list created from V2.
-	def streetNameCheck(Error,Parcel,field,siteAddField,errorType,acceptNull,stnamelist):
+	def streetNameCheck(Error,Parcel,field,siteAddField,errorType,acceptNull,stNameDict,coname):
 		try:
+			#county = coname
 			stringToTest = getattr(Parcel,field)
 			siteAddToTest = getattr(Parcel,siteAddField)
 			if stringToTest is not None:
-				if stringToTest in stnamelist:
+				if stringToTest.strip() in stNameDict[coname]:
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " does not appear in list created from V2 data. Please verify this value is correct.")
+					getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " does not appear in list created from V4 data. Please verify this value contains only the STREETNAME.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return(Error, Parcel)
 			else:
