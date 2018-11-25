@@ -161,6 +161,7 @@ if inputDict['isSearchable'] == 'true':
 
 			#Execute in-cursor error tests
 			totError,currParcel = Error.checkGeometricQuality(totError,currParcel)
+
 			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"addnum","address", True)
 			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"parcelfips","general", False)
 			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"zipcode","address", True)
@@ -184,12 +185,14 @@ if inputDict['isSearchable'] == 'true':
 			totError,currParcel = Error.checkDomainString(totError,currParcel,"placename","general",True,lsadDomains)
 			totError,currParcel = Error.checkDomainString(totError,currParcel,"suffix","address",True, suffixDomains)
 			totError,currParcel = Error.trYear(totError,currParcel,"taxrollyear","parcelid","tax",False,pinSkips,taxRollYears)
+			#totError,currParcel = Error.taxrollYrCheck(totError,currParcel,"taxrollyear","tax",False,taxRollYears)
 			totError,currParcel = Error.streetNameCheck(totError,currParcel,"streetname","siteadress","address",True,stNameDict,inputDict['county'])
 			totError,currParcel = Error.zipCheck(totError,currParcel,"zipcode","address",True)
 			totError,currParcel = Error.zip4Check(totError,currParcel,"zip4","address",True)
 			totError,currParcel = Error.impCheck(totError,currParcel,"improved","impvalue","tax")
+			totError,currParcel = Error.totCheck(totError,currParcel,"impvalue","cntassdvalue","lndvalue","tax")
 			totError,currParcel = Error.badChars(totError,currParcel,fieldNames,fieldNamesBadChars,'general')
-			# EXAMPLE FUNCTION # totError,currParcel = Error.reallyBadChars(totError,currParcel,fieldNames,fieldNamesBadChars,'general')
+			#EXAMPLE FUNCTION # totError,currParcel = Error.reallyBadChars(totError,currParcel,fieldNames,fieldNamesBadChars,'general')
 			totError,currParcel = Error.checkRedundantID(totError,currParcel,'taxparcelid','parcelid',True,'general')
 			totError,currParcel = Error.postalCheck(totError,currParcel,'pstladress','general',pinSkips,'taxrollyear','parcelid')
 			totError,currParcel = Error.auxPropCheck(totError,currParcel,'propclass','auxclass','taxrollyear','parcelid', pinSkips,'tax', copDomains, auxDomains)

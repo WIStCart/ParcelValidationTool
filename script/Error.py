@@ -311,7 +311,7 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
-	#verify that the values provided in the zip4 field is 4 characters long 
+	#verify that the values provided in the zip4 field is 4 characters long
 	def zip4Check(Error,Parcel,field,errorType,acceptNull):
 		try:
 			stringToTest = getattr(Parcel, field)
@@ -322,17 +322,15 @@ class Error:
 					getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " is not 4 digits long.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return (Error, Parcel)
-			else:
-				if acceptNull:
-					pass
-				return (Error, Parcel)
+			elif acceptNull:
+				pass
 		except:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return(Error, Parcel)
 
-	
-	
+
+
 	#Verify that value in Improved field is correct based on value provided in Impvalue field...
 	#We may want/need to tweak the logic in here depending on how strictly we enforce the value of <Null> allowed in Impvalue field (i.e. Only for non-tax parcels or allow either 0 or <Null>)
 	def impCheck(Error,Parcel,field,impValField,errorType):
@@ -355,6 +353,35 @@ class Error:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occured with the " + field.upper() + " field. Please manually inspect this field's value.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error,Parcel)
+
+
+	def totCheck (Error,Parcel,field,cntassValue,landValue,errorType):
+		try:
+			impvalue = getattr(Parcel, field)
+			cntassvalue = getattr(Parcel, cntassValue)
+			lndvalue =  getattr(Parcel, landValue)
+			if impvalue is None and cntassvalue is None and lndvalue is None:
+				pass
+			elif  (impvalue  is None or float(impvalue) == 0):
+				if (cntassvalue is not None and lndvalue is not None) and (float(cntassvalue) == float(lndvalue)):
+					#arcpy.AddMessage(impvalue)
+					pass
+				elif (cntassvalue is not None and lndvalue is not None) and (float(cntassvalue) <> float(lndvalue)):
+					getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " is zero or <Null>. 'CNTASSDVALUE' should be equal to 'LNDVALUE' for this record - please verify.")
+					Error.taxErrorCount += 1
+			elif (impvalue is not None and float(impvalue) > 0):
+				if (cntassvalue is not None and lndvalue is not None) and (float(cntassvalue) > float(lndvalue)) :
+					pass
+				elif (cntassvalue is not None and lndvalue is not None) and (float(cntassvalue) == float(lndvalue)):
+					getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " is greater than zero. 'CNTASSDVALUE' should not be equal to 'LNDVALUE' for this record - please verify.")
+					Error.taxErrorCount += 1
+			return(Error,Parcel)
+		except:
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return(Error,Parcel)
+
+
 
 	#checking strings for unacceptable chars including /n, /r, etc...
 	def badChars(Error,Parcel,fieldNamesList,charDict,errorType):
@@ -720,4 +747,3 @@ class Error:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the NETPRPTA or GRSPRPTA field.  Please manually inspect the values in these fields.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
-
