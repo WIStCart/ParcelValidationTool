@@ -1,6 +1,6 @@
 '''This file contains the lengthy dictionaries used by the validation tool script'''
 
-#list of field names 
+#list of field names
 fieldNames = ["OID@","SHAPE@","STATEID","PARCELID","TAXPARCELID","PARCELDATE","TAXROLLYEAR",
 "OWNERNME1","OWNERNME2","PSTLADRESS","SITEADRESS","ADDNUMPREFIX","ADDNUM","ADDNUMSUFFIX","PREFIX","STREETNAME",
 "STREETTYPE","SUFFIX","LANDMARKNAME","UNITTYPE","UNITID","PLACENAME","ZIPCODE","ZIP4","STATE","SCHOOLDIST",
@@ -114,7 +114,7 @@ fieldNamesBadChars = {
 copDomains = ['1','2','3','4','5','6','7','5M','M']
 
 #acceptable AUXCOP domains
-auxDomains = ['W1','W2','W3','W4','W5','W6','W7','W8','W9','X1','X2','X3','X4','X5','M','XTEL','S1']
+auxDomains = ['W1','W2','W3','W4','W5','W6','W7','W8','W9','X1','X2','X3','X4','X5','M','XTEL','S1', 'U', 'AWO', 'FM6', 'FM7', 'FM8']
 
 #dictionary for V3 completeness collection
 v3CompDict = {
