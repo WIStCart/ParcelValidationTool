@@ -259,6 +259,34 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
+		#Verify that all tall roll data is <Null> when the record represent a New Parcel (indicated by a future tax roll year)
+	def taxrollYrCheck(Error,Parcel,field,errorType,acceptNull,pinField,acceptYears):
+		try:
+			taxRollYear = getattr(Parcel,field)
+			impvalue = getattr(Parcel, "impvalue")
+			cntassvalue = getattr(Parcel, "cntassdvalue")
+			improved =  getattr(Parcel, "lndvalue")
+			estfmkvalue = getattr(Parcel, "estfmkvalue")
+			netvalue =  getattr(Parcel, "netprpta")
+			grossvalue = getattr(Parcel, "grsprpta")
+			propclass = getattr(Parcel, "propclass")
+			auxclass = getattr(Parcel, "auxclass")
+			#pinToTest = getattr(Parcel,parcelid)
+			if taxRollYear is not None:
+				if taxRollYear == acceptYears[2] or taxRollYear == acceptYears[3]:
+					if impvalue is not None or cntassvalue is not None or lndvalue is not None or estfmkvalue is not None or netvalue is not None or grossvalue is not None:
+						getattr(Parcel,errorType + "Errors").append("Future Year (" + str(taxRollYear) + ") found on " + field.upper() + " field. <Null> is expected in all tax roll data. Please verify.")
+						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				else:  #other years are okay
+					pass
+				return (Error, Parcel)
+			elif acceptNull:  # it is null -> TAXROLLYEAR for parcel splits/new parcels may be <Null>
+				pass
+		except: # using generic error handling because we don't know what errors to expect yet.
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
+
 	#Check to see if street name provided is within a list created from V2.
 	def streetNameCheck(Error,Parcel,field,siteAddField,errorType,acceptNull,stNameDict,coname):
 		try:
@@ -354,7 +382,7 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error,Parcel)
 
-
+	#Verify that CNTASSDVALUE is different to LandValue when ImpValue is greater than zero
 	def totCheck (Error,Parcel,field,cntassValue,landValue,errorType):
 		try:
 			impvalue = getattr(Parcel, field)
