@@ -28,6 +28,7 @@ class Error:
 		self.recordTotalCount = int(arcpy.GetCount_management(featureClass).getOutput(0)) # Total number of records in the feature class
 		self.checkEnvelopeInterval = math.trunc(self.recordTotalCount / 10) # Interval value used to apply 10 total checks on records at evenly spaced intervals throughout the dataset.
 		self.nextEnvelopeInterval = self.checkEnvelopeInterval
+		self.codedDomainfields = []
 
 	# Test records throughout the dataset to ensure that polygons exist within an actual county envelope ("Waukesha" issue or the "Lake Michigan" issue).
 	def checkGeometricQuality(self,Parcel):
@@ -775,3 +776,14 @@ class Error:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the NETPRPTA or GRSPRPTA field.  Please manually inspect the values in these fields.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
+
+	def checkCodedDomains(Error,featureClass):
+		subtypes = arcpy.da.ListSubtypes(featureClass)
+		for stcode, stdict in list(subtypes.items()):
+			for stkey in list(stdict.keys()):
+				if stkey == 'FieldValues':
+					fields = stdict[stkey]
+					for field, fieldvals in list(fields.items()):
+						if fieldvals[1] is not None:
+							Error.codedDomainfields.append(field)
+		return Error

@@ -144,6 +144,7 @@ if inputDict['isSearchable'] == 'true':
 	#Call all pre-cursor test functions
 	Error.checkCRS(totError, output_fc_temp)
 	Error.checkSchema(totError, output_fc_temp, parcelSchemaReq, fieldListPass)
+	Error.checkCodedDomains(totError, inputDict['inFC'])
 
 	#Adding new fields for error reporting.  We can change names, lenght, etc...
 	arcpy.AddMessage("Adding Error Fields")
