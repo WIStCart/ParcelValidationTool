@@ -1,5 +1,4 @@
 import arcpy, collections
-import json
 from ConfigParser import ConfigParser
 
 class Summary:
@@ -9,70 +8,7 @@ class Summary:
 
 	def writeSummaryTxt(Summary,outDirTxt,outName,totError):
 		try:
-			Validation_JSON = {
-				'inLineErrors':{
-					'General_Errors': str(totError.generalErrorCount),
-					'Geometric_Errors': str(totError.geometricErrorCount),
-					'Address_Errors': str(totError.addressErrorCount),
-					'Tax_Errors': str(totError.taxErrorCount)
-				},
-				'broadLevelErrors':{
-				'Geometric_Misplacement_Flag':[],
-				'Geometric_File_Error':[]
-				},
-				'Tax_Roll_Years_Pcnt':{
-					'Previous_Taxroll_Year':  str(round((float(totError.trYearPast / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2)),
-					'Expected_Taxroll_Year':  str(round((float(totError.trYearExpected / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2)),
-					'Future_Taxroll_Years':  str(round((float(totError.trYearFuture / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2)),
-					'Other_Taxroll_Years':  str(round((float(totError.trYearOther / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2))
-				},
-				'Records_Missing':{
-					'Missing_CONAME': str(totError.coNameMiss),
-					'Missing_PARCELFIPS': str(totError.fipsMiss),
-					'Missing_PARCELSRC': str(totError.srcMiss)
-				},
-				'Fields_Diffs':{
-					'PARCELID':  str(totError.comparisonDict["PARCELID"]),
-					'TAXPARCELID':  str(totError.comparisonDict["TAXPARCELID"]),
-					'PARCELDATE':  str(totError.comparisonDict["PARCELDATE"]),
-					'TAXROLLYEAR':  str(totError.comparisonDict["TAXROLLYEAR"]),
-					'OWNERNME1':  str(totError.comparisonDict["OWNERNME1"]),
-					'OWNERNME2':  str(totError.comparisonDict["OWNERNME2"]),
-					'PSTLADRESS':  str(totError.comparisonDict["PSTLADRESS"]),
-					'SITEADRESS':  str(totError.comparisonDict["SITEADRESS"]),
-					'ADDNUMPREFIX':  str(totError.comparisonDict["ADDNUMPREFIX"]),
-					'ADDNUM':  str(totError.comparisonDict["ADDNUM"]),
-					'ADDNUMSUFFIX':  str(totError.comparisonDict["ADDNUMSUFFIX"]),
-					'PREFIX':  str(totError.comparisonDict["PREFIX"]),
-					'STREETNAME':  str(totError.comparisonDict["STREETNAME"]),
-					'STREETTYPE':  str(totError.comparisonDict["STREETTYPE"]),
-					'SUFFIX':  str(totError.comparisonDict["SUFFIX"]),
-					'LANDMARKNAME':  str(totError.comparisonDict["LANDMARKNAME"]),
-					'UNITTYPE':  str(totError.comparisonDict["UNITTYPE"]),
-					'UNITID':  str(totError.comparisonDict["UNITID"]),
-					'PLACENAME':  str(totError.comparisonDict["PLACENAME"]),
-					'ZIPCODE':  str(totError.comparisonDict["ZIPCODE"]),
-					'ZIP4':  str(totError.comparisonDict["ZIP4"]),
-					'SCHOOLDIST':  str(totError.comparisonDict["SCHOOLDIST"]),
-					'SCHOOLDISTNO':  str(totError.comparisonDict["SCHOOLDISTNO"]),
-					'IMPROVED':  str(totError.comparisonDict["IMPROVED"]),
-					'CNTASSDVALUE':  str(totError.comparisonDict["CNTASSDVALUE"]),
-					'LNDVALUE':  str(totError.comparisonDict["LNDVALUE"]),
-					'IMPVALUE':  str(totError.comparisonDict["IMPVALUE"]),
-					'FORESTVALUE':  str(totError.comparisonDict["FORESTVALUE"]),
-					'ESTFMKVALUE':  str(totError.comparisonDict["ESTFMKVALUE"]),
-					'NETPRPTA':  str(totError.comparisonDict["NETPRPTA"]),
-					'GRSPRPTA':  str(totError.comparisonDict["GRSPRPTA"]),
-					'PROPCLASS':  str(totError.comparisonDict["PROPCLASS"]),
-					'AUXCLASS':  str(totError.comparisonDict["AUXCLASS"]),
-					'ASSDACRES':  str(totError.comparisonDict["ASSDACRES"]),
-					'DEEDACRES':  str(totError.comparisonDict["DEEDACRES"]),
-					'GISACRES':  str(totError.comparisonDict["GISACRES"]),
-					'CONAME':  str(totError.comparisonDict["CONAME"]),
-					'PARCELFIPS':  str(totError.comparisonDict["PARCELFIPS"]),
-					'PARCELSRC':  str(totError.comparisonDict["PARCELSRC"])
-					}
-			}
+			#Write general error report to .txt
 			Summary.errorSummaryFile = open(outDirTxt + "/" + outName + "_ValidationSummary.txt","w")
 			("Creating Validation Summary here: " + outDirTxt + "/" + outName + "_ValidationSummary.txt")
 			Summary.errorSummaryFile.write(outDirTxt + "\\" + outName + "_ValidationSummary.txt" + "\n")
@@ -94,16 +30,12 @@ class Summary:
 			if len(totError.geometricPlacementErrors) != 0:
 				for geometricErrorMessage in totError.geometricPlacementErrors:
 					Summary.errorSummaryFile.write("	Geometric Misplacement Flag: " + str(geometricErrorMessage) + "\n")
-					Validation_JSON["broadLevelErrors"]['Geometric_Misplacement_Flag'].append(str(geometricErrorMessage))
 			if len(totError.geometricFileErrors) != 0:
 				for geometricErrorMessage in totError.geometricFileErrors:
 					Summary.errorSummaryFile.write("	Geometric File Error: " + str(geometricErrorMessage) + "\n")
-					Validation_JSON["broadLevelErrors"]['Geometric_File_Error'].append(str(geometricErrorMessage))
 			if (len(totError.geometricFileErrors) == 0) and (len(totError.geometricPlacementErrors) == 0):
 				Summary.errorSummaryFile.write("	*No broad-level geometric errors found!" + "\n")
-				Validation_JSON["broadLevelErrors"]['Geometric_File_Error'].append("None")
-				Validation_JSON["broadLevelErrors"]['Geometric_Misplacement_Flag'].append("None")
-			Summary.errorSummaryFile.write("\n\n")
+			Summary.errorSummaryFile.write("\n\n")	
 			Summary.errorSummaryFile.write("Percentage of records with various Taxroll Years" + "\n")
 			Summary.errorSummaryFile.write("	Previous Taxroll Year: " + str(round((float(totError.trYearPast / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2)) + "%\n")
 			Summary.errorSummaryFile.write("	Expected Taxroll Year: " + str(round((float(totError.trYearExpected / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2)) + "%\n")
@@ -159,11 +91,9 @@ class Summary:
 			Summary.errorSummaryFile.write("         CONAME:  " + str(totError.comparisonDict["CONAME"]) + '\n')
 			Summary.errorSummaryFile.write("     PARCELFIPS:  " + str(totError.comparisonDict["PARCELFIPS"]) + '\n')
 			Summary.errorSummaryFile.write("      PARCELSRC:  " + str(totError.comparisonDict["PARCELSRC"]) + '\n')
-			Summary.errorSummaryFile.write("\n\n\n* Within: " + outDirTxt + "\\" + outName  + "\n")
+			Summary.errorSummaryFile.write("\n\n\n* Within: " + outDirTxt + "\\" + outName  + "\n") 
 			Summary.errorSummaryFile.write("************************************************************************\n")
 			Summary.errorSummaryFile.close()
-			with open(outDirTxt + "/" + outName + "Validation_JSON.json", 'w') as outfile:
-				json.dump(Validation_JSON, outfile)
 		except Exception as e:
 			arcpy.AddMessage("!!!!!!!!!!Error writing summary file!!!!!!!!!!")
 			arcpy.AddMessage(str(e))
@@ -196,7 +126,7 @@ class Summary:
 			for field in totError.comparisonDict.keys():
 				if field != 'state' or field != 'loaddate':
 					config.set('COMPARISON COMPLETENESS',field,totError.comparisonDict[field])
-		try:
+		try: 
 			#Write out .ini file
 			with open(inputDict['outINIDir']+'/'+inputDict['county']+'_'+inputDict['outName']+'.ini','w') as configFile:
 				config.write(configFile)
