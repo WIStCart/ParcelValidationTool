@@ -47,10 +47,18 @@ class Error:
 
 	# Will test the row against LTSB's feature service to identify if the feature is in the correct location.
 	def testCountyEnvelope(self,Parcel):
+		specialchars = ['/', '#', '&']  #this special characters occurs in some ParcelIDs
+		charsdict = {'&': '%26', '#': '%23', '/': '2F'}
+		parcelid =  str(Parcel.parcelid).upper()
+		for i in specialchars:
+			if parcelid is not None and i in parcelid:
+				parcelid = charsdict[i] + parcelid[parcelid.find(i)+1:]
 		try:
-			baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP/PARCELS/FeatureServer/0/query"
-			where = str(Parcel.parcelid)
-			query = "?f=json&where=UPPER(PARCELID)%20=%20UPPER(%27{}%27)&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=OBJECTID%2CPARCELID%2CTAXPARCELID%2CCONAME%2CPARCELSRC&outSR=3071&resultOffset=0&resultRecordCount=10000".format(where)
+			#baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP_V3/V3_Parcels/FeatureServer/0/query"
+			baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP/Parcels/FeatureServer/0/query"
+			#arcpy.AddMessage(parcelid)
+			where = str(Parcel.parcelfips) + parcelid
+			query = "?f=json&where=STATEID+%3D+%27{0}%27&geometry=true&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=OBJECTID%2CPARCELID%2CTAXPARCELID%2CCONAME%2CPARCELSRC&outSR=3071&resultOffset=0&resultRecordCount=10000".format(where)
 			fsURL = baseURL + query
 			arcpy.AddMessage(fsURL)
 			fs = arcpy.FeatureSet()
@@ -65,12 +73,16 @@ class Error:
 						arcpy.AddMessage("Parcel geometry validated.")
 						return "Valid"
 					else:
+						#diffx = v2x - v1x
+						#diffy = v2y - v1y
+						#arcpy.AddMessage(diffx)
+						#arcpy.AddMessage(diffy)
 						arcpy.AddMessage("Parcel geometry not yet validated, will attempt another record.")
 						return "Not Confirmed"
 			# Call it valid If the query returns no features (failure to return features would not be caused by a misalignment)
 			return "Valid"
 		except:
-			# Call it valid if an error happens (error would not be caused by a misalignment)
+			arcpy.AddMessage("out")# Call it valid if an error happens (error would not be caused by a misalignment)
 			return "Valid"
 		return "Valid"
 
