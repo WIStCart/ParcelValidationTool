@@ -45,6 +45,7 @@ class Error:
 		self.recordIterationCount += 1
 		return (self, Parcel)
 
+
 	# Will test the row against LTSB's feature service to identify if the feature is in the correct location.
 	def testCountyEnvelope(self,Parcel):
 		specialchars = ['/', '#', '&']  #this special characters occurs in some ParcelIDs
