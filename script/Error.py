@@ -26,8 +26,11 @@ class Error:
 		self.netMoreGrsCnt = 0
 		self.recordIterationCount = 0;
 		self.recordTotalCount = int(arcpy.GetCount_management(featureClass).getOutput(0)) # Total number of records in the feature class
-		self.checkEnvelopeInterval = math.trunc(self.recordTotalCount / 10) # Interval value used to apply 10 total checks on records at evenly spaced intervals throughout the dataset.
+		self.checkEnvelopeInterval = math.trunc(self.recordTotalCount / 100) # Interval value used to apply 10 total checks on records at evenly spaced intervals throughout the dataset.
 		self.nextEnvelopeInterval = self.checkEnvelopeInterval
+		self.notConfirmGeomCount = 0 #counts parcels with invalid Geometry
+		self.validatedGeomCount = 0 #counts parcels whose geometry is validated
+		self.geometryNotValidated = False
 		self.codedDomainfields = []
 
 	# Test records throughout the dataset to ensure that polygons exist within an actual county envelope ("Waukesha" issue or the "Lake Michigan" issue).
@@ -36,11 +39,18 @@ class Error:
 		#arcpy.AddMessage(self.recordIterationCount)
 		if self.nextEnvelopeInterval == self.recordIterationCount:
 			countyEnvelope = self.testCountyEnvelope(Parcel)
-			if countyEnvelope == "Valid": # would mean that the "Waukesha" issue or the "Lake Michigan" issue does not exist in this dataset.
+			if countyEnvelope == "Valid" and self.validatedGeomCount == 50: # would mean that the "Waukesha" issue or the "Lake Michigan" issue does not exist in this dataset.
 				self.nextEnvelopeInterval = 4000000
 				self.geometricPlacementErrors = []
-			else:
-				self.nextEnvelopeInterval = self.nextEnvelopeInterval + self.checkEnvelopeInterval
+				#arcpy.AddMessage("could validate geometry")
+			elif countyEnvelope == "Not Confirmed":
+				#arcpy.AddMessage(self.notConfirmGeomCount)
+				if self.notConfirmGeomCount == 50:
+					self.geometryNotValidated = True
+					self.nextEnvelopeInterval = 4000000
+					#arcpy.AddMessage("couldn't validate")
+			#else:
+			self.nextEnvelopeInterval = self.nextEnvelopeInterval + self.checkEnvelopeInterval
 		self,Parcel = self.testParcelGeometry(Parcel)
 		self.recordIterationCount += 1
 		return (self, Parcel)
@@ -49,21 +59,21 @@ class Error:
 	# Will test the row against LTSB's feature service to identify if the feature is in the correct location.
 	def testCountyEnvelope(self,Parcel):
 		specialchars = ['/', '#', '&']  #this special characters occurs in some ParcelIDs
-		charsdict = {'&': '%26', '#': '%23', '/': '2F'}
+		charsdict = {'&': '%26', '#': '%23', '/': '%2F'}
 		parcelid =  str(Parcel.parcelid).upper()
 		for i in specialchars:
 			if parcelid is not None and i in parcelid:
-				parcelid = charsdict[i] + parcelid[parcelid.find(i)+1:]
+				parcelid = parcelid[:parcelid.find(i)] + charsdict[i] + parcelid[parcelid.find(i)+1:]
 		try:
 			#baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP_V3/V3_Parcels/FeatureServer/0/query"
 			baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP/Parcels/FeatureServer/0/query"
-			#arcpy.AddMessage(parcelid)
 			where = str(Parcel.parcelfips) + parcelid
 			query = "?f=json&where=STATEID+%3D+%27{0}%27&geometry=true&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=OBJECTID%2CPARCELID%2CTAXPARCELID%2CCONAME%2CPARCELSRC&outSR=3071&resultOffset=0&resultRecordCount=10000".format(where)
 			fsURL = baseURL + query
-			arcpy.AddMessage(fsURL)
+			#arcpy.AddMessage(fsURL)
 			fs = arcpy.FeatureSet()
 			fs.load(fsURL)
+			#arcpy.AddMessage(parcelid)
 			with arcpy.da.UpdateCursor(fs,["SHAPE@XY"]) as cursorLTSB:
 				for rowLTSB in cursorLTSB:
 					v2x = round(rowLTSB[0][0],2)
@@ -72,6 +82,8 @@ class Error:
 					v1y = round(Parcel.shapeXY[1],2)
 					if (v2x == v1x) and (v2y == v1y):
 						arcpy.AddMessage("Parcel geometry validated.")
+						self.validatedGeomCount += 1
+						#arcpy.AddMessage(self.validatedGeomCount)
 						return "Valid"
 					else:
 						#diffx = v2x - v1x
@@ -79,11 +91,13 @@ class Error:
 						#arcpy.AddMessage(diffx)
 						#arcpy.AddMessage(diffy)
 						arcpy.AddMessage("Parcel geometry not yet validated, will attempt another record.")
+						self.notConfirmGeomCount += 1
+						#arcpy.AddMessage(self.notConfirmGeomCount)
 						return "Not Confirmed"
-			# Call it valid If the query returns no features (failure to return features would not be caused by a misalignment)
+						# Call it valid If the query returns no features (failure to return features would not be caused by a misalignment)
 			return "Valid"
 		except:
-			arcpy.AddMessage("out")# Call it valid if an error happens (error would not be caused by a misalignment)
+			# Call it valid if an error happens (error would not be caused by a misalignment)
 			return "Valid"
 		return "Valid"
 

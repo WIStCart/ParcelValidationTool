@@ -208,6 +208,12 @@ if inputDict['isSearchable'] == 'true':
 			currParcel.writeErrors(row,cursor, fieldNames)
 			currParcel = None
 
+	if totError.geometryNotValidated == True:
+		arcpy.AddMessage("THE GEOMETRY OF THIS FEATURE CLASS WAS NOT VALIDATED  \n")
+		arcpy.AddMessage("PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
+		arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+		exit()
+
 
 	#Write the ini file if final
 	if inputDict['isFinal'] == 'true':
