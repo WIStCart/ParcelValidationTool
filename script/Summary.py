@@ -1,4 +1,6 @@
 import arcpy, collections
+from Parcel import Parcel
+from LegacyCountyStats import *
 import json
 from ConfigParser import ConfigParser
 
@@ -10,6 +12,11 @@ class Summary:
 	def writeSummaryTxt(Summary,outDirTxt,outName,totError):
 		try:
 			Validation_JSON = {
+				'County_Info':{
+					'CO_NAME': totError.coName,
+					'Total_Records': totError.recordTotalCount,
+					'Legacy': eval(totError.coName + "LegacyDict")
+				},
 				'inLineErrors':{
 					'General_Errors': str(totError.generalErrorCount),
 					'Geometric_Errors': str(totError.geometricErrorCount),
