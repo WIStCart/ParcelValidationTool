@@ -49,14 +49,14 @@ if inputDict['isSearchable'] == 'true':
 
 	#Load files for current domain lists
 	#streetNames = [line.strip() for line in open(os.path.join(base, '..\data\V3_StreetName_Simplified.txt'), 'r')] #street name list
-	streetTypes = [line.strip() for line in open(os.path.join(base, '..\data\V3_StreetType_Simplified.txt'), 'r')] #street types domain list
+	streetTypes = [line.strip() for line in open(os.path.join(base, '..\data\V4_StreetType_Simplified.txt'), 'r')] #street types domain list
 	unitIdTypes = [line.strip() for line in open(os.path.join(base, '..\data\V4_UnitId_Simplified.txt'),'r')] #unitid domain list
 	unitTypes = [line.strip() for line in open(os.path.join(base, '..\data\V4_UnitType_Simplified.txt'),'r')] #unit type domain list
 	lsadDomains = [line.strip() for line in open(os.path.join(base, '..\data\LSAD_Simplified.txt'),'r')] #lsad domain list
-	taxRollYears = [line.strip() for line in open(os.path.join(base, '..\data\TaxRollYears.txt'),'r')] #taxroll years to test (past,expected,future1,future2)
+	taxRollYears = [line.strip() for line in open(os.path.join(base, '..\data\V4_TaxRollYears.txt'),'r')] #taxroll years to test (past,expected,future1,future2)
 	suffixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V3_SuffixDomains_Simplified.txt'),'r')] #suffix domain list
 	prefixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V3_PrefixDomains_Simplified.txt'),'r')] #prefix domain list
-	pinSkips = [line.strip() for line in open(os.path.join(base, '..\data\V3_PinSkips.txt'),'r')] #list of non-parcelid values found in field to ignore when checking for dups (and use in other functions)
+	pinSkips = [line.strip() for line in open(os.path.join(base, '..\data\V4_PinSkips.txt'),'r')] #list of non-parcelid values found in field to ignore when checking for dups (and use in other functions)
 
 	reader = csv.reader(open(os.path.join(base, '..\data\school_district_codes.csv'),'rU')) #school district code list (csv has been updated for V5/2018 school districts)
 	schoolDist_nameNo_dict = {}
@@ -161,7 +161,7 @@ if inputDict['isSearchable'] == 'true':
 			currParcel = Parcel(row, fieldNames)
 
 			#Execute in-cursor error tests
-			totError,currParcel = Error.checkGeometricQuality(totError,currParcel)
+			totError,currParcel = Error.checkGeometricQuality(totError,currParcel, pinSkips)
 
 			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"addnum","address", True)
 			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"parcelfips","general", False)
@@ -197,7 +197,8 @@ if inputDict['isSearchable'] == 'true':
 			totError,currParcel = Error.checkRedundantID(totError,currParcel,'taxparcelid','parcelid',True,'general')
 			totError,currParcel = Error.postalCheck(totError,currParcel,'pstladress','general',pinSkips,'taxrollyear','parcelid')
 			totError,currParcel = Error.auxPropCheck(totError,currParcel,'propclass','auxclass','taxrollyear','parcelid', pinSkips,'tax', copDomains, auxDomains)
-			# PROPCLASS of 4,5, or 5m should not contain an ESTFMKVALUE, thus this function is not applied # totError,currParcel = Error.fairMarketCheck(totError,currParcel,'propclass','estfmkvalue','general')
+			# PROPCLASS of 4,5, or 5m should not contain an ESTFMKVALUE, thus this function is not applied
+            # totError,currParcel = Error.fairMarketCheck(totError,currParcel,'propclass','estfmkvalue','general')
 			totError,currParcel = Error.matchContrib(totError,currParcel,"coname","parcelfips","parcelsrc",county_nameNo_dict,county_noName_dict,"general",False)
 			totError,currParcel = Error.netVsGross(totError,currParcel,"netprpta","grsprpta","tax")
 			totError,currParcel = Error.schoolDistCheck(totError,currParcel,"parcelid","schooldist","schooldistno",schoolDist_noName_dict,schoolDist_nameNo_dict,"tax",pinSkips,"taxrollyear")
@@ -208,14 +209,23 @@ if inputDict['isSearchable'] == 'true':
 			currParcel.writeErrors(row,cursor, fieldNames)
 			currParcel = None
 
+
+	arcpy.AddMessage("not confirmed geome "  +str(totError.notConfirmGeomCount)) #counts parcels with invalid Geometry
+
+	arcpy.AddMessage("validated geome " + str(totError.validatedGeomCount))
+	arcpy.AddMessage("THE FEATURE CLASS IS ABOUT " + str(totError.xyShift) + "METERS DISPLACED \n")
+##  if totError.geometryNotChecked = True:  David's function
 	if totError.geometryNotValidated == True:
+		arcpy.AddMessage(" \n")
 		arcpy.AddMessage("THE GEOMETRY OF THIS FEATURE CLASS WAS NOT VALIDATED  \n")
+		arcpy.AddMessage("THE FEATURE CLASS IS ABOUT " + str(totError.xyShift) + "METERS DISPLACED \n")
+		arcpy.AddMessage("THIS ISSUE IS INDICATIVE OF A RE-PROJECTION ERROR. \n ")
 		arcpy.AddMessage("PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
+		arcpy.AddMessage("CHECK THE DOCUMENTATION: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf Section 2 \n" )
 		arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 		exit()
 
-
-	#Write the ini file if final
+		#Write the ini file if final
 	if inputDict['isFinal'] == 'true':
 		summary.explainCertComplete(inputDict['inCert'])
 		summary.fieldConstraints(totError)

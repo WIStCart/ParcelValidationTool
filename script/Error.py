@@ -14,7 +14,8 @@ class Error:
 		self.comparisonDict = {}
 		self.attributeFileErrors = []
 		self.geometricFileErrors = []
-		self.geometricPlacementErrors = ["Several parcel geometries appear to be spatially misplaced when comparing them against last year's parcel geometries. This issue is indicative of a re-projection error. Please see the following documentation: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf section #2, for advice on how to project native data to the Statewide Parcel CRS."]
+		#self.geometricPlacementErrors = ["Several parcel geometries appear to be spatially misplaced when comparing them against last year's parcel geometries. This issue is indicative of a re-projection error. Please see the following documentation: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf section #2, for advice on how to project native data to the Statewide Parcel CRS."]
+		self.geometricPlacementErrors = []
 		self.pinSkipCount = 0
 		self.trYearPast = 0
 		self.trYearExpected = 0
@@ -31,26 +32,51 @@ class Error:
 		self.notConfirmGeomCount = 0 #counts parcels with invalid Geometry
 		self.validatedGeomCount = 0 #counts parcels whose geometry is validated
 		self.geometryNotValidated = False
+		self.geometryNotChecked = True
+		self.diffxy = 0
+		self.xyShift = 0
 		self.codedDomainfields = []
 
 	# Test records throughout the dataset to ensure that polygons exist within an actual county envelope ("Waukesha" issue or the "Lake Michigan" issue).
-	def checkGeometricQuality(self,Parcel):
+	def checkGeometricQuality(self,Parcel,ignoreList):
 		#arcpy.AddMessage(self.nextEnvelopeInterval)
 		#arcpy.AddMessage(self.recordIterationCount)
 		if self.nextEnvelopeInterval == self.recordIterationCount:
-			countyEnvelope = self.testCountyEnvelope(Parcel)
-			if countyEnvelope == "Valid" and self.validatedGeomCount == 50: # would mean that the "Waukesha" issue or the "Lake Michigan" issue does not exist in this dataset.
-				self.nextEnvelopeInterval = 4000000
-				self.geometricPlacementErrors = []
-				#arcpy.AddMessage("could validate geometry")
-			elif countyEnvelope == "Not Confirmed":
-				#arcpy.AddMessage(self.notConfirmGeomCount)
-				if self.notConfirmGeomCount == 50:
-					self.geometryNotValidated = True
+			if str(Parcel.parcelid).upper() in ignoreList:
+				self.nextEnvelopeInterval = self.nextEnvelopeInterval + 1
+			else:
+				countyEnvelope = self.testCountyEnvelope(Parcel)
+				if countyEnvelope == "Valid" and self.validatedGeomCount == 50: # would mean that the "Waukesha" issue or the "Lake Michigan" issue does not exist in this dataset.
 					self.nextEnvelopeInterval = 4000000
+					if self.notConfirmGeomCount > 0:
+						self.xyShift = round((self.diffxy/self.notConfirmGeomCount),2)
+					arcpy.AddMessage("Parcel geometry validated.")
+					self.geometricPlacementErrors = []
+				elif countyEnvelope == "Not Confirmed" and self.notConfirmGeomCount == 50:
+					self.nextEnvelopeInterval = 4000000
+					self.xyShift = round((self.diffxy/self.notConfirmGeomCount),2)
 					#arcpy.AddMessage("couldn't validate")
-			#else:
-			self.nextEnvelopeInterval = self.nextEnvelopeInterval + self.checkEnvelopeInterval
+					if  self.xyShift >= 6:
+						self.geometryNotValidated = True
+					elif self.xyShift >= 1.2 and self.xyShift < 6:
+						arcpy.AddMessage("Parcel geometry validated.")
+						arcpy.AddMessage("Note that several parcel geometries appear to be spatially misplaced by about: " + str(self.xyShift) + " meters." )
+						self.geometricPlacementErrors = ["Several parcel geometries appear to be spatially misplaced " + str(self.xyShift) + " meters when comparing them against last year's parcel geometries. This issue is indicative of a re-projection error. Please see the following documentation: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf section #2, for advice on how to project native data to the Statewide Parcel CRS."]
+					else:
+						arcpy.AddMessage("Parcel geometry validated.")
+						self.geometricPlacementErrors = []
+						#arcpy.AddMessage("Geometry validated -- but several parcels are misplaced: " + str(self.xyShift) + " meters.")
+				self.nextEnvelopeInterval = self.nextEnvelopeInterval + self.checkEnvelopeInterval
+		elif self.nextEnvelopeInterval < 4000000 and self.nextEnvelopeInterval >= (100 * self.checkEnvelopeInterval):
+			if self.validatedGeomCount == 0 and self.notConfirmGeomCount == 0: #no parcel geometry was checked -- likely ParcelIds are different from previous years
+				arcpy.AddMessage("couldn't check parcels " )
+				self.nextEnvelopeInterval = 4000000
+				self.geometryNotChecked = True   # flag for county centroid check funcion
+			elif self.notConfirmGeomCount  > 0:
+				self.nextEnvelopeInterval = 4000000
+				self.xyShift = round((self.diffxy/self.notConfirmGeomCount),2)
+				arcpy.AddMessage("Several parcel geometries appear to be spatially misplaced by about: " + str(self.xyShift) + " meters." )
+				self.geometricPlacementErrors = ["Several parcel geometries appear to be spatially misplaced " + str(self.xyShift) + " meters when comparing them against last year's parcel geometries. This issue is indicative of a re-projection error. Please see the following documentation: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf section #2, for advice on how to project native data to the Statewide Parcel CRS."]
 		self,Parcel = self.testParcelGeometry(Parcel)
 		self.recordIterationCount += 1
 		return (self, Parcel)
@@ -62,37 +88,41 @@ class Error:
 		charsdict = {'&': '%26', '#': '%23', '/': '%2F'}
 		parcelid =  str(Parcel.parcelid).upper()
 		for i in specialchars:
-			if parcelid is not None and i in parcelid:
+			while parcelid is not None and i in parcelid:
 				parcelid = parcelid[:parcelid.find(i)] + charsdict[i] + parcelid[parcelid.find(i)+1:]
 		try:
-			#baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP_V3/V3_Parcels/FeatureServer/0/query"
-			baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP/Parcels/FeatureServer/0/query"
-			where = str(Parcel.parcelfips) + parcelid
+			baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP_V3/V3_Parcels/FeatureServer/0/query"
+			#baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP/Parcels/FeatureServer/0/query"
+			where =  str(Parcel.parcelfips) + parcelid
+			#arcpy.AddMessage(where)
 			query = "?f=json&where=STATEID+%3D+%27{0}%27&geometry=true&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=OBJECTID%2CPARCELID%2CTAXPARCELID%2CCONAME%2CPARCELSRC&outSR=3071&resultOffset=0&resultRecordCount=10000".format(where)
 			fsURL = baseURL + query
 			#arcpy.AddMessage(fsURL)
 			fs = arcpy.FeatureSet()
 			fs.load(fsURL)
-			#arcpy.AddMessage(parcelid)
 			with arcpy.da.UpdateCursor(fs,["SHAPE@XY"]) as cursorLTSB:
 				for rowLTSB in cursorLTSB:
 					v2x = round(rowLTSB[0][0],2)
 					v1x = round(Parcel.shapeXY[0],2)
 					v2y = round(rowLTSB[0][1],2)
 					v1y = round(Parcel.shapeXY[1],2)
-					if (v2x == v1x) and (v2y == v1y):
-						arcpy.AddMessage("Parcel geometry validated.")
+					diffx = v2x - v1x
+					diffy = v2y - v1y
+					#if (v2x == v1x) and (v2y == v1y):
+					if (diffx == 0) and (diffy == 0):
 						self.validatedGeomCount += 1
-						#arcpy.AddMessage(self.validatedGeomCount)
+						if (self.validatedGeomCount % 10 == 0):
+							arcpy.AddMessage("Parcel geometry validated.")
 						return "Valid"
 					else:
-						#diffx = v2x - v1x
-						#diffy = v2y - v1y
-						#arcpy.AddMessage(diffx)
-						#arcpy.AddMessage(diffy)
-						arcpy.AddMessage("Parcel geometry not yet validated, will attempt another record.")
+						#arcpy.AddMessage("difference x :"  + str(diffx) + ' = ' + str(v2x) + " - " + str(v1x) )
+						#arcpy.AddMessage("difference y :"  + str(diffy) + ' = ' + str(v2y) + " - " + str(v1y) )
+						#diffxy = round(math.sqrt (diffx*diffx + diffy*diffy),2)
+						arcpy.AddMessage("difference xy :"  + str(diffxy))
+						self.diffxy = self.diffxy + diffxy
 						self.notConfirmGeomCount += 1
-						#arcpy.AddMessage(self.notConfirmGeomCount)
+						if (self.notConfirmGeomCount % 10 == 0):
+							arcpy.AddMessage("Parcel geometry not yet validated, will attempt another record.")
 						return "Not Confirmed"
 						# Call it valid If the query returns no features (failure to return features would not be caused by a misalignment)
 			return "Valid"
@@ -546,7 +576,7 @@ class Error:
 			propClassTest = str(getattr(Parcel,propClass)).replace(" ","")
 			estFmkValueTest = getattr(Parcel,estFmkValue)
 			if estFmkValueTest is None:
-				if re.search('4,', propClassTest) is not None:
+				if re.search('4,', propClassTest) is not None or re.search('4', propClassTest) is not None:
 					getattr(Parcel, errorType + "Errors").append("Unexpected information in " + estFmkValue.upper() + " field based off value in  " + propClass.upper() + " field.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				elif re.search(',4', propClassTest) is not None:
