@@ -814,3 +814,24 @@ class Error:
 						if fieldvals[1] is not None:
 							Error.codedDomainfields.append(field)
 		return Error
+
+	#backup geom check function for 100 no parcelid matches...
+	def ctyExtentCentCheck(self, coname, infc, centroidDict):
+		describeFc = arcpy.Describe(infc)
+		xMin = describeFc.extent.XMin
+		xMax = describeFc.extent.XMax
+		yMin = describeFc.extent.YMin
+		yMax = describeFc.extent.YMax
+
+		iNxMid = xMin + ((xMax - xMin)/2)
+		print 'Xmid = ' + str(round(iNxMid,0))
+		iNyMid = yMin + ((yMax - yMin)/2)
+		print 'Ymid = ' + str(round(iNyMid,0))
+
+		print 'CoCentroid X: ' + str(centroidDict[coname][0] + 100)
+		print 'CoCentroid Y: ' + str(centroidDict[coname][1] + 100)
+
+		if (centroidDict[coname][0] - 100) <= round(iNxMid,0) <= (centroidDict[coname][0] + 100) and (centroidDict[coname][1] - 100) <= round(iNyMid,0) <= (centroidDict[coname][1] + 100):
+			print('Looks Good!!')
+		else:
+			print('Something looks amiss with your parcel geometies.')
