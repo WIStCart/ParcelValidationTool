@@ -214,11 +214,13 @@ if inputDict['isSearchable'] == 'true':
 
 	arcpy.AddMessage("validated geome " + str(totError.validatedGeomCount))
 	arcpy.AddMessage("THE FEATURE CLASS IS ABOUT " + str(totError.xyShift) + "METERS DISPLACED \n")
-##  if totError.geometryNotChecked = True:  David's function
+	if totError.geometryNotChecked == False:
+		Error.ctyExtentCentCheck(totError, totError.coName, inputDict['inFC'], ctyCentroidDict)
+
 	if totError.geometryNotValidated == True:
 		arcpy.AddMessage(" \n")
 		arcpy.AddMessage("THE GEOMETRY OF THIS FEATURE CLASS WAS NOT VALIDATED  \n")
-		arcpy.AddMessage("THE FEATURE CLASS IS ABOUT " + str(totError.xyShift) + "METERS DISPLACED \n")
+		arcpy.AddMessage("THE FEATURE CLASS IS ABOUT " + str(totError.xyShift) + " METERS DISPLACED \n")
 		arcpy.AddMessage("THIS ISSUE IS INDICATIVE OF A RE-PROJECTION ERROR. \n ")
 		arcpy.AddMessage("PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
 		arcpy.AddMessage("CHECK THE DOCUMENTATION: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf Section 2 \n" )

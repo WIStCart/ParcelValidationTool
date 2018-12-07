@@ -71,7 +71,7 @@ class Error:
 			if self.validatedGeomCount == 0 and self.notConfirmGeomCount == 0: #no parcel geometry was checked -- likely ParcelIds are different from previous years
 				arcpy.AddMessage("couldn't check parcels " )
 				self.nextEnvelopeInterval = 4000000
-				self.geometryNotChecked = True   # flag for county centroid check funcion
+				self.geometryNotChecked = False   # flag for county centroid check funcion
 			elif self.notConfirmGeomCount  > 0:
 				self.nextEnvelopeInterval = 4000000
 				self.xyShift = round((self.diffxy/self.notConfirmGeomCount),2)
@@ -854,14 +854,14 @@ class Error:
 		yMax = describeFc.extent.YMax
 
 		iNxMid = xMin + ((xMax - xMin)/2)
-		print 'Xmid = ' + str(round(iNxMid,0))
 		iNyMid = yMin + ((yMax - yMin)/2)
-		print 'Ymid = ' + str(round(iNyMid,0))
-
-		print 'CoCentroid X: ' + str(centroidDict[coname][0] + 100)
-		print 'CoCentroid Y: ' + str(centroidDict[coname][1] + 100)
 
 		if (centroidDict[coname][0] - 100) <= round(iNxMid,0) <= (centroidDict[coname][0] + 100) and (centroidDict[coname][1] - 100) <= round(iNyMid,0) <= (centroidDict[coname][1] + 100):
-			print('Looks Good!!')
+			pass
 		else:
-			print('Something looks amiss with your parcel geometies.')
+			arcpy.AddMessage("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			arcpy.AddMessage("THE GEOMETRY OF THIS FEATURE CLASS WAS NOT VALIDATED  \n")
+			arcpy.AddMessage("THIS ISSUE CAN BE INDICATIVE OF A RE-PROJECTION ERROR. \n ")
+			arcpy.AddMessage("PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
+			arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			exit()
