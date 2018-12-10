@@ -190,7 +190,7 @@ if inputDict['isSearchable'] == 'true':
 			totError,currParcel = Error.streetNameCheck(totError,currParcel,"streetname","siteadress","address",True,stNameDict,inputDict['county'])
 			totError,currParcel = Error.zipCheck(totError,currParcel,"zipcode","address",True)
 			totError,currParcel = Error.zip4Check(totError,currParcel,"zip4","address",True)
-			totError,currParcel = Error.impCheck(totError,currParcel,"improved","impvalue","tax")
+			#totError,currParcel = Error.impCheck(totError,currParcel,"improved","impvalue","tax")
 			totError,currParcel = Error.totCheck(totError,currParcel,"impvalue","cntassdvalue","lndvalue","tax")
 			totError,currParcel = Error.badChars(totError,currParcel,fieldNames,fieldNamesBadChars,'general')
 			#EXAMPLE FUNCTION # totError,currParcel = Error.reallyBadChars(totError,currParcel,fieldNames,fieldNamesBadChars,'general')
@@ -198,7 +198,7 @@ if inputDict['isSearchable'] == 'true':
 			totError,currParcel = Error.postalCheck(totError,currParcel,'pstladress','general',pinSkips,'taxrollyear','parcelid')
 			totError,currParcel = Error.auxPropCheck(totError,currParcel,'propclass','auxclass','taxrollyear','parcelid', pinSkips,'tax', copDomains, auxDomains)
 			# PROPCLASS of 4,5, or 5m should not contain an ESTFMKVALUE, thus this function is not applied
-            # totError,currParcel = Error.fairMarketCheck(totError,currParcel,'propclass','estfmkvalue','general')
+			totError,currParcel = Error.fairMarketCheck(totError,currParcel,'propclass','estfmkvalue','general')
 			totError,currParcel = Error.matchContrib(totError,currParcel,"coname","parcelfips","parcelsrc",county_nameNo_dict,county_noName_dict,"general",False)
 			totError,currParcel = Error.netVsGross(totError,currParcel,"netprpta","grsprpta","tax")
 			totError,currParcel = Error.schoolDistCheck(totError,currParcel,"parcelid","schooldist","schooldistno",schoolDist_noName_dict,schoolDist_nameNo_dict,"tax",pinSkips,"taxrollyear")
@@ -209,13 +209,8 @@ if inputDict['isSearchable'] == 'true':
 			currParcel.writeErrors(row,cursor, fieldNames)
 			currParcel = None
 
-
-	arcpy.AddMessage("not confirmed geome "  +str(totError.notConfirmGeomCount)) #counts parcels with invalid Geometry
-
-	arcpy.AddMessage("validated geome " + str(totError.validatedGeomCount))
-	arcpy.AddMessage("THE FEATURE CLASS IS ABOUT " + str(totError.xyShift) + "METERS DISPLACED \n")
 	if totError.geometryNotChecked == False:
-		Error.ctyExtentCentCheck(totError, totError.coName, inputDict['inFC'], ctyCentroidDict)
+		Error.ctyExtentCentCheck(totError, inputDict['inFC'], ctyCentroidDict)
 
 	if totError.geometryNotValidated == True:
 		arcpy.AddMessage(" \n")
@@ -225,7 +220,7 @@ if inputDict['isSearchable'] == 'true':
 		arcpy.AddMessage("PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
 		arcpy.AddMessage("CHECK THE DOCUMENTATION: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf Section 2 \n" )
 		arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
-		exit()
+		sys.exit()
 
 		#Write the ini file if final
 	if inputDict['isFinal'] == 'true':

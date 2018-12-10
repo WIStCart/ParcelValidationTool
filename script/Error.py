@@ -108,8 +108,8 @@ class Error:
 					v1y = round(Parcel.shapeXY[1],2)
 					diffx = v2x - v1x
 					diffy = v2y - v1y
-					#if (v2x == v1x) and (v2y == v1y):
-					if (diffx == 0) and (diffy == 0):
+					if (v2x == v1x) and (v2y == v1y):
+					#if (diffx == 0) and (diffy == 0):
 						self.validatedGeomCount += 1
 						if (self.validatedGeomCount % 10 == 0):
 							arcpy.AddMessage("Checking parcel geometry ...")
@@ -118,7 +118,7 @@ class Error:
 						#arcpy.AddMessage("difference x :"  + str(diffx) + ' = ' + str(v2x) + " - " + str(v1x) )
 						#arcpy.AddMessage("difference y :"  + str(diffy) + ' = ' + str(v2y) + " - " + str(v1y) )
 						diffxy = round(math.sqrt (diffx*diffx + diffy*diffy),2)
-						#arcpy.AddMessage("difference xy :"  + str(diffxy))
+						#arcpy.AddMessage("difference xy : %s"  % (str(diffxy)) )
 						self.diffxy = self.diffxy + diffxy
 						self.notConfirmGeomCount += 1
 						if (self.notConfirmGeomCount % 10 == 0):
@@ -570,17 +570,17 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
-	#checking ESTFMKVALUE field against PROPCLASS field for erroneous null values when PROPCLASS of 4 is present with another value
+	#checking ESTFMKVALUE field against PROPCLASS field for erroneous not null values when PROPCLASS of 4 is present with another value
  	def fairMarketCheck(Error,Parcel,propClass,estFmkValue,errorType):
  		try:
 			propClassTest = str(getattr(Parcel,propClass)).replace(" ","")
 			estFmkValueTest = getattr(Parcel,estFmkValue)
-			if estFmkValueTest is None:
+			if estFmkValueTest is not None:
 				if re.search('4,', propClassTest) is not None or re.search('4', propClassTest) is not None:
-					getattr(Parcel, errorType + "Errors").append("Unexpected information in " + estFmkValue.upper() + " field based off value in  " + propClass.upper() + " field.")
+					getattr(Parcel, errorType + "Errors").append("Unexpected value in " + estFmkValue.upper() + " field based off value in  " + propClass.upper() + " field.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				elif re.search(',4', propClassTest) is not None:
-					getattr(Parcel, errorType + "Errors").append("Unexpected information in " + estFmkValue.upper() + " field based off value in  " + propClass.upper() + " field.")
+					getattr(Parcel, errorType + "Errors").append("Unexpected value in " + estFmkValue.upper() + " field based off value in  " + propClass.upper() + " field.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				else:
 					pass
@@ -846,7 +846,8 @@ class Error:
 		return Error
 
 	#backup geom check function for 100 no parcelid matches...
-	def ctyExtentCentCheck(self, coname, infc, centroidDict):
+	def ctyExtentCentCheck(self, infc, centroidDict):
+		coname = self.coName
 		describeFc = arcpy.Describe(infc)
 		xMin = describeFc.extent.XMin
 		xMax = describeFc.extent.XMax
