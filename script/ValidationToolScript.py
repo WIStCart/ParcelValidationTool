@@ -195,7 +195,7 @@ if inputDict['isSearchable'] == 'true':
 			totError,currParcel = Error.badChars(totError,currParcel,fieldNames,fieldNamesBadChars,'general')
 			#EXAMPLE FUNCTION # totError,currParcel = Error.reallyBadChars(totError,currParcel,fieldNames,fieldNamesBadChars,'general')
 			totError,currParcel = Error.checkRedundantID(totError,currParcel,'taxparcelid','parcelid',True,'general')
-			totError,currParcel = Error.postalCheck(totError,currParcel,'pstladress','general',pinSkips,'taxrollyear','parcelid')
+			totError,currParcel = Error.postalCheck(totError,currParcel,'pstladress','general',pinSkips,'taxrollyear','parcelid',badPstladdSet)
 			totError,currParcel = Error.auxPropCheck(totError,currParcel,'propclass','auxclass','taxrollyear','parcelid', pinSkips,'tax', copDomains, auxDomains)
 			# PROPCLASS of 4,5, or 5m should not contain an ESTFMKVALUE, thus this function is not applied
 			totError,currParcel = Error.fairMarketCheck(totError,currParcel,'propclass','estfmkvalue','general')

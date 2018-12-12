@@ -789,7 +789,7 @@ class Error:
 
 
 	#check for valid postal address
-	def postalCheck (Error,Parcel,PostalAd,errorType,ignoreList,taxYear,pinField):
+	def postalCheck (Error,Parcel,PostalAd,errorType,ignoreList,taxYear,pinField,badPstladdSet):
 		try:
 			address = getattr(Parcel,PostalAd)
 			year = getattr(Parcel, taxYear)
@@ -798,8 +798,8 @@ class Error:
 				pass
 			else:
 				if year is not None:
-					if int(year) <= 2017:
-						if 'UNAVAILABLE' in address or 'ADDRESS' in address or 'ADDDRESS' in address or 'UNKNOWN' in address or ' 00000' in address or 'NULL' in address or 'NONE' in address or 'MAIL EXEMPT' in address or 'TAX EX' in address or 'UNASSIGNED' in address or 'N/A' in address:
+					if int(year) <= 2018:
+						if ('UNAVAILABLE' in address or 'ADDRESS' in address or 'ADDDRESS' in address or 'UNKNOWN' in address or ' 00000' in address or 'NULL' in address or 'NONE' in address or 'MAIL EXEMPT' in address or 'TAX EX' in address or 'UNASSIGNED' in address or 'N/A' in address) or (address in badPstladdSet):
 						#arcpy.AddMessage(address)
 							getattr(Parcel,errorType + "Errors").append("A value provided in the " + PostalAd.upper() + " field may contain an incomplete address. Please verify the value is correct or set to <Null> if complete address is unknown.")
 							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
