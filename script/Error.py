@@ -91,8 +91,8 @@ class Error:
 			while parcelid is not None and i in parcelid:
 				parcelid = parcelid[:parcelid.find(i)] + charsdict[i] + parcelid[parcelid.find(i)+1:]
 		try:
-			baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP_V3/V3_Parcels/FeatureServer/0/query"
-			#baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP/Parcels/FeatureServer/0/query"
+			#baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP_V3/V3_Parcels/FeatureServer/0/query"
+			baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP/Parcels/FeatureServer/0/query"
 			where =  str(Parcel.parcelfips) + parcelid
 			query = "?f=json&where=STATEID+%3D+%27{0}%27&geometry=true&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=OBJECTID%2CPARCELID%2CTAXPARCELID%2CCONAME%2CPARCELSRC&outSR=3071&resultOffset=0&resultRecordCount=10000".format(where)
 			fsURL = baseURL + query
@@ -536,7 +536,7 @@ class Error:
 			auxToTest = getattr(Parcel,auxField)
 			testListCop = []
 			testListAux = []
-			if (pinToTest in ignoreList) or (pinToTest is None) or (year is not None and int(year) > 2017):
+			if (pinToTest in ignoreList) or (pinToTest is None) or (year is not None and int(year) > 2018):
 				pass
 			else:
 				if copToTest is None and auxToTest is None:
@@ -704,7 +704,7 @@ class Error:
 				if schNo not in schNoNameDict or len(schNo) != 4:
 					getattr(Parcel,errorType + "Errors").append("The value provided in " + schDistNoField.upper() + " is not within the acceptable domain list or is not 4 digits long as expected. Please verify value.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-			if schNo is None and schNa is None and pinToTest not in ignoreList and pinToTest is not None and (year is not None and int(year) <= 2017):
+			if schNo is None and schNa is None and pinToTest not in ignoreList and pinToTest is not None and (year is not None and int(year) <= 2018):
 				getattr(Parcel,errorType + "Errors").append("Both the " + schDistNoField.upper() + " &  the " + schDistField.upper() + " are <Null> and a value is expected.")
 				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 			return (Error,Parcel)
