@@ -91,8 +91,8 @@ class Error:
 			while parcelid is not None and i in parcelid:
 				parcelid = parcelid[:parcelid.find(i)] + charsdict[i] + parcelid[parcelid.find(i)+1:]
 		try:
-			#baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP_V3/V3_Parcels/FeatureServer/0/query"
-			baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP/Parcels/FeatureServer/0/query"
+			baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP_V3/V3_Parcels/FeatureServer/0/query"
+			#baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP/Parcels/FeatureServer/0/query"
 			where =  str(Parcel.parcelfips) + parcelid
 			query = "?f=json&where=STATEID+%3D+%27{0}%27&geometry=true&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=OBJECTID%2CPARCELID%2CTAXPARCELID%2CCONAME%2CPARCELSRC&outSR=3071&resultOffset=0&resultRecordCount=10000".format(where)
 			fsURL = baseURL + query
@@ -577,10 +577,10 @@ class Error:
 			estFmkValueTest = getattr(Parcel,estFmkValue)
 			if estFmkValueTest is not None:
 				if re.search('4,', propClassTest) is not None or re.search('4', propClassTest) is not None:
-					getattr(Parcel, errorType + "Errors").append("Unexpected value in " + estFmkValue.upper() + " field based off value in  " + propClass.upper() + " field.")
+					getattr(Parcel, errorType + "Errors").append("<Null> value in " + estFmkValue.upper() + " field is expected according to value in " + propClass.upper() + " field.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				elif re.search(',4', propClassTest) is not None:
-					getattr(Parcel, errorType + "Errors").append("Unexpected value in " + estFmkValue.upper() + " field based off value in  " + propClass.upper() + " field.")
+					getattr(Parcel, errorType + "Errors").append("<Null> value in " + estFmkValue.upper() + " field is expected according to value in " + propClass.upper() + " field.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				else:
 					pass
@@ -641,37 +641,31 @@ class Error:
 				if coNameToTest != Error.coName:
 					getattr(Parcel,errorType + "Errors").append("The value provided in " + coNamefield.upper() + " field does not match expected county name.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-			else:
-				if acceptNull:
-					pass
-				else:
 					Error.coNameMiss += 1
+			else:
+				Error.coNameMiss += 1
 			if fipsToTest is not None:
 				try:
-					if fipsToTest != coNameDict[Error.coName]:
+					if fipsToTest.upper() != coNameDict[Error.coName]:
 						getattr(Parcel,errorType + "Errors").append("The value provided in " + fipsfield.upper() + " field does not match submitting county fips.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+						Error.fipsMiss += 1
 				except:
 					getattr(Parcel,errorType + "Errors").append("The value provided in " + srcfield.upper() + " field does not appear to meet required domains.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 			else:
-				if acceptNull:
-					pass
-				else:
-					Error.fipsMiss += 1
+				Error.fipsMiss += 1
 			if srcToTest is not None:
 				try:
-					if srcToTest != coNumberDict[coNameDict[Error.coName]]:
+					if srcToTest.upper() != coNumberDict[coNameDict[Error.coName]]:
 						getattr(Parcel,errorType + "Errors").append("The value provided in " + srcfield.upper() + " field does not match submitting county name.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+						Error.srcMiss += 1
 				except:
 					getattr(Parcel,errorType + "Errors").append("The value provided in " + fipsfield.upper() + " field does not appear to meet required domains.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 			else:
-				if acceptNull:
-					pass
-				else:
-					Error.srcMiss += 1
+				Error.srcMiss += 1
 			return(Error,Parcel)
 		except:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")

@@ -54,8 +54,8 @@ if inputDict['isSearchable'] == 'true':
 	unitTypes = [line.strip() for line in open(os.path.join(base, '..\data\V4_UnitType_Simplified.txt'),'r')] #unit type domain list
 	lsadDomains = [line.strip() for line in open(os.path.join(base, '..\data\LSAD_Simplified.txt'),'r')] #lsad domain list
 	taxRollYears = [line.strip() for line in open(os.path.join(base, '..\data\V4_TaxRollYears.txt'),'r')] #taxroll years to test (past,expected,future1,future2)
-	suffixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V3_SuffixDomains_Simplified.txt'),'r')] #suffix domain list
-	prefixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V3_PrefixDomains_Simplified.txt'),'r')] #prefix domain list
+	suffixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V4_SuffixDomains_Simplified.txt'),'r')] #suffix domain list
+	prefixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V4_PrefixDomains_Simplified.txt'),'r')] #prefix domain list
 	pinSkips = [line.strip() for line in open(os.path.join(base, '..\data\V4_PinSkips.txt'),'r')] #list of non-parcelid values found in field to ignore when checking for dups (and use in other functions)
 
 	reader = csv.reader(open(os.path.join(base, '..\data\school_district_codes.csv'),'rU')) #school district code list (csv has been updated for V5/2018 school districts)
@@ -161,7 +161,7 @@ if inputDict['isSearchable'] == 'true':
 			currParcel = Parcel(row, fieldNames)
 
 			#Execute in-cursor error tests
-			totError,currParcel = Error.checkGeometricQuality(totError,currParcel, pinSkips)
+			#totError,currParcel = Error.checkGeometricQuality(totError,currParcel, pinSkips)
 
 			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"addnum","address", True)
 			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"parcelfips","general", False)
@@ -198,7 +198,7 @@ if inputDict['isSearchable'] == 'true':
 			totError,currParcel = Error.postalCheck(totError,currParcel,'pstladress','general',pinSkips,'taxrollyear','parcelid',badPstladdSet)
 			totError,currParcel = Error.auxPropCheck(totError,currParcel,'propclass','auxclass','taxrollyear','parcelid', pinSkips,'tax', copDomains, auxDomains)
 			# PROPCLASS of 4,5, or 5m should not contain an ESTFMKVALUE, thus this function is not applied
-			totError,currParcel = Error.fairMarketCheck(totError,currParcel,'propclass','estfmkvalue','general')
+			totError,currParcel = Error.fairMarketCheck(totError,currParcel,'propclass','estfmkvalue','tax')
 			totError,currParcel = Error.matchContrib(totError,currParcel,"coname","parcelfips","parcelsrc",county_nameNo_dict,county_noName_dict,"general",False)
 			totError,currParcel = Error.netVsGross(totError,currParcel,"netprpta","grsprpta","tax")
 			totError,currParcel = Error.schoolDistCheck(totError,currParcel,"parcelid","schooldist","schooldistno",schoolDist_noName_dict,schoolDist_nameNo_dict,"tax",pinSkips,"taxrollyear")
