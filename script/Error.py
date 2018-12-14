@@ -540,7 +540,7 @@ class Error:
 				pass
 			else:
 				if copToTest is None and auxToTest is None:
-					getattr(Parcel,errorType + "Errors").append("Both the " + propField.upper() + " and " + auxField.upper() + " field are <Null> and a value is expected.")
+					getattr(Parcel,errorType + "Errors").append("Both the " + propField.upper() + " and " + auxField.upper() + " fields are <Null> and a value is expected for any non-new parcels.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				if copToTest is not None:
 					checkVal = copToTest.split(",")
@@ -799,7 +799,7 @@ class Error:
 			else:
 				if year is not None:
 					if int(year) <= 2018:
-						if ('UNAVAILABLE' in address or 'ADDRESS' in address or 'ADDDRESS' in address or 'UNKNOWN' in address or ' 00000' in address or 'NULL' in address or 'NONE' in address or 'MAIL EXEMPT' in address or 'TAX EX' in address or 'UNASSIGNED' in address or 'N/A' in address) or (address in badPstladdSet):
+						if ('UNAVAILABLE' in address or 'ADDRESS' in address or 'ADDDRESS' in address or 'UNKNOWN' in address or ' 00000' in address or 'NULL' in address or ('NONE' in address and 'HONONEGAH' not in address) or 'MAIL EXEMPT' in address or 'TAX EX' in address or 'UNASSIGNED' in address or 'N/A' in address) or (address in badPstladdSet):
 						#arcpy.AddMessage(address)
 							getattr(Parcel,errorType + "Errors").append("A value provided in the " + PostalAd.upper() + " field may contain an incomplete address. Please verify the value is correct or set to <Null> if complete address is unknown.")
 							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)

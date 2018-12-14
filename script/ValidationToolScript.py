@@ -1,4 +1,4 @@
-.import arcpy,os,re,csv,collections,urllib2
+import arcpy,os,re,csv,collections,urllib2
 from Parcel import Parcel
 from Error import Error
 from Summary import Summary
