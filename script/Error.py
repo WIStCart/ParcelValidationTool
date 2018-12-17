@@ -91,8 +91,8 @@ class Error:
 			while parcelid is not None and i in parcelid:
 				parcelid = parcelid[:parcelid.find(i)] + charsdict[i] + parcelid[parcelid.find(i)+1:]
 		try:
-			baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP_V3/V3_Parcels/FeatureServer/0/query"
-			#baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP/Parcels/FeatureServer/0/query"
+			#baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP_V3/V3_Parcels/FeatureServer/0/query"
+			baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP/Parcels/FeatureServer/0/query"
 			where =  str(Parcel.parcelfips) + parcelid
 			query = "?f=json&where=STATEID+%3D+%27{0}%27&geometry=true&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=OBJECTID%2CPARCELID%2CTAXPARCELID%2CCONAME%2CPARCELSRC&outSR=3071&resultOffset=0&resultRecordCount=10000".format(where)
 			fsURL = baseURL + query
@@ -122,7 +122,7 @@ class Error:
 						self.diffxy = self.diffxy + diffxy
 						self.notConfirmGeomCount += 1
 						if (self.notConfirmGeomCount % 10 == 0):
-							arcpy.AddMessage("Parcel geometry not yet validated, will attempt another record.")
+							arcpy.AddMessage("Parcel geometry not validated yet, will attempt another record.")
 						return "Not Confirmed"
 						# Call it valid If the query returns no features (failure to return features would not be caused by a misalignment)
 			return "Valid"
@@ -212,7 +212,7 @@ class Error:
 				if acceptNull:
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("Null Found on " + field.upper())
+					getattr(Parcel,errorType + "Errors").append("<Null> Found on " + field.upper())
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
@@ -238,7 +238,7 @@ class Error:
 				if acceptNull:
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("Null Found on " + field.upper())
+					getattr(Parcel,errorType + "Errors").append("<Null> Found on " + field.upper())
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
@@ -264,7 +264,7 @@ class Error:
 					#arcpy.AddMessage("This value is <Null>... or exists in our list...")
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("The value in the " + field.upper() + " does not appear to be in a list created from V4 data.  Please verify this value is appropriately placed in this field.")
+					getattr(Parcel,errorType + "Errors").append("The value in the " + field.upper() + " does not appear to be in a list created from V4 data. Please verify this value is appropriately placed in this field.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return (Error,Parcel)
 			else:
@@ -279,7 +279,7 @@ class Error:
 					if acceptNull:
 						pass
 					else:
-						getattr(Parcel,errorType + "Errors").append("Null Found on " + field.upper())
+						getattr(Parcel,errorType + "Errors").append("<Null> Found on " + field.upper())
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
@@ -309,7 +309,7 @@ class Error:
 					if pinToTest in ignoreList or pinToTest is None:
 						Error.pinSkipCount += 1
 					else:
-						getattr(Parcel,errorType + "Errors").append("Null Found on " + field.upper() + " field and value is expected.")
+						getattr(Parcel,errorType + "Errors").append("<Null> Found on " + field.upper() + " field and value is expected.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 			return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
@@ -360,13 +360,13 @@ class Error:
 				return(Error, Parcel)
 			else:
 				if siteAddToTest is not None and stringToTest is None:
-					getattr(Parcel,errorType + "Errors").append(field.upper() + " is Null but " + siteAddField.upper() + " is populated.  Please ensure elements are in the appropriate field.")
+					getattr(Parcel,errorType + "Errors").append(field.upper() + " is <Null> but " + siteAddField.upper() + " is populated. Please ensure elements are in the appropriate field.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return(Error, Parcel)
 				if acceptNull:
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("Null Found on " + field.upper() + " field and value is expected.")
+					getattr(Parcel,errorType + "Errors").append("<Null> Found on " + field.upper() + " field and value is expected.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
@@ -389,7 +389,7 @@ class Error:
 				if acceptNull:
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("Null Found on " + field.upper() + " field and value is expected.")
+					getattr(Parcel,errorType + "Errors").append("<Null> Found on " + field.upper() + " field and value is expected.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
@@ -632,7 +632,7 @@ class Error:
 		return (Error, Parcel)
 
 	#checking CONAME, PARCELFIPS and PARCELSRC fields to ensure they match expected and meet domain requirements
-	def matchContrib(Error,Parcel,coNamefield,fipsfield,srcfield,coNameDict,coNumberDict,errorType,acceptNull):
+	def matchContrib(Error,Parcel,coNamefield,fipsfield,srcfield,coNameDict,coNumberDict,errorType):
 		try:
 			coNameToTest = getattr(Parcel,coNamefield)
 			fipsToTest = getattr(Parcel,fipsfield)

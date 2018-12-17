@@ -62,7 +62,7 @@ class Summary:
 					'ZIP4':  str(totError.comparisonDict["ZIP4"]),
 					'SCHOOLDIST':  str(totError.comparisonDict["SCHOOLDIST"]),
 					'SCHOOLDISTNO':  str(totError.comparisonDict["SCHOOLDISTNO"]),
-					'IMPROVED':  str(totError.comparisonDict["IMPROVED"]),
+					#'IMPROVED':  str(totError.comparisonDict["IMPROVED"]),
 					'CNTASSDVALUE':  str(totError.comparisonDict["CNTASSDVALUE"]),
 					'LNDVALUE':  str(totError.comparisonDict["LNDVALUE"]),
 					'IMPVALUE':  str(totError.comparisonDict["IMPVALUE"]),
@@ -150,7 +150,7 @@ class Summary:
 			Summary.errorSummaryFile.write("           ZIP4:  " + str(totError.comparisonDict["ZIP4"]) + '\n')
 			Summary.errorSummaryFile.write("     SCHOOLDIST:  " + str(totError.comparisonDict["SCHOOLDIST"]) + '\n')
 			Summary.errorSummaryFile.write("   SCHOOLDISTNO:  " + str(totError.comparisonDict["SCHOOLDISTNO"]) + '\n')
-			Summary.errorSummaryFile.write("       IMPROVED:  " + str(totError.comparisonDict["IMPROVED"]) + '\n')
+			#Summary.errorSummaryFile.write("       IMPROVED:  " + str(totError.comparisonDict["IMPROVED"]) + '\n')
 			Summary.errorSummaryFile.write("   CNTASSDVALUE:  " + str(totError.comparisonDict["CNTASSDVALUE"]) + '\n')
 			Summary.errorSummaryFile.write("       LNDVALUE:  " + str(totError.comparisonDict["LNDVALUE"]) + '\n')
 			Summary.errorSummaryFile.write("       IMPVALUE:  " + str(totError.comparisonDict["IMPVALUE"]) + '\n')
