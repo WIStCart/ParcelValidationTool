@@ -355,7 +355,7 @@ class Error:
 				if stringToTest.strip() in stNameDict[coname]:
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " does not appear in list created from V4 data. Please verify this value contains only the STREETNAME.")
+					getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " does not appear in list created from last year's data. Please verify this value contains only the STREETNAME and street name is correct.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return(Error, Parcel)
 			else:
@@ -540,7 +540,7 @@ class Error:
 				pass
 			else:
 				if copToTest is None and auxToTest is None:
-					getattr(Parcel,errorType + "Errors").append("Both the " + propField.upper() + " and " + auxField.upper() + " fields are <Null> and a value is expected for any non-new parcels.")
+					getattr(Parcel,errorType + "Errors").append("The " + propField.upper() + " and " + auxField.upper() + " fields are <Null> and a value is expected for any non-new parcels.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				if copToTest is not None:
 					checkVal = copToTest.split(",")
