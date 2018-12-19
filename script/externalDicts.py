@@ -114,7 +114,7 @@ fieldNamesBadChars = {
 copDomains = ['1','2','3','4','5','6','7','5M','M']
 
 #acceptable AUXCOP domains
-auxDomains = ['W1','W2','W3','W4','W5','W6','W7','W8','W9','X1','X2','X3','X4','X5','M','XTEL','S1', 'U', 'AWO', 'FM6', 'FM7', 'FM8', 'AW', 'AWO']
+auxDomains = ['W1','W2','W3','W4','W5','W6','W7','W8','W9','X1','X2','X3','X4','X5','M','XTEL','S1', 'U', 'AWO', 'FM6', 'FM7', 'FM8', 'AW']
 
 #dictionary for V3 completeness collection
 v3CompDict = {
