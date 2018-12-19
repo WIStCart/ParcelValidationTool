@@ -213,12 +213,13 @@ if inputDict['isSearchable'] == 'true':
 		Error.ctyExtentCentCheck(totError, inputDict['inFC'], ctyCentroidDict)
 
 	if totError.geometryNotValidated == True:
-		arcpy.AddMessage(" \n")
+		arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 		arcpy.AddMessage("THE GEOMETRY OF THIS FEATURE CLASS WAS NOT VALIDATED  \n")
-		arcpy.AddMessage("THE FEATURE CLASS IS ABOUT " + str(totError.xyShift) + " METERS DISPLACED \n")
+		arcpy.AddMessage("THE FEATURE CLASS IS ABOUT " + str(totError.xyShift) + " METERS DISPLACED FROM DATA SUBMITTED LAST YEAR. \n")
 		arcpy.AddMessage("THIS ISSUE IS INDICATIVE OF A RE-PROJECTION ERROR. \n ")
 		arcpy.AddMessage("PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
 		arcpy.AddMessage("CHECK THE DOCUMENTATION: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf Section 2 \n" )
+		arcpy.AddMessage("CONTACT THE PARCEL TEAM AT SCO WITH QUESTIONS ABOUT THIS ISSUE.\n")
 		arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 		sys.exit()
 
@@ -233,6 +234,10 @@ if inputDict['isSearchable'] == 'true':
 
 		#Write feature class from memory back out to hard disk
 		arcpy.FeatureClassToFeatureClass_conversion(output_fc_temp,inputDict['outDir'],inputDict['outName'])
+		arcpy.AddMessage("\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+		arcpy.AddMessage("REVEIW THE VALIDATON SUMMARY PAGE (INSERT PATH HERE) FOR A SUMMARY OF THE POTENTIAL ISSUES FOUND.\n")
+		arcpy.AddMessage("REVIEW AND CORRECT IF NECESSARY, THE OUPUT PARCEL FEATURE CLASS.  RECORD-SPECIFIC ERRORS CAN BE FOUND IN THE FOUR COLUMNS ADDED TO THE END OF THE OUTPUT FEATURE CLASS.\n")
+		arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 
 	arcpy.AddMessage("General Errors: " + str(totError.generalErrorCount))
 	arcpy.AddMessage("Geometric Errors: " + str(totError.geometricErrorCount))

@@ -210,13 +210,14 @@ class Summary:
 				with open(inputDict['inCert'],'r') as certFile:
 					for line in certFile:
 						configFile.write(line)
-			arcpy.AddMessage("\n")
+			arcpy.AddMessage("\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 			arcpy.AddMessage("Wrote .ini file to "+inputDict['outINIDir'])
 			arcpy.AddMessage("\n")
 			arcpy.AddMessage("SUBMISSIONS WITHOUT .ini WILL NOT BE ACCEPTED!")
-			arcpy.AddMessage("\n\n")
-			arcpy.AddMessage("------>  .ini FILE CREATION COMPLETE!  GREAT WORK!!  <------")
-			arcpy.AddMessage("\n\n")
+			arcpy.AddMessage("\n")
+			arcpy.AddMessage("------>  .ini FILE CREATION COMPLETE!  GREAT WORK!!  <------\n\n")
+			arcpy.AddMessage("NOW, ZIP UP THE .ini FILE, THE PARCEL FILE GEODATABASE, THE OTHER_LAYERS FILE GEODATABASE, AND SUBMIT TO wisedecade.legis.wisconsin.gov")
+			arcpy.AddMessage("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
 		except Exception as e:
 			arcpy.AddMessage("!!!!!!!!!!Error writing .ini file!!!!!!!!!!")
 			arcpy.AddMessage(str(e))

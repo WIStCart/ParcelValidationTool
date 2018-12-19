@@ -856,8 +856,9 @@ class Error:
 			pass
 		else:
 			arcpy.AddMessage("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
-			arcpy.AddMessage("THE GEOMETRY OF THIS FEATURE CLASS WAS NOT VALIDATED  \n")
+			arcpy.AddMessage("THE GEOMETRY OF THIS FEATURE CLASS WAS NOT VALIDATED.  \n")
 			arcpy.AddMessage("THIS ISSUE CAN BE INDICATIVE OF A RE-PROJECTION ERROR. \n ")
+			arcpy.AddMessage("REMINDER: YOUR DATA SHOULD BE RE-PROJECTED TO NAD_1983_HARN_Wisconsin_TM (Meters) PRIOR TO LOADING DATA INTO THE TEMPLATE FEATURE CLASS.\n")
 			arcpy.AddMessage("PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
 			arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 			exit()
