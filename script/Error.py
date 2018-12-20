@@ -313,7 +313,7 @@ class Error:
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 			return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			getattr(Parcel,errorType + "Errors").append("trYear -- An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
@@ -323,7 +323,7 @@ class Error:
 			taxRollYear = getattr(Parcel,field)
 			impvalue = getattr(Parcel, "impvalue")
 			cntassvalue = getattr(Parcel, "cntassdvalue")
-			improved =  getattr(Parcel, "lndvalue")
+			lndvalue =  getattr(Parcel, "lndvalue")
 			estfmkvalue = getattr(Parcel, "estfmkvalue")
 			netvalue =  getattr(Parcel, "netprpta")
 			grossvalue = getattr(Parcel, "grsprpta")
@@ -332,7 +332,7 @@ class Error:
 			#pinToTest = getattr(Parcel,parcelid)
 			if taxRollYear is not None:
 				if taxRollYear == acceptYears[2] or taxRollYear == acceptYears[3]:
-					if impvalue is not None or cntassvalue is not None or lndvalue is not None or estfmkvalue is not None or netvalue is not None or grossvalue is not None:
+					if impvalue is not None or cntassvalue is not None or lndvalue is not None or estfmkvalue is not None or netvalue is not None or grossvalue is not None or propclass is not None or auxclass is not None:
 						getattr(Parcel,errorType + "Errors").append("Future Year (" + str(taxRollYear) + ") found on " + field.upper() + " field. <Null> is expected in all tax roll data. Please verify.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				else:  #other years are okay
@@ -341,7 +341,7 @@ class Error:
 			elif acceptNull:  # it is null -> TAXROLLYEAR for parcel splits/new parcels may be <Null>
 				pass
 		except: # using generic error handling because we don't know what errors to expect yet.
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			getattr(Parcel,errorType + "Errors").append("taxrollYrCheck -- An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 

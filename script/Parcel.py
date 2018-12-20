@@ -57,7 +57,7 @@ class Parcel:
 		self.addressErrors = []
 		self.taxErrors = []
 		self.generalErrors = []
-		
+
 	def writeErrors(self, row, cursor, fieldNames):
 		#Write all accumulated errors to their respective rows, then update the row within the cursor
 		if len(self.addressErrors) > 0:

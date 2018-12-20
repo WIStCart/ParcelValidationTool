@@ -235,6 +235,7 @@ if inputDict['isSearchable'] == 'true':
 		#Write feature class from memory back out to hard disk
 		arcpy.FeatureClassToFeatureClass_conversion(output_fc_temp,inputDict['outDir'],inputDict['outName'])
 		arcpy.AddMessage("\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+		arcpy.AddMessage("TEST RUN COMPLETE\n")
 		arcpy.AddMessage("REVEIW THE VALIDATON SUMMARY PAGE (INSERT PATH HERE) FOR A SUMMARY OF THE POTENTIAL ISSUES FOUND.\n")
 		arcpy.AddMessage("REVIEW AND CORRECT IF NECESSARY, THE OUPUT PARCEL FEATURE CLASS.  RECORD-SPECIFIC ERRORS CAN BE FOUND IN THE FOUR COLUMNS ADDED TO THE END OF THE OUTPUT FEATURE CLASS.\n")
 		arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
