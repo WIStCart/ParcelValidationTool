@@ -231,16 +231,15 @@ if inputDict['isSearchable'] == 'true':
 	if inputDict['isFinal'] == 'false':
 		# Write all summary errors to file
 		outSummaryJSON = os.path.join(base, '..\summary\summary.js') # full (hard coded) path to the output .json 
-		outSummaryPage = os.path.join(base, '..\summary\/validation.html') # full (hard coded) path to the Validation Summary Page 
-		outSummaryDir = os.path.join(base, '..\summary\/') # full (hard coded) path to the Validation Summary directory
-		#Summary.writeSummaryTxt(summary,inputDict['outSummaryDir'],inputDict['outName'],totError)
+		outSummaryPage = os.path.join(base, '..\summary\\validation.html') # full (hard coded) path to the Validation Summary Page (escape \v with a \\)
+		outSummaryDir = os.path.join(base, '..\summary') # full (hard coded) path to the Validation Summary directory
 		Summary.writeSummaryTxt(summary,outSummaryDir,inputDict['outName'],totError,outSummaryPage,outSummaryJSON)
 
 		#Write feature class from memory back out to hard disk
 		arcpy.FeatureClassToFeatureClass_conversion(output_fc_temp,inputDict['outDir'],inputDict['outName'])
 		arcpy.AddMessage("\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 		arcpy.AddMessage("TEST RUN COMPLETE\n")
-		arcpy.AddMessage("REVEIW THE VALIDATON SUMMARY PAGE (INSERT PATH HERE) FOR A SUMMARY OF THE POTENTIAL ISSUES FOUND.\n")
+		arcpy.AddMessage("REVEIW THE VALIDATION SUMMARY PAGE (" + outSummaryPage.replace("\script\..","") + ") FOR A SUMMARY OF THE POTENTIAL ISSUES FOUND.\n")
 		arcpy.AddMessage("REVIEW AND CORRECT IF NECESSARY, THE OUPUT PARCEL FEATURE CLASS.  RECORD-SPECIFIC ERRORS CAN BE FOUND IN THE FOUR COLUMNS ADDED TO THE END OF THE OUTPUT FEATURE CLASS.\n")
 		arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 
