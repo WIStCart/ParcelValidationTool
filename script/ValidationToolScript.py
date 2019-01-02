@@ -230,7 +230,11 @@ if inputDict['isSearchable'] == 'true':
 		summary.writeIniFile(inputDict,totError)
 	if inputDict['isFinal'] == 'false':
 		# Write all summary errors to file
-		Summary.writeSummaryTxt(summary,inputDict['outSummaryDir'],inputDict['outName'],totError)
+		outSummaryJSON = os.path.join(base, '..\summary\summary.js') # full (hard coded) path to the output .json 
+		outSummaryPage = os.path.join(base, '..\summary\/validation.html') # full (hard coded) path to the Validation Summary Page 
+		outSummaryDir = os.path.join(base, '..\summary\/') # full (hard coded) path to the Validation Summary directory
+		#Summary.writeSummaryTxt(summary,inputDict['outSummaryDir'],inputDict['outName'],totError)
+		Summary.writeSummaryTxt(summary,outSummaryDir,inputDict['outName'],totError,outSummaryPage,outSummaryJSON)
 
 		#Write feature class from memory back out to hard disk
 		arcpy.FeatureClassToFeatureClass_conversion(output_fc_temp,inputDict['outDir'],inputDict['outName'])

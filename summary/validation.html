@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+
+    <title>Validation Summary</title>
+    <meta name="Validation Summary" content="Summary of Parcel Validation Tool">
+
+  </head>
+
+<body>
+
+<div id="root"></div>
+
+</body>
+	<script src="summary.js" type = "text/javascript"></script>
+	<script>
+		var quickHTML = "<text style='text-align:center; font-size: 117pt;color:pink;position: absolute;transform: rotate(20deg);top: 15%;left: 25%;width: 50%;'>This is just an example version!</text><br>"
+		for (x in testValues){
+			quickHTML = quickHTML + "<b>" + x + "</b><br>"
+			for (y in testValues[x]){
+				quickHTML = quickHTML + "<text style='margin-left:15px; color:blue;'>" + y + "</text><br>"
+			}
+		}
+		document.getElementById("root").innerHTML = quickHTML;
+	</script>
+</html>

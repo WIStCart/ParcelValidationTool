@@ -2,6 +2,7 @@ import arcpy, collections
 from Parcel import Parcel
 from LegacyCountyStats import *
 import json
+import webbrowser
 from ConfigParser import ConfigParser
 
 class Summary:
@@ -9,7 +10,7 @@ class Summary:
 	def __init__(self):
 		pass #placeholder
 
-	def writeSummaryTxt(Summary,outDirTxt,outName,totError):
+	def writeSummaryTxt(Summary,outDirTxt,outName,totError,outPage,outJSON):
 		try:
 			Validation_JSON = {
 				'County_Info':{
@@ -169,11 +170,13 @@ class Summary:
 			Summary.errorSummaryFile.write("\n\n\n* Within: " + outDirTxt + "\\" + outName  + "\n")
 			Summary.errorSummaryFile.write("************************************************************************\n")
 			Summary.errorSummaryFile.close()
-			with open(outDirTxt + "/" + outName + "Validation_JSON.json", 'w') as outfile:
+			with open(outJSON, 'w') as outfile:
+				outfile.write("var testValues = ")
 				json.dump(Validation_JSON, outfile)
 		except Exception as e:
 			arcpy.AddMessage("!!!!!!!!!!Error writing summary file!!!!!!!!!!")
 			arcpy.AddMessage(str(e))
+		webbrowser.open(outPage, new=2)
 
 	def writeIniFile(self,inputDict,totError):
 		arcpy.AddMessage("\n")
