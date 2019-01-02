@@ -208,7 +208,7 @@ class Summary:
 					config.set('COMPARISON COMPLETENESS',field,totError.comparisonDict[field])
 		try:
 			#Write out .ini file
-			with open(inputDict['outINIDir']+'/'+inputDict['county']+'_'+inputDict['outName']+'.ini','w') as configFile:
+			with open(inputDict['outINIDir']+'/'+inputDict['county'] +'.ini','w') as configFile:
 				config.write(configFile)
 				with open(inputDict['inCert'],'r') as certFile:
 					for line in certFile:
