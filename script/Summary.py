@@ -26,7 +26,8 @@ class Summary:
 				},
 				'broadLevelErrors':{
 				'Geometric_Misplacement_Flag':[],
-				'Geometric_File_Error':[]
+				'Geometric_File_Error':[],
+                'Coded_Domain_Fields': ', '.join(totError.codedDomainfields)
 				},
 				'Tax_Roll_Years_Pcnt':{
 					'Previous_Taxroll_Year':  str(round((float(totError.trYearPast / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2)),

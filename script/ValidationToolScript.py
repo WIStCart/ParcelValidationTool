@@ -231,7 +231,7 @@ if inputDict['isSearchable'] == 'true':
 		summary.writeIniFile(inputDict,totError)
 	if inputDict['isFinal'] == 'false':
 		# Write all summary errors to file
-		outSummaryJSON = os.path.join(base, '..\summary\summary.js') # full (hard coded) path to the output .json 
+		outSummaryJSON = os.path.join(base, '..\summary\summary.js') # full (hard coded) path to the output .json
 		outSummaryPage = os.path.join(base, '..\summary\\validation.html') # full (hard coded) path to the Validation Summary Page (escape \v with a \\)
 		outSummaryDir = os.path.join(base, '..\summary') # full (hard coded) path to the Validation Summary directory
 		Summary.writeSummaryTxt(summary,outSummaryDir,inputDict['outName'],totError,outSummaryPage,outSummaryJSON)
