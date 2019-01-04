@@ -264,7 +264,7 @@ class Error:
 					#arcpy.AddMessage("This value is <Null>... or exists in our list...")
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("The value in the " + field.upper() + " does not appear to be in a list created from V4 data. Please verify this value is appropriately placed in this field.")
+					getattr(Parcel,errorType + "Errors").append("The value in the " + field.upper() + " does not appear to be in a list created from last year's data. Please verify this value is appropriately placed in this field.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return (Error,Parcel)
 			else:
@@ -313,7 +313,7 @@ class Error:
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 			return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
-			getattr(Parcel,errorType + "Errors").append("trYear -- An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
@@ -321,19 +321,15 @@ class Error:
 	def taxrollYrCheck(Error,Parcel,field,errorType,acceptNull,pinField,acceptYears):
 		try:
 			taxRollYear = getattr(Parcel,field)
-			impvalue = getattr(Parcel, "impvalue")
-			cntassvalue = getattr(Parcel, "cntassdvalue")
-			lndvalue =  getattr(Parcel, "lndvalue")
-			estfmkvalue = getattr(Parcel, "estfmkvalue")
-			netvalue =  getattr(Parcel, "netprpta")
-			grossvalue = getattr(Parcel, "grsprpta")
-			propclass = getattr(Parcel, "propclass")
-			auxclass = getattr(Parcel, "auxclass")
-			#pinToTest = getattr(Parcel,parcelid)
+			taxRollFields = {'IMPVALUE': getattr(Parcel, "impvalue"), 'CNTASSDVALUE': getattr(Parcel, "cntassdvalue"), 'LNDVALUE': getattr(Parcel, "lndvalue"), 'ESTFMKVALUE': getattr(Parcel, "estfmkvalue"), 'NETPRPTA': getattr(Parcel, "netprpta"), 'GRSPRPTA': getattr(Parcel, "grsprpta"), 'PROPCLASS': getattr(Parcel, "propclass"), 'AUXCLASS': getattr(Parcel, "auxclass")}
+			probFields = []
 			if taxRollYear is not None:
 				if taxRollYear == acceptYears[2] or taxRollYear == acceptYears[3]:
-					if impvalue is not None or cntassvalue is not None or lndvalue is not None or estfmkvalue is not None or netvalue is not None or grossvalue is not None or propclass is not None or auxclass is not None:
-						getattr(Parcel,errorType + "Errors").append("Future Year (" + str(taxRollYear) + ") found on " + field.upper() + " field. <Null> is expected in all tax roll data. Please verify.")
+					for key, val in taxRollFields.iteritems():
+						if val is not None:
+							probFields.append(key)
+					if len(probFields) > 0:
+						getattr(Parcel,errorType + "Errors").append("Future Year (" + str(taxRollYear) + ") found and " + " / ".join(probFields) + " field(s) is/are not <Null>. A <Null> value is expected in all tax roll data for records annotated with future tax roll years. Please correct.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				else:  #other years are okay
 					pass
@@ -341,7 +337,7 @@ class Error:
 			elif acceptNull:  # it is null -> TAXROLLYEAR for parcel splits/new parcels may be <Null>
 				pass
 		except: # using generic error handling because we don't know what errors to expect yet.
-			getattr(Parcel,errorType + "Errors").append("taxrollYrCheck -- An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
