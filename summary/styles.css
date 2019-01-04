@@ -1,0 +1,236 @@
+body {
+    background: #003366;
+    margin: 0;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+p {
+    padding-left: 10px;
+    padding-right: 10px;
+    color: #4C4C4C;
+}
+
+.tippy-tooltip{
+  border-radius: 0px !important;
+}
+
+#reportedValue{
+  font-weight: bold !important;
+  color: red !important;
+}
+
+#fields {
+  text-align: center;
+}
+.custom-tooltip{
+  background-color: white;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+#smallerrors {
+  text-align: center;
+}
+
+#summary {
+    width:96%;
+    text-align: center;
+}
+
+#broadLevel {
+    display: inline-table;
+    *display: inline;
+}
+
+#row{
+  height: auto;
+  -ms-text-justify: distribute-all-lines;
+  text-justify: distribute-all-lines;
+}
+.bricks {
+    border: 2px solid #818181; /*#337ab7;*/
+    border-radius: 2px;
+    padding: 1px;
+    background-color: #ECECEC;
+    margin: auto;
+    margin-top: 1%;
+    margin-left: 2%;
+}
+#inline, #broad  {
+    display: inline-block;
+    vertical-align: top;
+    width: 45%;
+    height:350px;
+    overflow: auto;
+    /*height: auto;
+    min-height: 325px;
+    min-width: 400px;*/
+}
+
+#comparison{
+  width: auto;
+  margin-right: 5%;
+}
+
+#comparison h2 {
+    text-align: center;
+}
+.Pdata {
+    list-style-type: circle;
+    vertical-align: middle;
+    overflow-y: scroll;
+    height:150px;
+    margin-right: 1%;
+}
+
+.values {
+    margin: auto;
+    margin-top: 1%;
+    margin-left: 1%;
+    width: 30%;
+    border: 1px solid;
+    border-radius: 4px;
+    padding: 3px;
+    background: white;
+}
+
+#zeroes {
+      border: 2px solid  grey;
+    height: 300px;
+    margin-bottom: 1%;
+}
+
+#positives {
+    border: 2px solid  #189238;
+    height: 300px;
+    margin-bottom: 1%;
+}
+
+#negatives  {
+    border: 2px solid #D34057;
+    height: 300px;
+    margin-bottom: 1%;
+}
+/*chart area*/
+#chart{
+  display: flex;
+  margin: 0;
+  overflow: hidden;
+}
+.chartpair{
+  text-align: center;
+  display: inline-block;
+}
+.chartChart{
+  flex: 1;
+}
+/*end chart area*/
+
+#errortooltip{
+  color:	#404040;
+  text-align: left;
+}
+
+/* chart info box */
+.infoPanel{
+  background-color: white;
+  margin-right: 20px;
+  height: 300px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  border-style: solid;
+  border-width: 1px;
+  overflow: hidden;
+}
+#tooltip{
+  margin: 5px 10px 5px;
+  position: relative;
+  color:	#404040;
+  text-align: left;
+}
+footer {
+    display:inline-block;
+    margin-top: 10px;
+    margin-left: 25px;
+    color: blue;
+}
+
+#infoTitle{
+  font-size: 150%;
+  color:#004282;
+  -webkit-text-stroke-width: .1px;
+  -webkit-text-stroke-color: #FFC90E;
+}
+/* end chart info box */
+
+
+.recharts-layer.recharts-bar-rectangle:hover{
+  cursor: pointer;
+}
+.rechart-wrapper{
+  margin: 5px;
+  text-align: center;
+}
+
+.lihover:hover {
+  color: #FFC90E;
+  cursor: pointer;
+}
+
+li {
+  padding: 1px;
+}
+
+#desc{
+  font-weight: bold;
+}
+
+#moreButton:hover{
+  color:#e5eaef;
+  cursor: pointer;
+  background-color: #7f99b2;
+  border: 2px solid #003366;
+}
+#subbutton{
+  color:#e5eaef;
+  background-color: #003366;
+  border: 2px solid #4CAF50;
+  border-radius: 20%;
+}
+#subbutton:hover {
+  color:#e5eaef;
+  cursor: pointer;
+  background-color: #7f99b2;
+  border: 2px solid #003366;
+  border-radius: 20%;
+}
+
+
+
+#content {
+    line-height: 1.1em;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+}
+
+#parent {
+     border : 1px solid #003366;
+     overflow : hidden;
+     background: #99adc1;
+ }
+.data {
+    list-style-type: none;
+}
+#extra{
+    display: none;
+}
+#moreButton {
+    background-color: #004282;
+    color: white
+}
+
+#less {
+    color: orange;
+}
+#more {
+    color: #003366;
+}

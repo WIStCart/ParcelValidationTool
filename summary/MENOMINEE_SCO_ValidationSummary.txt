@@ -1,0 +1,85 @@
+C:\00_SCO\02_GitHub\ParcelValidationTool\script\..\summary\MENOMINEE_SCO_ValidationSummary.txt
+Validation Summary Table: 
+This validation summary table contains an overview of any errors found by the Parcel Validation Tool. Please review the contents of this file and make changes to your parcel dataset as necessary.
+
+************************************************************************
+* In-line errors
+************************************************************************
+The following lines summarized the element-specific errors that were found while validating your parcel dataset.  The stats below are meant as a means of reviewing the output.  Please see the GeneralElementErrors, AddressElementErrors, TaxrollElementErrors, and GeometricElementErrors fields to address these errors individually.
+	General Errors: 0
+	Geometric Errors: 0
+	Address Errors: 84
+	Tax Errors: 0
+
+
+************************************************************************
+* Broad-level errors:
+************************************************************************
+The following lines explain any broad geometric errors that were found while validating your parcel dataset.
+	Geometric Misplacement Flag: Several parcel geometries appear to be spatially misplaced 0.02 meters when comparing them against last year's parcel geometries. This issue is indicative of a re-projection error. Please see the following documentation: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf section #2, for advice on how to project native data to the Statewide Parcel CRS.
+
+
+Percentage of records with various Taxroll Years
+	Previous Taxroll Year: 100.0%
+	Expected Taxroll Year: 0.0%
+	Future Taxroll Years: 0.0%
+	Other Taxroll Years: 0.0%
+
+
+Records missing CONAME, PARCELFIPS, or PARCELSOURCE
+	Missing CONAME: 0
+	Missing PARCELFIPS: 0
+	Missing PARCELSRC: 0
+
+If any of the above values are greater than 0, please add missing values.  These 3 fields should be populated for all records submitted.
+
+
+BELOW IS A COMPARISON OF COMPLETENESS VALUES FROM YOUR PREVIOUS PARCEL SUBMISSION AND THIS CURRENT SUBMISSION.
+-->If the value shown is a seemingly large negative number, please verify that all data was joined correctly and no data was lost during processing.
+-->Note: This does not necessarily mean your data is incorrect, we just want to highlight large discrepancies that could indicate missing or incorrect data.
+
+          FIELD     DIFFERENCE
+         ------     ----------
+       PARCELID:  159
+    TAXPARCELID:  0
+     PARCELDATE:  159
+    TAXROLLYEAR:  159
+      OWNERNME1:  0
+      OWNERNME2:  0
+     PSTLADRESS:  0
+     SITEADRESS:  84
+   ADDNUMPREFIX:  84
+         ADDNUM:  84
+   ADDNUMSUFFIX:  0
+         PREFIX:  24
+     STREETNAME:  84
+     STREETTYPE:  84
+         SUFFIX:  0
+   LANDMARKNAME:  0
+       UNITTYPE:  0
+         UNITID:  0
+      PLACENAME:  159
+        ZIPCODE:  0
+           ZIP4:  0
+     SCHOOLDIST:  159
+   SCHOOLDISTNO:  159
+   CNTASSDVALUE:  0
+       LNDVALUE:  0
+       IMPVALUE:  0
+    FORESTVALUE:  0
+    ESTFMKVALUE:  0
+       NETPRPTA:  0
+       GRSPRPTA:  0
+      PROPCLASS:  0
+       AUXCLASS:  159
+      ASSDACRES:  0
+      DEEDACRES:  0
+       GISACRES:  159
+         CONAME:  159
+     PARCELFIPS:  159
+      PARCELSRC:  159
+
+
+
+* Within: C:\00_SCO\02_GitHub\ParcelValidationTool\script\..\summary\MENOMINEE_SCO
+************************************************************************

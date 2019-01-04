@@ -1,0 +1,85 @@
+C:\00_SCO\02_GitHub\ParcelValidationTool\script\..\summary\CHIPPEWA_SCO_ValidationSummary.txt
+Validation Summary Table: 
+This validation summary table contains an overview of any errors found by the Parcel Validation Tool. Please review the contents of this file and make changes to your parcel dataset as necessary.
+
+************************************************************************
+* In-line errors
+************************************************************************
+The following lines summarized the element-specific errors that were found while validating your parcel dataset.  The stats below are meant as a means of reviewing the output.  Please see the GeneralElementErrors, AddressElementErrors, TaxrollElementErrors, and GeometricElementErrors fields to address these errors individually.
+	General Errors: 17
+	Geometric Errors: 0
+	Address Errors: 6
+	Tax Errors: 17164
+
+
+************************************************************************
+* Broad-level errors:
+************************************************************************
+The following lines explain any broad geometric errors that were found while validating your parcel dataset.
+	*No broad-level geometric errors found!
+
+
+Percentage of records with various Taxroll Years
+	Previous Taxroll Year: 98.56%
+	Expected Taxroll Year: 1.44%
+	Future Taxroll Years: 0.0%
+	Other Taxroll Years: 0.0%
+
+
+Records missing CONAME, PARCELFIPS, or PARCELSOURCE
+	Missing CONAME: 0
+	Missing PARCELFIPS: 0
+	Missing PARCELSRC: 0
+
+If any of the above values are greater than 0, please add missing values.  These 3 fields should be populated for all records submitted.
+
+
+BELOW IS A COMPARISON OF COMPLETENESS VALUES FROM YOUR PREVIOUS PARCEL SUBMISSION AND THIS CURRENT SUBMISSION.
+-->If the value shown is a seemingly large negative number, please verify that all data was joined correctly and no data was lost during processing.
+-->Note: This does not necessarily mean your data is incorrect, we just want to highlight large discrepancies that could indicate missing or incorrect data.
+
+          FIELD     DIFFERENCE
+         ------     ----------
+       PARCELID:  0
+    TAXPARCELID:  0
+     PARCELDATE:  0
+    TAXROLLYEAR:  0
+      OWNERNME1:  0
+      OWNERNME2:  0
+     PSTLADRESS:  17
+     SITEADRESS:  0
+   ADDNUMPREFIX:  0
+         ADDNUM:  0
+   ADDNUMSUFFIX:  0
+         PREFIX:  0
+     STREETNAME:  0
+     STREETTYPE:  -6
+         SUFFIX:  -1
+   LANDMARKNAME:  0
+       UNITTYPE:  0
+         UNITID:  0
+      PLACENAME:  0
+        ZIPCODE:  0
+           ZIP4:  0
+     SCHOOLDIST:  0
+   SCHOOLDISTNO:  0
+   CNTASSDVALUE:  0
+       LNDVALUE:  0
+       IMPVALUE:  0
+    FORESTVALUE:  0
+    ESTFMKVALUE:  12138
+       NETPRPTA:  22
+       GRSPRPTA:  0
+      PROPCLASS:  0
+       AUXCLASS:  0
+      ASSDACRES:  0
+      DEEDACRES:  0
+       GISACRES:  0
+         CONAME:  0
+     PARCELFIPS:  0
+      PARCELSRC:  0
+
+
+
+* Within: C:\00_SCO\02_GitHub\ParcelValidationTool\script\..\summary\CHIPPEWA_SCO
+************************************************************************

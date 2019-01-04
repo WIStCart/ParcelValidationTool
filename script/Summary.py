@@ -16,7 +16,7 @@ class Summary:
 				'County_Info':{
 					'CO_NAME': totError.coName,
 					'Total_Records': totError.recordTotalCount,
-					'Legacy': eval(totError.coName + "LegacyDict")
+					'Legacy': eval((totError.coName).replace(" ","_") + "LegacyDict")
 				},
 				'inLineErrors':{
 					'General_Errors': str(totError.generalErrorCount),
