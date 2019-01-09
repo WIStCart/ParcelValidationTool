@@ -195,7 +195,7 @@ var App = function (_React$Component) {
             "Click on a bar to display info."
           ),
           React.createElement("div", { dangerouslySetInnerHTML: { __html: text } }),
-          pct ? React.createElement("footer", { dangerouslySetInnerHTML: { __html: total } }) : " "
+          isFinite(pct) ? React.createElement("footer", { dangerouslySetInnerHTML: { __html: total } }) : " "
         )
       );
     }
