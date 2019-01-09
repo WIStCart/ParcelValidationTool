@@ -350,7 +350,7 @@ class InLineErrors extends React.Component {
       var p = this.props.inline
       var e = this.props.inlineexp
       var listArray = []
-      var taxOrderAray = ["General_Errors","Address_Errors","Tax_Errors","Geometric_Errors"] // Determines the order of elements from top to bottom 
+      var taxOrderAray = ["General_Errors","Address_Errors","Tax_Errors","Geometric_Errors"] // Determines the order of elements from top to bottom
       for (var l in taxOrderAray){
           var i = taxOrderAray[l]
           var x = i.split("_").join(" ")
@@ -824,13 +824,13 @@ class Expand extends React.Component {
 ReactDOM.render(<App/>,document.getElementById('root'));
 
 // Animated tutorial (using jQuery because it is fastest to implement right now)
-var broad_A 
-var inline_B 
-var summary_C 
+var broad_A
+var inline_B
+var summary_C
 
 var interval_X = 6000;
 
-var interval_Y_obj 
+var interval_Y_obj
 var interval_Y = 1000;
 
 var firstRound = true;
@@ -845,7 +845,7 @@ function administerTutorial(_directive){
     $("#comparison").css("opacity","1")
     $("#summary").css("opacity","1")
     $("#broad").css("opacity","1")
-    $("#summary").trigger( "click" ); // to disengage any on-click popups that may be open 
+    $("#summary").trigger( "click" ); // to disengage any on-click popups that may be open
     $(".fake-highlight").removeClass("fake-highlight")
     $("#popupHider").append($("#popupTutorial"))
   }else{
@@ -860,22 +860,22 @@ function administerTutorial(_directive){
     feed(["Geometric_File_Error","Geometric_Misplacement_Flag","Coded_Domain_Fields"])
 
 
-    broad_A = setTimeout(function(){ 
-      $("#summary").trigger( "click" ); // to disengage any on-click popups that may be open 
+    broad_A = setTimeout(function(){
+      $("#summary").trigger( "click" ); // to disengage any on-click popups that may be open
       $("#inline").css("opacity","1")
       $("#broad").css("opacity","0.25")
       feed(["General_Errors","Address_Errors","Tax_Errors","Geometric_Errors"])
     }, interval_X);
 
-    inline_B = setTimeout(function(){ 
-      $("#summary").trigger( "click" ); // to disengage any on-click popups that may be open 
+    inline_B = setTimeout(function(){
+      $("#summary").trigger( "click" ); // to disengage any on-click popups that may be open
       $("#comparison").css("opacity","1")
       $("#inline").css("opacity","0.25")
     }, interval_X * 2);
 
-    summary_C = setTimeout(function(){ 
-      $("#summary").trigger( "click" ); // to disengage any on-click popups that may be open 
-      $("#helpButton").trigger( "click" ); // to disengage any on-click popups that may be open 
+    summary_C = setTimeout(function(){
+      $("#summary").trigger( "click" ); // to disengage any on-click popups that may be open
+      $("#helpButton").trigger( "click" ); // to disengage any on-click popups that may be open
       administerTutorial("stop")
     }, interval_X * 3);
   }
