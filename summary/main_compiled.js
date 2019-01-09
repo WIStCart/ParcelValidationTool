@@ -157,7 +157,7 @@ var App = function (_React$Component) {
       var less = "<u><b id='less'>fewer</u></b>";
       var more = "<u><b id='more'>more</b></u>";
       var newV = "<u><b id='more'>new</b></u>";
-      var refName = "https://www.sco.wisc.edu/parcels/Submission_Documentation.pdf#nameddest=" + bar.name
+      var refName = bar.name ? "https://www.sco.wisc.edu/parcels/Submission_Documentation.pdf#nameddest=" + bar.name.toString().toLowerCase() : "blank"
 
       var total = pct.toString().replace("-", "") + "%  (" + Math.abs(Number(n)).toLocaleString(navigator.language, { minimumFractionDigits: 0 }) + " of " + Number(o).toLocaleString(navigator.language, { minimumFractionDigits: 0 }) + " records)";
       if (pct > 2.5) {
