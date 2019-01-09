@@ -91,7 +91,7 @@ const testValues =
               //tax
               "SCHOOLDIST": "-26028",
               "SCHOOLDISTNO": "-26028",
-              "CNTASSDVALUE": "21927",
+              "CNTASSDVALUE": "44334",
               "TAXROLLYEAR": "-26840",
               "LNDVALUE": "-22927",
               "IMPVALUE": "-23843",

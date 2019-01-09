@@ -13,6 +13,10 @@ p {
 .tippy-tooltip{
   border-radius: 0px !important;
 }
+.tippy-popper{
+  pointer-events: all !important;
+  word-break: break-word;
+}
 
 #reportedValue{
   font-weight: bold !important;
@@ -24,6 +28,7 @@ p {
 }
 .custom-tooltip{
   background-color: white;
+
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 #smallerrors {
@@ -31,7 +36,7 @@ p {
 }
 
 #summary {
-    width:96%;
+    width:95%;
     text-align: center;
 }
 
@@ -42,32 +47,56 @@ p {
 
 #row{
   height: auto;
+  width: calc(95% + 4px);
+  margin-left: calc(2.5% - 2px);
   -ms-text-justify: distribute-all-lines;
   text-justify: distribute-all-lines;
 }
 .bricks {
     border: 2px solid #818181; /*#337ab7;*/
     border-radius: 2px;
-    padding: 1px;
     background-color: #ECECEC;
     margin: auto;
     margin-top: 1%;
-    margin-left: 2%;
 }
 #inline, #broad  {
     display: inline-block;
     vertical-align: top;
-    width: 45%;
+    
     height:350px;
     overflow: auto;
+    word-break: break-word;
     /*height: auto;
     min-height: 325px;
     min-width: 400px;*/
 }
+#broadlevel{
+  display: inline-flex;
+  width:50%;
+}
+.tax-roll-missing{
+  text-align:left !important;
+  margin-left: 10px;
+  margin-top:5px;
+  margin-bottom:5px;
+}
+.attention{
+  text-decoration-style: solid;
+  text-decoration-color: #003366;
+  text-decoration-line: underline;
+  text-decoration-skip-ink: none;
+}
+#inline{
+  width: calc(33% - 4px);
+  float: right;
+}
+#broad{
+   width: calc(64.5% - 4px);
+}
 
 #comparison{
-  width: auto;
-  margin-right: 5%;
+  width: 95%;
+  margin-left: calc(2.5% - 2px);
 }
 
 #comparison h2 {
@@ -128,7 +157,18 @@ p {
   color:	#404040;
   text-align: left;
 }
-
+.normal-text{
+  font-weight:normal !important;
+}
+.attention-required{
+  font-style: italic;
+}
+.breakable{
+  word-break: break-all;
+}
+.bold-fieldname{
+  font-weight:bold;
+}
 /* chart info box */
 .infoPanel{
   background-color: white;
@@ -148,8 +188,10 @@ p {
 footer {
     display:inline-block;
     margin-top: 10px;
-    margin-left: 25px;
-    color: blue;
+    margin-right: 25px;
+    text-align:right;
+    width:100%;
+    color: #9E9E9E;
 }
 
 #infoTitle{
@@ -170,8 +212,14 @@ footer {
 }
 
 .lihover:hover {
-  color: #FFC90E;
+  color: #FFC90E !important;
   cursor: pointer;
+}
+.fake-highlight { /*to emulate the above state*/
+  color: #FFC90E !important;
+}
+.click-note{
+  color:#9E9E9E;
 }
 
 li {
@@ -181,27 +229,53 @@ li {
 #desc{
   font-weight: bold;
 }
-
+.popup-tutorial{
+  position: relative;
+  top: 7px;
+  right: 87px;
+  display: inline;
+}
+.popup-hider{
+  position: absolute;
+  display:none;
+  visibility:hidden;
+}
 #moreButton:hover{
   color:#e5eaef;
   cursor: pointer;
   background-color: #7f99b2;
-  border: 2px solid #003366;
+  border: 0px solid #003366;
 }
 #subbutton{
   color:#e5eaef;
   background-color: #003366;
-  border: 2px solid #4CAF50;
-  border-radius: 20%;
+  border: 0px solid #4CAF50;
+  border-radius: 0%;
+  
 }
 #subbutton:hover {
   color:#e5eaef;
   cursor: pointer;
   background-color: #7f99b2;
-  border: 2px solid #003366;
-  border-radius: 20%;
+  border: 0px solid #003366;
+  border-radius: 0%;
 }
-
+#helpButton:hover{
+  background-color: #013366;
+  color: #FFC90E;
+}
+#helpButton{
+  background-color: #FFC90E;
+  color: #013366;
+  font-weight: bold;
+  border-width: 0;
+  padding: 9px;
+  position: absolute;
+  right: calc(2.5% + 20px);
+  top: calc(1% + 20px);
+  cursor: pointer;
+  z-index: 2;
+}
 
 
 #content {
@@ -225,7 +299,8 @@ li {
 }
 #moreButton {
     background-color: #004282;
-    color: white
+    color: white;
+    border-width: 0px !important;
 }
 
 #less {

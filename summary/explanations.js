@@ -50,8 +50,7 @@ const explain = {"County_Info": {
       },
       "broadLevelErrors": {
         "Geometric_File_Error": ["None"],
-        "Geometric_Misplacement_Flag": ["None"],
-		"Coded_Domain_Fields": ["None"]
+        "Geometric_Misplacement_Flag": ["None"]
       },
       "inLineErrors": {
           "Tax_Errors": "A",
