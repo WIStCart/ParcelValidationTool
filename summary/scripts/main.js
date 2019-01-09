@@ -88,19 +88,20 @@ class App extends React.Component {
     this.setState({
       validation: testValues,
       explanations: explain
+    // callback function for the asyncronous setState call.
     }, () => console.log("State: ", this.state.validation, this.state.explanations)
   )
   }
   //this function creates the data we want to work with for the chart out of the raw output JSON
   data(){
     var data=[]
-
     for (let i in testValues.County_Info.Legacy){
         // if change is zero don't display if old value is zero and new is X explain.
         if ((testValues.County_Info.Legacy[i] === 0) && (!(testValues.Fields_Diffs[i] === "0")) ){
           data.push({
            name: i,
            'Percentage of Last Years Value': 100,
+
            cat: general.indexOf(i) > -1 ? "general" : tax.indexOf(i) > -1 ? 'tax' : 'address',
            tell: ("There are: " + testValues.Fields_Diffs[i] + " new values since last submission.")
            })
