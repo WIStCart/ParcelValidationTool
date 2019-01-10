@@ -146,10 +146,13 @@ class App extends React.Component {
       var less = "<u><b id='less'>fewer</u></b>"
       var more = "<u><b id='more'>more</b></u>"
       var newV = "<u><b id='more'>new</b></u>"
+      var refName = bar.name ? "https://www.sco.wisc.edu/parcels/Submission_Documentation.pdf#nameddest=" + bar.name.toString().toLowerCase() : "blank"
+      var target = "_blank"
+
       var total = pct.toString().replace("-", "") + "%  (" + Math.abs(Number(n)).toLocaleString(navigator.language, { minimumFractionDigits: 0 }) + " of " + Number(o).toLocaleString(navigator.language, { minimumFractionDigits: 0 }) + " records)"
           if (pct > 2.5) {
               var sub = pct + "% " + more + " non-null values than V4 data.<br><br>"
-              var text = "There are " + pct + "% " + more + " " + bar.name + " values than the number present in the final V4 data. This condition suggests there may be a problem within the " + bar.name + " field, please examine this field. This condition may also be the result of new parcels or new values added to the data (in which case they can be left as is.)"
+              var text = "There are " + pct + "% " + more + " " + `<a href=${refName} target=${target}>` + bar.name + "</a>" + " values than the number present in the final V4 data. This condition suggests there may be a problem within the " + bar.name + " field, please examine this field. This condition may also be the result of new parcels or new values added to the data (in which case they can be left as is.)";
           }
           else if (pct < -2.5) {
               pct = pct.toString().replace("-", "")
@@ -181,7 +184,7 @@ class App extends React.Component {
 
                  {sub ? <div dangerouslySetInnerHTML={{ __html: "<br>" + sub}}></div> : <strong>Click on a bar to display info.</strong>}
                  <div dangerouslySetInnerHTML={{ __html: text}}></div>
-                 {pct ? <footer dangerouslySetInnerHTML={{ __html: total}}></footer> :  " "}
+                 {isFinite(pct) ? <footer dangerouslySetInnerHTML={{ __html: total}}></footer> :  " "}
                </div>
            </div>
        );
