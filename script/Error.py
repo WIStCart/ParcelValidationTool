@@ -309,7 +309,7 @@ class Error:
 					if pinToTest in ignoreList or pinToTest is None:
 						Error.pinSkipCount += 1
 					else:
-						getattr(Parcel,errorType + "Errors").append("<Null> Found on " + field.upper() + " field and value is expected.")
+						getattr(Parcel,errorType + "Errors").append("Value in " + field.upper() + " is flagged.  See schema definition. In most cases, value should be expected year (" + acceptYears[1] + "), or future year (" + acceptYears[2] + ") if new parcel/split.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 			return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
