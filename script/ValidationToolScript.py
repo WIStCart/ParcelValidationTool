@@ -200,7 +200,7 @@ if inputDict['isSearchable'] == 'true':
 			totError,currParcel = Error.auxPropCheck(totError,currParcel,'propclass','auxclass','taxrollyear','parcelid', pinSkips,'tax', copDomains, auxDomains)
 			# PROPCLASS of 4,5, or 5m should not contain an ESTFMKVALUE, thus this function is not applied
 			totError,currParcel = Error.fairMarketCheck(totError,currParcel,'propclass','estfmkvalue','tax')
-			totError,currParcel = Error.matchContrib(totError,currParcel,"coname","parcelfips","parcelsrc",county_nameNo_dict,county_noName_dict,"general")
+			totError,currParcel = Error.matchContrib(totError,currParcel,"coname","parcelfips","parcelsrc",county_nameNo_dict,county_noName_dict,False,"general")
 			totError,currParcel = Error.netVsGross(totError,currParcel,"netprpta","grsprpta","tax")
 			totError,currParcel = Error.schoolDistCheck(totError,currParcel,"parcelid","schooldist","schooldistno",schoolDist_noName_dict,schoolDist_nameNo_dict,"tax",pinSkips,"taxrollyear")
 			totError,currParcel = Error.fieldCompleteness(totError,currParcel,fieldNames,fieldListPass,v3CompDict)

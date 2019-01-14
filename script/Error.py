@@ -628,7 +628,8 @@ class Error:
 		return (Error, Parcel)
 
 	#checking CONAME, PARCELFIPS and PARCELSRC fields to ensure they match expected and meet domain requirements
-	def matchContrib(Error,Parcel,coNamefield,fipsfield,srcfield,coNameDict,coNumberDict,errorType ):
+	def matchContrib(Error,Parcel,coNamefield,fipsfield,srcfield,coNameDict,coNumberDict,acceptNull,errorType ):
+		nullList = ["<Null>", "<NULL>", "NULL", ""]
 		try:
 			coNameToTest = getattr(Parcel,coNamefield)
 			fipsToTest = getattr(Parcel,fipsfield)
@@ -637,31 +638,44 @@ class Error:
 				if coNameToTest != Error.coName:
 					getattr(Parcel,errorType + "Errors").append("The value provided in " + coNamefield.upper() + " field does not match expected county name.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					#Error.coNameMiss += 1
+				elif coNameToTest in nullList or coNameToTest.find(' ') >= 0:
+					getattr(Parcel,errorType + "Errors").append("The value provided in " + coNamefield.upper() + " field does not match expected county name.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					Error.coNameMiss += 1
 			else:
-				Error.coNameMiss += 1
+				if acceptNull:
+					pass
+				else:
+					Error.coNameMiss += 1
 			if fipsToTest is not None:
-				try:
-					if fipsToTest.upper() != coNameDict[Error.coName]:
-						getattr(Parcel,errorType + "Errors").append("The value provided in " + fipsfield.upper() + " field does not match submitting county fips.")
-						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-						Error.fipsMiss += 1
-				except:
-					getattr(Parcel,errorType + "Errors").append("The value provided in " + srcfield.upper() + " field does not appear to meet required domains.")
+				if fipsToTest.upper() != coNameDict[Error.coName]:
+					getattr(Parcel,errorType + "Errors").append("The value provided in " + fipsfield.upper() + " field does not match submitting county fips.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-			else:
-				Error.fipsMiss += 1
-			if srcToTest is not None:
-				try:
-					if srcToTest.upper() != coNumberDict[coNameDict[Error.coName]]:
-						getattr(Parcel,errorType + "Errors").append("The value provided in " + srcfield.upper() + " field does not match submitting county name.")
-						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-						Error.srcMiss += 1
-				except:
+					#Error.fipsMiss += 1
+				elif fipsToTest in nullList or fipsToTest.find(' ') >= 0:
 					getattr(Parcel,errorType + "Errors").append("The value provided in " + fipsfield.upper() + " field does not appear to meet required domains.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					Error.fipsMiss += 1
 			else:
-				Error.srcMiss += 1
+				if acceptNull:
+					pass
+				else:
+					Error.fipsMiss += 1
+			if srcToTest is not None:
+				if srcToTest.upper() != coNumberDict[coNameDict[Error.coName]]:
+					getattr(Parcel,errorType + "Errors").append("The value provided in " + srcfield.upper() + " field does not match submitting county name.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					#Error.srcMiss += 1
+				elif srcToTest in nullList or srcToTest.find(' ') >= 0:
+					getattr(Parcel,errorType + "Errors").append("The value provided in " + srcfield.upper() + " field does not appear to meet required domains.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					Error.srcMiss += 1
+			else:
+				if acceptNull:
+					pass
+				else:
+					Error.srcMiss += 1
 			return(Error,Parcel)
 		except:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
