@@ -79,13 +79,7 @@ class App extends React.Component {
             <div id="comparison" className="bricks">
                 <h2>Submission Comparison</h2>
                 <p>BELOW IS A COMPARISON OF COMPLETENESS VALUES FROM YOUR PREVIOUS PARCEL SUBMISSION AND THIS CURRENT SUBMISSION. <text class='attention'>If the value shown is a seemingly large negative number, please verify that all data was joined correctly and no data was lost during processing</text>. Note: This does not necessarily mean your data is incorrect, we just want to highlight large discrepancies that could indicate missing or incorrect data. <text class="click-note">(click element for info)</text><ExtraInfo></ExtraInfo></p>
-                <div id="chart">
-                </div>
-                <Expand>
-                    <Positive positives={fd} fdexp={fdExplained}/>
-                    <Zero zeroes={fd} fdexp={fdExplained}/>
-                    <Negative negatives={fd} fdexp={fdExplained}/>
-                </Expand>
+                <FieldsList fields={this.state.validation.Fields_Diffs} legacyFields={this.state.validation.County_Info.Legacy} />
             </div>
 
          </div>
@@ -94,6 +88,37 @@ class App extends React.Component {
 }
 
 //This component renders the "more" information above the chart.
+class FieldsList extends React.Component {
+  list(){
+    var f = this.props.fields
+    var l = this.props.legacyFields
+
+    var tableArray = []
+    for (var i in f)
+      if (Math.abs(l[i] - f[i]) != 0){
+        tableArray.push(
+          <tr>
+            <td style={{  textAlign: "left" }}><a style={{ fontWeight: 'bold'}}>{i + ": "}</a></td>
+            <td style={{ textAlign: "right" }}>{l[i] - f[i]}</td>
+          </tr>
+
+        );
+      }
+    return tableArray
+}
+  render() {
+      return (
+      <div className="tablecase">
+        <tr className="table">
+          <th style={{  textAlign: "left", width: "70%" }}>Field</th>
+          <th style={{ textAlign: "right", fontWeight: "30%" }}>Change</th>
+        </tr>
+        <hr/>
+        <tr className="table">{this.list()}</tr>
+      </div>
+  );
+  }
+}
 class ExtraInfo extends React.Component {
     constructor(){
       super();
@@ -148,54 +173,13 @@ class InLineErrors extends React.Component {
       for (var l in taxOrderAray){
           var i = taxOrderAray[l]
           var x = i.split("_").join(" ")
-          var l = i.split("_")[0]
           var lv = (Number(p[i])).toLocaleString(navigator.language, { minimumFractionDigits: 0 })
-          if (l == "Tax") {
-              x = "Tax Roll Element Errors"
-              var ds = {
-                  color: catColors.tax
-              }
-          }
-          else if (l == "Address") {
-              x = "Address Element Errors"
-              var ds = {
-                  color: catColors.address
-              }
-          }
-          else if (l == "General") {
-              x = "General Element Errors"
-              var ds = {
-                  color: catColors.general
-              }
-          }
-          else {
-              x = "Geometric Element Errors"
-              var ds = {
-                  color: 'black'
-              }
-          }
-          listArray.push(
-            <Tooltip key={i}
-               // options
-               html={(
-                <div id="errortooltip">
-                  <strong>
-                    {x}
-                  </strong>
-               <div style={ds} dangerouslySetInnerHTML={{ __html: "<br>" + "There were " + '<a id="reportedValue">' + lv +'</a>' + " errors found that relate to " + l.toLowerCase() + " attributes in the feature class. To review these errors, sort descending on the " + x + " field, which was added to your output feature class while executing the tool."}}></div>
-                </div>
-              )}
-               position="top"
-               trigger="click"
-               animation = "fade"
-               touchHold = "true"
-               size = "large"
-               offset = "-300"
-               theme = "light"
-             >
-               <li /*style={ds}*/ className="lihover" id={i} key={i}><b>{x + ": "}</b> {lv}</li>
-            </Tooltip>
 
+          listArray.push(
+            <tr>
+              <td style={{  textAlign: "left" }}><a style={{ fontWeight: 'bold'}}>{x + ": "}</a></td>
+              <td style={{ textAlign: "right" }}>{lv}</td>
+            </tr>
           );
       }
       return listArray
@@ -203,23 +187,14 @@ class InLineErrors extends React.Component {
     render() {
     return (
      <div>
-       <h2 id = "smallerrors"> In Line Errors</h2>
+       <h2 id = "smallerrors"> FLAGS IN OUTPUT FEATURE CLASS</h2>
        <p>The following lines summarize the element-specific errors that were found while validating your parcel dataset.  The stats below are meant as a means of reviewing the output.  <text class='attention'>Please see the GeneralElementErrors, AddressElementErrors, TaxrollElementErrors, and GeometricElementErrors fields within the output feature class to address these errors individually</text>. <text class="click-note">(click element for info)</text></p>
-        <ul className="data"> {this.list()}</ul>
+       <tr className="table">{this.list()}</tr>
      </div>
     );
     }
 }
-// Messages included in popup of each respective Broad Level error:
-var Geometric_Misplacement_Flag_Link = "Please review the directives in the documentation here: <a class='breakable' href='http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf' target='_blank'>http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf</a> (section #2) for advice on how to project native data to the Statewide Parcel CRS."
-var Coded_Domain_Fields_Link = "Please ensure that all coded domains are removed from the feature class before submitting."
-var Geometric_File_Error_Link = "Please review the directives in the documentation here: <a class='breakable' href='https://www.sco.wisc.edu/parcels/tools/Validation/Validation_and_Submission_Tool_Guide.pdf#nameddest=geometric_file_errors' target='_blank'>https://www.sco.wisc.edu/parcels/tools/Validation/Validation_and_Submission_Tool_Guide.pdf#nameddest=geometric_file_errors</a>"
-var Geometric_Misplacement_Flag_Pre = ""
-var Coded_Domain_Fields_Pre = "<text class='normal-text'>The following fields contain coded domains or subtypes: </text>"
-var Geometric_File_Error_Pre = ""
-var Geometric_Misplacement_Flag_Attn = "Geometries appear to be misplaced."
-var Coded_Domain_Fields_Attn = "Coded domains or subtypes were found."
-var Geometric_File_Error_Attn = "Click for detail."
+
 //This component renders the list of broad level errors items and sets up a tooltip on them to render on click.
 class BroadLevelErrors extends React.Component {
   list(){
@@ -227,7 +202,7 @@ class BroadLevelErrors extends React.Component {
     var e = this.props.broadLevelexp
     var listArray = []
     for (var i in p){
-        console.log(i)
+
        var x = i.split("_").join(" ")
         if ((p[i] == "None")||(p[i] == "")) {
             var z = "No action required"
@@ -241,25 +216,10 @@ class BroadLevelErrors extends React.Component {
             var y = window[ i + "_Link"]
         }
         listArray.push(
-          <Tooltip key={i}
-             // options
-             html={(
-              <div id="errortooltip">
-              <p dangerouslySetInnerHTML={{ __html: z}}></p>
-              <p dangerouslySetInnerHTML={{ __html: y}}></p>
-              </div>
-            )}
-             position="top"
-             trigger="click"
-             animation = "fade"
-             touchHold = "true"
-             size = "large"
-             offset = "-300"
-             theme = "light"
-           >
-             <li className="lihover" id={i} key={i}><b>{x + ": "}</b> <text dangerouslySetInnerHTML={{ __html: t}}></text></li>
-          </Tooltip>
-
+          <tr>
+            <td style={{  textAlign: "left" }}><a style={{ fontWeight: 'bold'}}>{x + ": "}</a></td>
+            <td style={{ textAlign: "right" }}>{t + " " + z}</td>
+          </tr>
         );
     }
     return listArray
@@ -267,10 +227,10 @@ class BroadLevelErrors extends React.Component {
   render() {
     return (
        <div>
-        <h2 id = "smallerrors"> Broad Level Errors</h2>
+        <h2 id = "smallerrors"> GENERAL FILE ERRORS</h2>
         <p>The following lines explain any broad geometric errors that were found while validating your parcel dataset.
         If any of the "Missing Records" values are greater than 0, please add missing values. <text class="click-note">(click element for info)</text></p>
-        <ul className="data"> {this.list()}</ul>
+        <tr className="data"> {this.list()}</tr>
        </div>
     );
   }
@@ -328,28 +288,10 @@ class TaxRoll extends React.Component {
               }
           }
           listArray.push(
-            <Tooltip  id="errortooltip" key={i}
-               // options
-               html={(
-                <div id="errortooltip">
-                <strong>
-                  {z}
-
-                </strong>
-                <div dangerouslySetInnerHTML={{ __html: h + t}}></div>
-                </div>
-              )}
-               position="top"
-               trigger="click"
-               animation = "fade"
-               touchHold = "true"
-               size = "large"
-               offset = "-300"
-               theme = "light"
-             >
-               <li className="lihover" id={i} key={i}><b>{z + year + ": "}</b> {+ p[i] + "%"}</li>
-            </Tooltip>
-
+            <tr>
+              <td style={{  textAlign: "left" }}><a style={{ fontWeight: 'bold'}}>{z + year + ": "}</a></td>
+              <td style={{ textAlign: "right" }}>{+ p[i] + "%"}</td>
+            </tr>
           );
       }
       return listArray
@@ -359,7 +301,7 @@ class TaxRoll extends React.Component {
          <div id="broadlevel">
             <div id="broadlevelparent">
                 <h3 id = "smallerrors"  class= "tax-roll-missing" >Tax Roll Percentages</h3>
-                <ul className="data"> {this.list()}</ul>
+                <tr className="data"> {this.list()}</tr>
             </div>
          </div>
       );
@@ -372,43 +314,12 @@ class MissingRecords extends React.Component {
       var listArray = []
       for (var i in p){
           var x = i.split("_").join(" ")
-          var y = x.split(" ")[1]
           var lv = (Number(p[i])).toLocaleString(navigator.language, { minimumFractionDigits: 0 })
-          if (p[i] > 0) {
-              var innerText = "There are " + '<a id="reportedValue">' +  lv + '</a>'  + " missing values in this field. Please ensure that all values in the " + y + " field are populated appropriately."
-          }
-          else if (e[i] == 0) {
-              var innerText = "There are 0 missing values in this field, no action required."
-          }
-          if (y.charAt(y.length - 1) == "E") {
-              var t = " (County Name)"
-          }
-          else if (y.charAt(y.length - 1) == "C") {
-              var t = " (Parcel Source Name)"
-          }
-          else if (y.charAt(y.length - 1) == "S") {
-              var t = " (Parcel Source FIPS)"
-          }
-          var fieldName = "<text class='bold-fieldname'>" + y + t + "</tex><br><br>"
           listArray.push(
-            <Tooltip key={i}
-               // options
-               html={(
-                <div id="errortooltip">
-                <div dangerouslySetInnerHTML={{ __html: fieldName}}></div>
-                <div dangerouslySetInnerHTML={{ __html: innerText}}></div>
-                </div>
-              )}
-               position="top"
-               trigger="click"
-               animation = "fade"
-               touchHold = "true"
-               size = "large"
-               offset = "-300"
-               theme = "light"
-             >
-               <li className="lihover" id={i} key={i}><b>{x + ": "}</b> {lv}</li>
-            </Tooltip>
+            <tr>
+              <td style={{  textAlign: "left" }}><a style={{ fontWeight: 'bold'}}>{x + ": "}</a></td>
+              <td style={{ textAlign: "right" }}>{lv}</td>
+            </tr>
           );
       }
       return listArray
@@ -418,158 +329,14 @@ class MissingRecords extends React.Component {
          <div id="broadlevel">
             <div id="broadlevelparent">
                 <h3 id = "smallerrors" class= "tax-roll-missing" >Missing Records</h3>
-                <ul className="data"> {this.list()}</ul>
+                <tr className="data"> {this.list()}</tr>
             </div>
          </div>
       );
     }
 }
 // The following three components render the lists of Positive, Negative, and Zero value fields in the expandable area below the chart. They also setup a tooltip
-class Zero extends React.Component {
-  list(){
-    var p = this.props.zeroes
-    var e = this.props.fdexp
-    var listArray = []
-    for (var i in p){
-      if (p[i] == 0){
-        listArray.push(
-          <Tooltip key={i}
-             // options
-             html={(
-              <div id="tippytooltip">
-              <strong>
-                {i}
-              </strong>
-              <div dangerouslySetInnerHTML={{ __html: e[i]}}></div>
-              </div>
-            )}
-             position="top"
-             trigger="click"
-             animation = "fade"
-             touchHold = "true"
-             size = "large"
-             offset = "-300"
-             theme = "light"
-           >
-             <li className="lihover" key={i}><a id={i} value={p[i]} id="desc">{i + ": "}</a> {+ p[i]}</li>
-          </Tooltip>
-        );
-      }
-    }
-    return listArray
-  }
-   render() {
-      return (
-         <div id="zeroes" className="values">
 
-            <h2 id="fields">Zero Diference</h2>
-            <p>No change in value from the previous submission. Double check that this fits with current submission.</p>
-             <ul className="Pdata">
-             {this.list()}
-             </ul>
-
-         </div>
-
-      );
-   }
-}
-class Positive extends React.Component {
-  list(){
-    var p = this.props.positives
-    var e = this.props.fdexp
-    var listArray = []
-    for (var i in p){
-      if (p[i] > 0){
-
-        listArray.push(
-          <Tooltip key={i}
-             // options
-             html={(
-              <div id="tippytooltip">
-              <strong>
-                {i}
-              </strong>
-              <div dangerouslySetInnerHTML={{ __html: e[i]}}></div>
-              </div>
-            )}
-             position="top"
-             trigger="click"
-             animation = "fade"
-             touchHold = "true"
-             size = "large"
-             offset = "-300"
-             theme = "light"
-           >
-             <li className="lihover" key={i}><a id={i} value={p[i]} id="desc">{i + ": "}</a> {+ p[i]}</li>
-          </Tooltip>
-
-        );
-      }
-    }
-    return listArray.sort(function(a, b){return a.props.value - b.props.value});
-  }
-   render() {
-
-      return (
-
-         <div id="positives" className="values">
-          <h2 id="fields">Positive Difference</h2>
-           <p>Error/Flag: Value is significant in the positive direction. This difference could be indicative of an improvement in data.</p>
-           <ul className="Pdata">
-           {this.list()}
-           </ul>
-         </div>
-
-      );
-   }
-}
-class Negative extends React.Component {
-  list(){
-    var p = this.props.negatives
-    var e = this.props.fdexp
-    var listArray = []
-    for (var i in p){
-      if (p[i] < 0){
-        listArray.push(
-          <Tooltip key={i}
-             // options
-             html={(
-              <div id="tippytooltip">
-              <strong>
-                {i}
-              </strong>
-              <div dangerouslySetInnerHTML={{ __html: e[i]}}></div>
-              </div>
-            )}
-             position="top"
-             trigger="click"
-             animation = "fade"
-             touchHold = "true"
-             size = "large"
-             offset = "-300"
-             theme = "light"
-           >
-             <li className="lihover" key={i}><a id={i} value={p[i]} id="desc">{i + ": "}</a> {+ p[i]}</li>
-          </Tooltip>
-        );
-      }
-    }
-
-    return listArray.sort(function(a, b){return a.props.value - b.props.value});
-  }
-   render() {
-      return (
-         <div id="negatives" className="values" >
-            <h2 id="fields">Negative Difference</h2>
-            <p>Error/Flag: Value is significant in the negative direction. This difference could be indicative of a problem in data.</p>
-             <ul className="Pdata" >
-             {this.list()}
-             </ul>
-         </div>
-
-      );
-   }
-}
 // This component renders the expandable area below the chart theat houses the above three components : Zero, Positive, Negative
 class Expand extends React.Component {
 
@@ -616,77 +383,3 @@ class Expand extends React.Component {
 
 
 ReactDOM.render(<App/>,document.getElementById('root'));
-
-// Animated tutorial (using jQuery because it is fastest to implement right now)
-var broad_A
-var inline_B
-var summary_C
-
-var interval_X = 6000;
-
-var interval_Y_obj
-var interval_Y = 1000;
-
-var firstRound = true;
-
-function administerTutorial(_directive){
-  if (_directive == "stop"){
-    clearTimeout(broad_A);
-    clearTimeout(inline_B);
-    clearTimeout(summary_C);
-    clearInterval(interval_Y_obj);
-    $("#inline").css("opacity","1")
-    $("#comparison").css("opacity","1")
-    $("#summary").css("opacity","1")
-    $("#broad").css("opacity","1")
-    $("#summary").trigger( "click" ); // to disengage any on-click popups that may be open
-    $(".fake-highlight").removeClass("fake-highlight")
-    $("#popupHider").append($("#popupTutorial"))
-  }else{
-    $("#inline").css("opacity","0.25")
-    $("#comparison").css("opacity","0.25")
-    $("#summary").css("opacity","0.25")
-    if (firstRound){
-      $("#summary").append("<div id='popupTutorial' class='popup-tutorial'><img style='width: 20px; position:absolute;' src='pointer.png' alt='pointer'></div>");
-      $("#summary").append("<div id='popupHider' class='popup-hider'></div>");
-      firstRound = false;
-    }
-    feed(["Geometric_File_Error","Geometric_Misplacement_Flag","Coded_Domain_Fields"])
-
-
-    broad_A = setTimeout(function(){
-      $("#summary").trigger( "click" ); // to disengage any on-click popups that may be open
-      $("#inline").css("opacity","1")
-      $("#broad").css("opacity","0.25")
-      feed(["General_Errors","Address_Errors","Tax_Errors","Geometric_Errors"])
-    }, interval_X);
-
-    inline_B = setTimeout(function(){
-      $("#summary").trigger( "click" ); // to disengage any on-click popups that may be open
-      $("#comparison").css("opacity","1")
-      $("#inline").css("opacity","0.25")
-    }, interval_X * 2);
-
-    summary_C = setTimeout(function(){
-      $("#summary").trigger( "click" ); // to disengage any on-click popups that may be open
-      $("#helpButton").trigger( "click" ); // to disengage any on-click popups that may be open
-      administerTutorial("stop")
-    }, interval_X * 3);
-  }
-}
-
-function feed(_ids){
-  var count_Y = 0
-  switch_Y();
-  interval_Y_obj = setInterval(switch_Y, 1000);
-  function switch_Y(){
-    if (count_Y > _ids.length){
-      clearInterval(interval_Y_obj);
-      $("#" + _ids[_ids.length - 1] ).trigger( "click" );
-    }else{
-      $(".fake-highlight").removeClass("fake-highlight")
-      $("#" + _ids[count_Y] ).addClass("fake-highlight").append($("#popupTutorial"))
-      count_Y++;
-    }
-  }
-}

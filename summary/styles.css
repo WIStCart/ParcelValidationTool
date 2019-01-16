@@ -59,10 +59,17 @@ p {
     margin: auto;
     margin-top: 1%;
 }
+.table{
+  margin-right: 50px;
+  display: inline-table;
+}
+.tablecase{
+  text-align: center;
+}
 #inline, #broad  {
     display: inline-block;
     vertical-align: top;
-    
+
     height:350px;
     overflow: auto;
     word-break: break-word;
@@ -251,7 +258,7 @@ li {
   background-color: #003366;
   border: 0px solid #4CAF50;
   border-radius: 0%;
-  
+
 }
 #subbutton:hover {
   color:#e5eaef;
@@ -293,6 +300,7 @@ li {
  }
 .data {
     list-style-type: none;
+    margin-left: 10px;
 }
 #extra{
     display: none;
