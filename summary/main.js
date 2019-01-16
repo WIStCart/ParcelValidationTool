@@ -97,14 +97,19 @@ class FieldsList extends React.Component {
     for (var i in f)
       if (Math.abs(l[i] - f[i]) != 0){
         tableArray.push(
-          <tr>
+          <tr mag= {l[i] - f[i]}>
             <td style={{  textAlign: "left" }}><a style={{ fontWeight: 'bold'}}>{i + ": "}</a></td>
             <td style={{ textAlign: "right" }}>{l[i] - f[i]}</td>
           </tr>
 
         );
       }
-    return tableArray
+      tableArray = tableArray.sort(function(a,b){
+        var mag_a = a.props.mag;
+        var mag_b = b.props.mag;
+        return mag_b - mag_a;
+       })
+      return tableArray
 }
   render() {
       return (
@@ -205,7 +210,7 @@ class BroadLevelErrors extends React.Component {
 
        var x = i.split("_").join(" ")
         if ((p[i] == "None")||(p[i] == "")) {
-            var z = "No action required"
+            var z = "No action required."
             var t = "No broad-level errors found!"
             var y = ""
         }
@@ -230,7 +235,7 @@ class BroadLevelErrors extends React.Component {
         <h2 id = "smallerrors"> GENERAL FILE ERRORS</h2>
         <p>The following lines explain any broad geometric errors that were found while validating your parcel dataset.
         If any of the "Missing Records" values are greater than 0, please add missing values. <text class="click-note">(click element for info)</text></p>
-        <tr className="data"> {this.list()}</tr>
+        <tr className="table"> {this.list()}</tr>
        </div>
     );
   }
@@ -299,9 +304,9 @@ class TaxRoll extends React.Component {
     render() {
       return (
          <div id="broadlevel">
-            <div id="broadlevelparent">
+            <div className="table">
                 <h3 id = "smallerrors"  class= "tax-roll-missing" >Tax Roll Percentages</h3>
-                <tr className="data"> {this.list()}</tr>
+                <tr > {this.list()}</tr>
             </div>
          </div>
       );

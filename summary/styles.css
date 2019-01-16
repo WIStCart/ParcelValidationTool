@@ -60,11 +60,12 @@ p {
     margin-top: 1%;
 }
 .table{
-  margin-right: 50px;
+  padding-left: 50px;
   display: inline-table;
 }
 .tablecase{
   text-align: center;
+  padding-left: 50px;
 }
 #inline, #broad  {
     display: inline-block;
