@@ -60,7 +60,8 @@ p {
     margin-top: 1%;
 }
 .table{
-  padding-left: 50px;
+  margin-left: 10px;
+  margin-bottom: 5px;
   display: inline-table;
 }
 .tablecase{
@@ -71,7 +72,7 @@ p {
     display: inline-block;
     vertical-align: top;
 
-    height:350px;
+    height:380px;
     overflow: auto;
     word-break: break-word;
     /*height: auto;

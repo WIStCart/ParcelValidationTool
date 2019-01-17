@@ -12,6 +12,23 @@ function getPcnt(oldNumber, newNumber){
     return percentDifference.toLocaleString(navigator.language, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
   }
 };
+var fieldStyle = {
+  height: 25,
+  textAlign: "left",
+  border: ".5px solid black",
+  backgroundColor: "#ffffff",
+  borderBottomWidth: 0,
+  borderRightWidth:.25,
+  verticalAlign:"bottom"
+}
+var changeStyle = {
+  textAlign: "right",
+  backgroundColor: "#ffffff",
+  border: ".5px solid black",
+  borderBottomWidth: 0,
+  borderLeftWidth:0,
+  verticalAlign:"bottom"
+}
 
 //three variables declared for sorting the data into three categories.
 // This is the main App component
@@ -97,18 +114,20 @@ class FieldsList extends React.Component {
     for (var i in f)
       if (Math.abs(l[i] - f[i]) != 0){
         tableArray.push(
-          <tr mag= {l[i] - f[i]}>
-            <td style={{  textAlign: "left" }}><a style={{ fontWeight: 'bold'}}>{i + ": "}</a></td>
-            <td style={{ textAlign: "right" }}>{l[i] - f[i]}</td>
+          <tr style={{ backgroundColor: "#ffffff"}} mag= {l[i] - f[i]}>
+            <td style={fieldStyle}><a style={{ fontWeight: 'bold', padding: '10px'}}>{i + ": "}</a></td>
+            <td style={changeStyle}><a style={{ padding: '10px'}}>{l[i] - f[i]}</a></td>
           </tr>
 
         );
       }
+      /**
       tableArray = tableArray.sort(function(a,b){
         var mag_a = a.props.mag;
         var mag_b = b.props.mag;
         return mag_b - mag_a;
        })
+       **/
       return tableArray
 }
   render() {
@@ -119,7 +138,7 @@ class FieldsList extends React.Component {
           <th style={{ textAlign: "right", fontWeight: "30%" }}>Change</th>
         </tr>
         <hr/>
-        <tr className="table">{this.list()}</tr>
+        <tr className="table" style={{border: "1px solid black", borderWidth: ".5px .5px 1px 0px"}}>{this.list()}</tr>
       </div>
   );
   }
@@ -182,8 +201,8 @@ class InLineErrors extends React.Component {
 
           listArray.push(
             <tr>
-              <td style={{  textAlign: "left" }}><a style={{ fontWeight: 'bold'}}>{x + ": "}</a></td>
-              <td style={{ textAlign: "right" }}>{lv}</td>
+              <td style={fieldStyle}><a style={{ fontWeight: 'bold', padding: '10px'}}>{x + ": "}</a></td>
+              <td style={changeStyle}><a style={{ padding: '10px'}}>{lv}</a></td>
             </tr>
           );
       }
@@ -194,7 +213,7 @@ class InLineErrors extends React.Component {
      <div>
        <h2 id = "smallerrors"> FLAGS IN OUTPUT FEATURE CLASS</h2>
        <p>The following lines summarize the element-specific errors that were found while validating your parcel dataset.  The stats below are meant as a means of reviewing the output.  <text class='attention'>Please see the GeneralElementErrors, AddressElementErrors, TaxrollElementErrors, and GeometricElementErrors fields within the output feature class to address these errors individually</text>. <text class="click-note">(click element for info)</text></p>
-       <tr className="table">{this.list()}</tr>
+       <tr className="table" style={{border: "1px solid black", borderWidth: ".5px .5px 1px 0px"}}>{this.list()}</tr>
      </div>
     );
     }
@@ -222,8 +241,8 @@ class BroadLevelErrors extends React.Component {
         }
         listArray.push(
           <tr>
-            <td style={{  textAlign: "left" }}><a style={{ fontWeight: 'bold'}}>{x + ": "}</a></td>
-            <td style={{ textAlign: "right" }}>{t + " " + z}</td>
+            <td style={fieldStyle}><a style={{ fontWeight:'bold', padding:'10px'}}>{x + ": "}</a></td>
+            <td style={changeStyle}><a style={{ padding: '10px'}}>{t + " " + z}</a></td>
           </tr>
         );
     }
@@ -235,7 +254,7 @@ class BroadLevelErrors extends React.Component {
         <h2 id = "smallerrors"> GENERAL FILE ERRORS</h2>
         <p>The following lines explain any broad geometric errors that were found while validating your parcel dataset.
         If any of the "Missing Records" values are greater than 0, please add missing values. <text class="click-note">(click element for info)</text></p>
-        <tr className="table"> {this.list()}</tr>
+        <tr className="table" style={{border: "1px solid black", borderWidth: ".5px .5px 1px 0px"}} > {this.list()}</tr>
        </div>
     );
   }
@@ -294,8 +313,8 @@ class TaxRoll extends React.Component {
           }
           listArray.push(
             <tr>
-              <td style={{  textAlign: "left" }}><a style={{ fontWeight: 'bold'}}>{z + year + ": "}</a></td>
-              <td style={{ textAlign: "right" }}>{+ p[i] + "%"}</td>
+              <td style={fieldStyle}><a style={{ fontWeight: 'bold', padding: '10px'}}>{z + year + ": "}</a></td>
+              <td style={changeStyle}><a style={{ padding: '10px'}}>{+ p[i] + "%"}</a></td>
             </tr>
           );
       }
@@ -306,7 +325,7 @@ class TaxRoll extends React.Component {
          <div id="broadlevel">
             <div className="table">
                 <h3 id = "smallerrors"  class= "tax-roll-missing" >Tax Roll Percentages</h3>
-                <tr > {this.list()}</tr>
+                <tr className="table" style={{border: "1px solid black", borderWidth: ".5px .5px 1px 0px", marginBottom: 5}}> {this.list()}</tr>
             </div>
          </div>
       );
@@ -322,8 +341,8 @@ class MissingRecords extends React.Component {
           var lv = (Number(p[i])).toLocaleString(navigator.language, { minimumFractionDigits: 0 })
           listArray.push(
             <tr>
-              <td style={{  textAlign: "left" }}><a style={{ fontWeight: 'bold'}}>{x + ": "}</a></td>
-              <td style={{ textAlign: "right" }}>{lv}</td>
+              <td style={fieldStyle}><a style={{ fontWeight: 'bold', padding: '10px'}}>{x + ": "}</a></td>
+              <td style={changeStyle}><a style={{ padding: '10px'}}>{lv}</a></td>
             </tr>
           );
       }
@@ -334,7 +353,7 @@ class MissingRecords extends React.Component {
          <div id="broadlevel">
             <div id="broadlevelparent">
                 <h3 id = "smallerrors" class= "tax-roll-missing" >Missing Records</h3>
-                <tr className="data"> {this.list()}</tr>
+                <tr className="table" style={{border: "1px solid black", borderWidth: ".5px .5px 1px 0px"}}> {this.list()}</tr>
             </div>
          </div>
       );
