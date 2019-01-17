@@ -52,6 +52,52 @@ p {
   -ms-text-justify: distribute-all-lines;
   text-justify: distribute-all-lines;
 }
+#inline, #broad,  {
+    display: inline-block;
+    vertical-align: top;
+    height:380px;
+    overflow: auto;
+    word-break: break-word;
+
+}
+#comparison, #next  {
+    display: inline-block;
+    overflow: auto;
+    word-break: break-word;
+    /*height: auto;
+    min-height: 325px;
+    min-width: 400px;*/
+}
+
+#comparison{
+  height: 500px;
+  width: calc(64.5% - 4px);
+}
+
+#next{
+  height: 500px;
+  float:right;
+  width: calc(33% - 4px);
+}
+
+#inline{
+  height: 400px;
+  width: calc(33% - 4px);
+  float: right;
+}
+#broad{
+  height: 400px;
+    display: inline-block;
+   width: calc(64.5% - 4px);
+}
+
+#comparison h2 {
+    text-align: center;
+}
+
+#next h2 {
+  text-align: center;
+}
 .bricks {
     border: 2px solid #818181; /*#337ab7;*/
     border-radius: 2px;
@@ -65,20 +111,9 @@ p {
   display: inline-table;
 }
 .tablecase{
-  text-align: center;
   padding-left: 50px;
 }
-#inline, #broad  {
-    display: inline-block;
-    vertical-align: top;
 
-    height:380px;
-    overflow: auto;
-    word-break: break-word;
-    /*height: auto;
-    min-height: 325px;
-    min-width: 400px;*/
-}
 #broadlevel{
   display: inline-flex;
   width:50%;
@@ -95,26 +130,12 @@ p {
   text-decoration-line: underline;
   text-decoration-skip-ink: none;
 }
-#inline{
-  width: calc(33% - 4px);
-  float: right;
-}
-#broad{
-   width: calc(64.5% - 4px);
-}
 
-#comparison{
-  width: 95%;
-  margin-left: calc(2.5% - 2px);
-}
 
-#comparison h2 {
-    text-align: center;
-}
+
 .Pdata {
     list-style-type: circle;
     vertical-align: middle;
-    overflow-y: scroll;
     height:150px;
     margin-right: 1%;
 }

@@ -92,11 +92,27 @@ class App extends React.Component {
                     <MissingRecords missing={mr} missingexp={mrExplained} />
                 </div>
               </div>
+          <div id="row">
             <div id="comparison" className="bricks">
                 <h2>ATTRIBUTE COMPARISON</h2>
-                <p>BELOW IS A COMPARISON OF COMPLETENESS VALUES FROM YOUR PREVIOUS PARCEL SUBMISSION AND THIS CURRENT SUBMISSION. <text class='attention'>If the value shown is a seemingly large negative number, please verify that all data was joined correctly and no data was lost during processing</text>. Note: This does not necessarily mean your data is incorrect, we just want to highlight large discrepancies that could indicate missing or incorrect data. <ExtraInfo></ExtraInfo></p>
                 <FieldsList fields={this.state.validation.Fields_Diffs} legacyFields={this.state.validation.County_Info.Legacy} />
             </div>
+            <div id="next" className="bricks">
+              <h2>NEXT STEPS</h2>
+                <ul className="Pdata">
+                  <li>Resolve errors in output feature class and/or provide explanations for legitimate missing/non-conforming data in the Explain-Certification.txt file.</li>
+                  <li>Complete and save your Explain-Certification.txt file.</li>
+                  <li>Run the Validation Tool in FINAL mode. Input yout Explain-Certification.txt file in the tool in section 2.</li>
+                  <li>Save the resulting ".ini" file -- which is your <b>mandatory</b> submission form.</li>
+                  <li>Zip and submit:
+                    <ul>
+                    <li>.ini submission form</li>
+                    <li>parcel feature class with tax roll data</li>
+                    <li>other layers: PLSS, RML</li>
+                    </ul></li>
+                </ul>
+            </div>
+          </div>
 
          </div>
       );
@@ -114,7 +130,7 @@ class FieldsList extends React.Component {
       if (Math.abs(l[i] - f[i]) != 0){
         tableArray.push(
           <tr style={{ backgroundColor: "#ffffff"}} mag= {l[i] - f[i]}>
-            <td style={fieldStyle}><a style={{ fontWeight: 'bold', padding: '10px'}}>{i + ": "}</a></td>
+            <td style={fieldStyle}><a href={"https://www.sco.wisc.edu/parcels/Submission_Documentation.pdf#nameddest=" +  i.toLowerCase()} style={{ fontWeight: 'bold', padding: '10px'}}>{i + ": "}</a></td>
             <td style={changeStyle}><a style={{ padding: '10px'}}>{l[i] - f[i]}</a></td>
           </tr>
 
@@ -130,14 +146,20 @@ class FieldsList extends React.Component {
       return tableArray
 }
   render() {
+    var array = this.list()
+    var m = Math.floor(array.length / 3)
+    var n = Math.ceil(2 * array.length / 3)
+    var first = array.slice(0, m)
+    var second = array.slice(m, n)
+    var third = array.slice(n, array.length)
+    var tableHeader = [<th style={fieldStyle}><a style={{ padding: '10px'}}>Field</a></th>, <th style={changeStyle}><a style={{ padding: '10px'}}>Change</a></th>]
+
       return (
       <div className="tablecase">
-        <tr className="table">
-          <th style={{  textAlign: "left", width: "70%" }}>Field</th>
-          <th style={{ textAlign: "right", fontWeight: "30%" }}>Change</th>
-        </tr>
         <hr/>
-        <tr className="table" style={{border: "1px solid black", borderWidth: ".5px .5px 1px 0px"}}>{this.list()}</tr>
+        <tr className="table" style={{border: "1px solid black", borderWidth: ".5px .5px 1px 0px"}}>{tableHeader[0]}{tableHeader[1]}{first}</tr>
+        <tr className="table" style={{border: "1px solid black", borderWidth: ".5px .5px 1px 0px"}}>{tableHeader[0]}{tableHeader[1]}{second}</tr>
+        <tr className="table" style={{border: "1px solid black", borderWidth: ".5px .5px 1px 0px"}}>{tableHeader[0]}{tableHeader[1]}{third}</tr>
       </div>
   );
   }
@@ -228,8 +250,8 @@ class BroadLevelErrors extends React.Component {
 
        var x = i.split("_").join(" ")
         if ((p[i] == "None")||(p[i] == "")) {
-            var z = "No action required."
-            var t = "No broad-level errors found!"
+            var z = ""
+            var t = "None."
             var y = ""
         }
         else if ((p[i] != "None")&&(p[i] != "")) {
