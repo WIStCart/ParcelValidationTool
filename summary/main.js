@@ -94,8 +94,8 @@ class App extends React.Component {
                 </div>
               </div>
             <div id="comparison" className="bricks">
-                <h2>Submission Comparison</h2>
-                <p>BELOW IS A COMPARISON OF COMPLETENESS VALUES FROM YOUR PREVIOUS PARCEL SUBMISSION AND THIS CURRENT SUBMISSION. <text class='attention'>If the value shown is a seemingly large negative number, please verify that all data was joined correctly and no data was lost during processing</text>. Note: This does not necessarily mean your data is incorrect, we just want to highlight large discrepancies that could indicate missing or incorrect data. <text class="click-note">(click element for info)</text><ExtraInfo></ExtraInfo></p>
+                <h2>ATTRIBUTE COMPARISON</h2>
+                <p>BELOW IS A COMPARISON OF COMPLETENESS VALUES FROM YOUR PREVIOUS PARCEL SUBMISSION AND THIS CURRENT SUBMISSION. <text class='attention'>If the value shown is a seemingly large negative number, please verify that all data was joined correctly and no data was lost during processing</text>. Note: This does not necessarily mean your data is incorrect, we just want to highlight large discrepancies that could indicate missing or incorrect data. <ExtraInfo></ExtraInfo></p>
                 <FieldsList fields={this.state.validation.Fields_Diffs} legacyFields={this.state.validation.County_Info.Legacy} />
             </div>
 
@@ -212,7 +212,7 @@ class InLineErrors extends React.Component {
     return (
      <div>
        <h2 id = "smallerrors"> FLAGS IN OUTPUT FEATURE CLASS</h2>
-       <p>The following lines summarize the element-specific errors that were found while validating your parcel dataset.  The stats below are meant as a means of reviewing the output.  <text class='attention'>Please see the GeneralElementErrors, AddressElementErrors, TaxrollElementErrors, and GeometricElementErrors fields within the output feature class to address these errors individually</text>. <text class="click-note">(click element for info)</text></p>
+       <p>The following lines summarize the element-specific errors that were found while validating your parcel dataset.  The stats below are meant as a means of reviewing the output.  <text class='attention'>Please see the GeneralElementErrors, AddressElementErrors, TaxrollElementErrors, and GeometricElementErrors fields within the output feature class to address these errors individually</text>. </p>
        <tr className="table" style={{border: "1px solid black", borderWidth: ".5px .5px 1px 0px"}}>{this.list()}</tr>
      </div>
     );
@@ -253,7 +253,7 @@ class BroadLevelErrors extends React.Component {
        <div>
         <h2 id = "smallerrors"> GENERAL FILE ERRORS</h2>
         <p>The following lines explain any broad geometric errors that were found while validating your parcel dataset.
-        If any of the "Missing Records" values are greater than 0, please add missing values. <text class="click-note">(click element for info)</text></p>
+        If any of the "Missing Records" values are greater than 0, please add missing values. </p>
         <tr className="table" style={{border: "1px solid black", borderWidth: ".5px .5px 1px 0px"}} > {this.list()}</tr>
        </div>
     );
