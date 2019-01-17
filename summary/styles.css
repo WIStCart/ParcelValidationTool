@@ -77,12 +77,12 @@ p {
 #next{
   height: 500px;
   float:right;
-  width: calc(33% - 4px);
+  width: calc(35% - 4px);
 }
 
 #inline{
   height: 400px;
-  width: calc(33% - 4px);
+  width: calc(35% - 4px);
   float: right;
 }
 #broad{
