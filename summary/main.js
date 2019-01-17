@@ -1,6 +1,3 @@
-const Tooltip = reactTippy.Tooltip;
-const {ResponsiveContainer, BarChart, Bar, ReferenceLine, XAxis, YAxis, CartesianGrid, Legend, Cell} = window.Recharts;
-const TooltipChart = window.Recharts.Tooltip;
 
 // simple function for getting percent change negative or positive.
 function getPcnt(oldNumber, newNumber){
