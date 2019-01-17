@@ -76,7 +76,6 @@ class App extends React.Component {
       return (
 
          <div>
-             <button id="helpButton" onClick={this.startHelp}>{this.state.helpName}</button>
              <div id="summary" className="bricks">
                <h1> {coInfo.CO_NAME.charAt(0) + coInfo.CO_NAME.slice(1).toLowerCase()} Parcel Validation Summary <img className="img-responsive" src="withumb.png" alt="" height="30" width="30"/></h1><hr/>
                <p>This validation summary page contains an overview of <i>possible</i> errors found by the Parcel Validation Tool. Please review the contents of this file and make changes to your parcel dataset as necessary.</p>
