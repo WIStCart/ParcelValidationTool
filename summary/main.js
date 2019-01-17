@@ -165,50 +165,7 @@ class FieldsList extends React.Component {
   );
   }
 }
-class ExtraInfo extends React.Component {
-    constructor(){
-      super();
-      this.state = {
-         display: 'none',
-         name: "More"
-      };
-    }
 
-    showHide =() => {
-        if (this.state.display == 'none') {
-            this.setState({display:'block'});
-            this.setState({name:"Less"})
-        } else {
-            this.setState({display:'none'});
-            this.setState({name:"More"})
-        }
-    }
-
-    render() {
-        return (
-        <div>
-            <button id="moreButton" onClick={this.showHide}>{this.state.name}</button>
-            <ul id ="extra" style={{display:this.state.display}}>
-                <li className="noHover">
-                It is expected that parcel submissions continue to grow in quality and attribute completeness, as well as natural increases in quantity of records. These subtle changes may be reflected in the chart and are not necessarily indicative of errors.
-                </li>
-                <li className="noHover">
-                Significant differences, however, in the number of records populated from one submission to the next (e.g., from V4 to V5) are indications of possible error or possible improvement.
-                </li>
-                <li className="noHover">
-                The chart below is created by comparing your current submission against what was established in the previous year’s parcel data (the final, standardized V4 statewide parcel layer).
-                </li>
-                <li className="noHover">
-                Please take a moment to review this chart. When reviewing an exceptional field perhaps an explanation will be immediately apparent, if not, examine the attribute field for an explanation.  Explanations are uses by the parcel processing team and may be placed in the <a href="https://www.sco.wisc.edu/parcels/Submission_Documentation.pdf#nameddest=inputting_explain_certification" target="_blank">Explain-Certification.txt.</a>
-                </li>
-                <li className="noHover">
-                Note: An exceptional value does not necessarily mean your data is incorrect. This chart is intended to highlight large discrepancies that could indicate missing or incorrect data.
-                </li>
-            </ul>
-        </div>
-    );
-    }
-}
 //This component renders the list of inline errors items and sets up a tooltip on them to render on click.
 class InLineErrors extends React.Component {
     list(){
@@ -383,49 +340,6 @@ class MissingRecords extends React.Component {
 }
 // The following three components render the lists of Positive, Negative, and Zero value fields in the expandable area below the chart. They also setup a tooltip
 
-// This component renders the expandable area below the chart theat houses the above three components : Zero, Positive, Negative
-class Expand extends React.Component {
-
-   constructor(){
-     super();
-     this.state = {
-        height:'.5em'
-     };
-   }
-
-  countLines =() => {
-    let height = this.testComp.offsetHeight;
-    if ( (height - 2 ) / 16 > 3.3 ) {
-       this.setState({showButton:true});
-    }
-  }
-
-  showHidePara =() => {
-     if (this.state.height == 'auto') {
-        this.setState({height:'.5em'});
-     } else {
-        this.setState({height:'auto'});
-     }
-  }
-
-  componentDidMount() {
-      this.countLines();
-  }
-
-  render() {
-    return (
-    < div>
-        { this.state.showButton ? <button id="subbutton"onClick={this.showHidePara}> + </button>: null}
-        <div id ="parent" style={{height:this.state.height}}>
-
-          <div id = "content" ref={(c) => this.testComp = c } style={{height:'auto'}}>
-         {this.props.children}
-         </div>
-      </div>
-    </div>
-    );
-  }
-}
 
 
 ReactDOM.render(<App/>,document.getElementById('root'));
