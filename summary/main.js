@@ -78,7 +78,11 @@ class App extends React.Component {
          <div>
              <div id="summary" className="bricks">
                <h1> {coInfo.CO_NAME.charAt(0) + coInfo.CO_NAME.slice(1).toLowerCase()} Parcel Validation Summary <img className="img-responsive" src="withumb.png" alt="" height="30" width="30"/></h1><hr/>
-               <p>This validation summary page contains an overview of <i>possible</i> errors found by the Parcel Validation Tool. Please review the contents of this file and make changes to your parcel dataset as necessary.</p>
+               <h4 style = {{textAlign: "left"}}>Summary of possible errors found by the Validation Tool, for which you must:</h4>
+               <ul>
+                  <li style = {{textAlign: "left"}}><b>1)</b> Resolve errors in the output feature class (go back to the output feature class and resolve the error by making the data consistent wit hthe schema specs in the <a href="https://www.sco.wisc.edu/parcels/Submission_Documentation.pdf" target="_blank">submission documentation</a>)</li>
+                  <li style = {{textAlign: "left"}}><b>2)</b> Provide written explanations for any legitimately missing/non-conforming data in the Explain-Certification.txt file.</li>
+               </ul>
              </div>
              <div id="row">
                 <div id="inline" className="bricks">
@@ -130,7 +134,7 @@ class FieldsList extends React.Component {
       if (Math.abs(l[i] - f[i]) != 0){
         tableArray.push(
           <tr style={{ backgroundColor: "#ffffff"}} mag= {l[i] - f[i]}>
-            <td style={fieldStyle}><a href={"https://www.sco.wisc.edu/parcels/Submission_Documentation.pdf#nameddest=" +  i.toLowerCase()} style={{ fontWeight: 'bold', padding: '10px'}}>{i + ": "}</a></td>
+            <td style={fieldStyle}><a href={"https://www.sco.wisc.edu/parcels/Submission_Documentation.pdf#nameddest=" +  i.toLowerCase()} target="_blank" style={{ fontWeight: 'bold', padding: '10px'}}>{i + ": "}</a></td>
             <td style={changeStyle}><a style={{ padding: '10px'}}>{l[i] - f[i]}</a></td>
           </tr>
 
