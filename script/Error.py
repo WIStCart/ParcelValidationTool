@@ -25,7 +25,7 @@ class Error:
 		self.fipsMiss = 0
 		self.srcMiss = 0
 		self.netMoreGrsCnt = 0
-		self.recordIterationCount = 0;
+		self.recordIterationCount = 0
 		self.recordTotalCount = int(arcpy.GetCount_management(featureClass).getOutput(0)) # Total number of records in the feature class
 		self.checkEnvelopeInterval = math.trunc(self.recordTotalCount / 100) # Interval value used to apply 10 total checks on records at evenly spaced intervals throughout the dataset.
 		self.nextEnvelopeInterval = self.checkEnvelopeInterval
@@ -61,7 +61,7 @@ class Error:
 					elif self.xyShift >= 1.2 and self.xyShift < 6:
 						arcpy.AddMessage("\n ")
 						arcpy.AddMessage("Parcel geometry validated, but several parcel geometries appear to be spatially misplaced by about: " + str(self.xyShift) + " meters. \n" )
-						self.geometricPlacementErrors = ["Several parcel geometries appear to be spatially misplaced " + str(self.xyShift) + " meters when comparing them against last year's parcel geometries. This issue is indicative of a re-projection error. Please see the following documentation: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf section #2, for advice on how to project native data to the Statewide Parcel CRS."]
+						self.geometricPlacementErrors = ["Several parcel geometries appear to be spatially misplaced " + str(self.xyShift) + " meters when comparing them against parcel geometries from last year. This issue is indicative of a re-projection error. Please see the following documentation: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf section #2, for advice on how to project native data to the Statewide Parcel CRS."]
 					else:
 						arcpy.AddMessage("\nParcel geometry validated.")
 						self.geometricPlacementErrors = []
@@ -76,7 +76,7 @@ class Error:
 				self.nextEnvelopeInterval = 4000000
 				self.xyShift = round((self.diffxy/self.notConfirmGeomCount),2)
 				arcpy.AddMessage("Several parcel geometries appear to be spatially misplaced by about: " + str(self.xyShift) + " meters." )
-				self.geometricPlacementErrors = ["Several parcel geometries appear to be spatially misplaced " + str(self.xyShift) + " meters when comparing them against last year's parcel geometries. This issue is indicative of a re-projection error. Please see the following documentation: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf section #2, for advice on how to project native data to the Statewide Parcel CRS."]
+				self.geometricPlacementErrors = ["Several parcel geometries appear to be spatially misplaced " + str(self.xyShift) + " meters when comparing them against parcel geometries from last year. This issue is indicative of a re-projection error. Please see the following documentation: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf section #2, for advice on how to project native data to the Statewide Parcel CRS."]
 		self,Parcel = self.testParcelGeometry(Parcel)
 		self.recordIterationCount += 1
 		return (self, Parcel)
@@ -138,7 +138,7 @@ class Error:
 			xCent = geom.centroid.X
 			yCent = geom.centroid.Y
 		except:
-			Parcel.geometricErrors.append("Corrupt Geometry: The feature's geometry could not be accessed.")
+			Parcel.geometricErrors.append("Corrupt Geometry: The geometry of the feature class could not be accessed.")
 			self.geometricErrorCount += 1
 		try:
 			areaP = Parcel.shapeArea
@@ -153,7 +153,7 @@ class Error:
 				Parcel.geometricErrors.append("Sliver Polygon: AREA/LENGTH")
 				self.geometricErrorCount += 1
 		except:
-			Parcel.geometricErrors.append("Corrupt Geometry: The feature's area and/or length could not be accessed.")
+			Parcel.geometricErrors.append("Corrupt Geometry: The area and/or length of the feature class could not be accessed.")
 			self.geometricErrorCount += 1
 		return self,Parcel
 
@@ -191,7 +191,7 @@ class Error:
 					arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 					exit()
 		except: # using generic error handling because we don't know what errors to expect yet.
-			arcpy.AddMessage("The feature class's coordinate reference system could not be validated. Please ensure that the feature class is projected to the Statewide Parcel CRS. This documentation may be of use in projecting the dataset: http://www.sco.wisc.edu/images/stories/publications/V2/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf.")
+			arcpy.AddMessage("The coordinate reference system of the feature class could not be validated. Please ensure that the feature class is projected to the Statewide Parcel CRS. This documentation may be of use in projecting the dataset: http://www.sco.wisc.edu/images/stories/publications/V2/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf.")
 			exit()
 
 	#Check if text value is a valid number(Error object, Parcel object, field to test, type of error to classify this as, are <Null>s are considered errors?)
@@ -205,7 +205,7 @@ class Error:
 					try:
 						float(stringToTest)
 					except ValueError:
-						getattr(Parcel,errorType + "Errors").append("Value in " + field.upper() + " doesn't appear to be a numeric value.")
+						getattr(Parcel,errorType + "Errors").append("Value in " + field.upper() + " does not appear to be a numeric value.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return (Error, Parcel)
 			else:
@@ -216,7 +216,7 @@ class Error:
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the" + field.upper() + "field. Please inspect this field's value.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the" + field.upper() + "field. Please inspect the value of this field.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
@@ -242,7 +242,7 @@ class Error:
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please inspect this field's value.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please inspect the value of this field.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
@@ -255,7 +255,7 @@ class Error:
 					if any(substring in stringToTest for substring in testList):
 						pass
 					else:
-						getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " doesn't contain required LSAD descriptor.")
+						getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " does not contain required LSAD descriptor.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					return (Error,Parcel)
 
@@ -264,7 +264,7 @@ class Error:
 					#arcpy.AddMessage("This value is <Null>... or exists in our list...")
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("The value in the " + field.upper() + " does not appear to be in a list created from last year's data. Please verify this value is appropriately placed in this field.")
+					getattr(Parcel,errorType + "Errors").append("The value in the " + field.upper() + " does not appear to be in a list created from last year data. Please verify this value is appropriately placed in this field.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return (Error,Parcel)
 			else:
@@ -283,7 +283,7 @@ class Error:
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect the value of this field.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
@@ -309,11 +309,11 @@ class Error:
 					if pinToTest in ignoreList or pinToTest is None:
 						Error.pinSkipCount += 1
 					else:
-						getattr(Parcel,errorType + "Errors").append("Value in " + field.upper() + " is flagged.  See schema definition. In most cases, value should be expected year (" + acceptYears[1] + "), or future year (" + acceptYears[2] + ") if new parcel/split.")
+						getattr(Parcel,errorType + "Errors").append("Value in " + field.upper() + " is flagged. See schema definition. In most cases; value should be expected year (" + acceptYears[1] + "); or future year (" + acceptYears[2] + ") if new parcel/split.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 			return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect the value of this field.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
@@ -337,7 +337,7 @@ class Error:
 			elif acceptNull:  # it is null -> TAXROLLYEAR for parcel splits/new parcels may be <Null>
 				pass
 		except: # using generic error handling because we don't know what errors to expect yet.
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect the value of this field.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
@@ -351,7 +351,7 @@ class Error:
 				if stringToTest.strip() in stNameDict[coname]:
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " does not appear in list created from last year's data. Please verify this value contains only the STREETNAME and street name is correct.")
+					getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " does not appear in list created from last year data. Please verify this value contains only the STREETNAME and street name is correct.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return(Error, Parcel)
 			else:
@@ -366,7 +366,7 @@ class Error:
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect the value of this field.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
@@ -389,7 +389,7 @@ class Error:
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect the value of this field.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
@@ -407,7 +407,7 @@ class Error:
 			elif acceptNull:
 				pass
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect the value of this field.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return(Error, Parcel)
 
@@ -422,17 +422,17 @@ class Error:
 			if imprTest == None and impValue == None:
 				pass
 			elif (imprTest == None and impValue is not None) or (imprTest is not None and impValue is None):
-				getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " doesn't correspond with 'IMPVALUE' for this record - please verify.")
+				getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " does not correspond with 'IMPVALUE' for this record - please verify.")
 				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 			elif (imprTest.upper() == 'NO' and float(impValue) <>  0):
-				getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " doesn't correspond with 'IMPVALUE' for this record - please verify.")
+				getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " does not correspond with 'IMPVALUE' for this record - please verify.")
 				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 			elif (imprTest.upper() == 'YES' and float(impValue) <= 0):
-				getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " doesn't correspond with 'IMPVALUE' for this record - please verify.")
+				getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " does not correspond with 'IMPVALUE' for this record - please verify.")
 				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCounty") + 1)
 			return (Error,Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occured with the " + field.upper() + " field. Please manually inspect this field's value.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occured with the " + field.upper() + " field. Please manually inspect the value of this field.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error,Parcel)
 
@@ -459,7 +459,7 @@ class Error:
 					Error.taxErrorCount += 1
 			return(Error,Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect the value of this field.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return(Error,Parcel)
 
@@ -478,7 +478,7 @@ class Error:
 							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 			return (Error, Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + f.upper() + " field. Please manually inspect this field's value.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + f.upper() + " field. Please manually inspect the value of this field.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
@@ -500,7 +500,7 @@ class Error:
 							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 			return (Error, Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + f.upper() + " field. Please manually inspect this field's value.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + f.upper() + " field. Please manually inspect the value of this field.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
@@ -519,12 +519,12 @@ class Error:
 				pass
 			return (Error, Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + taxField.upper() + "or" + parcelField.upper() + " fields. Please inspect these fields' values.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + taxField.upper() + "or" + parcelField.upper() + " fields. Please inspect the values of these fields.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
 	#Check for PROP/AUX value existing when expected and then check existing values for dups and for values not in expected domain lists...(Makes classOfPropCheck fcn obsolete)
-	def auxPropCheck(Error,Parcel,propField,auxField,yearField,pinField,ignoreList,errorType,copDomainList,auxDomainList):
+	def auxPropCheck(Error,Parcel,propField,auxField,yearField,pinField,ignoreList,errorType,copDomainList,auxDomainList, acceptYears):
 		try:
 			year = getattr(Parcel,yearField)
 			pinToTest = getattr(Parcel,pinField)
@@ -532,10 +532,11 @@ class Error:
 			auxToTest = getattr(Parcel,auxField)
 			testListCop = []
 			testListAux = []
-			if (pinToTest in ignoreList) or (pinToTest is None) or (year is not None and int(year) > 2018):
+			if (pinToTest in ignoreList) or (pinToTest is None) or (year is not None and int(year) > int(acceptYears[1])):   #
 				pass
 			else:
 				if copToTest is None and auxToTest is None:
+					#arcpy.AddMessage( str(year) + " and " + str(acceptYears[1]) )
 					getattr(Parcel,errorType + "Errors").append("The " + propField.upper() + " and " + auxField.upper() + " fields are <Null> and a value is expected for any non-new parcels.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				if copToTest is not None:
@@ -562,7 +563,7 @@ class Error:
 							testListAux.append(val.strip())
 			return(Error, Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("!!!!!!An unknown issue occurred with the " + propField.upper() + " and/or " + auxField.upper() + " field. Please manually inspect these field's value.")
+			getattr(Parcel,errorType + "Errors").append("!!!!!!An unknown issue occurred with the " + propField.upper() + " and/or " + auxField.upper() + " field. Please manually inspect the values of these fields.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
@@ -583,7 +584,7 @@ class Error:
 				return(Error,Parcel)
 
  		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + propClass.upper() + "or" + estFmkValue.upper() + " field. Please manually inspect this field's value.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + propClass.upper() + "or" + estFmkValue.upper() + " field. Please manually inspect the values of these fields.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
@@ -623,7 +624,7 @@ class Error:
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return(Error,Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect the value of this field.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
@@ -639,7 +640,7 @@ class Error:
 					getattr(Parcel,errorType + "Errors").append("The value provided in " + coNamefield.upper() + " field does not match expected county name.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					#Error.coNameMiss += 1
-				elif coNameToTest in nullList or coNameToTest.find(' ') >= 0:
+				elif coNameToTest in nullList or coNameToTest.isspace():
 					getattr(Parcel,errorType + "Errors").append("The value provided in " + coNamefield.upper() + " field does not match expected county name.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					Error.coNameMiss += 1
@@ -667,7 +668,7 @@ class Error:
 					getattr(Parcel,errorType + "Errors").append("The value provided in " + srcfield.upper() + " field does not match submitting county name.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					#Error.srcMiss += 1
-				elif srcToTest in nullList or srcToTest.find(' ') >= 0:
+				elif srcToTest in nullList or srcToTest.isspace():
 					getattr(Parcel,errorType + "Errors").append("The value provided in " + srcfield.upper() + " field does not appear to meet required domains.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					Error.srcMiss += 1
@@ -678,7 +679,7 @@ class Error:
 					Error.srcMiss += 1
 			return(Error,Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect this field's value.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect the value of this field.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
@@ -713,7 +714,7 @@ class Error:
 				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 			return (Error,Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + schDistField.upper() + " or " + schDistNoField.upper() + " field. Please manually inspect this field's value.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + schDistField.upper() + " or " + schDistNoField.upper() + " field. Please manually inspect the values of these fields.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
@@ -794,7 +795,7 @@ class Error:
 
 	#check for valid postal address
 	# Error.postalCheck(totError,currParcel,'pstladress','general',pinSkips,'taxrollyear','parcelid',badPstladdSet)
-	def postalCheck (Error,Parcel,PostalAd,errorType,ignoreList,taxYear,pinField,badPstladdSet):
+	def postalCheck (Error,Parcel,PostalAd,errorType,ignoreList,taxYear,pinField,badPstladdSet, acceptYears):
 		try:
 			address = getattr(Parcel,PostalAd)
 			year = getattr(Parcel, taxYear)
@@ -803,7 +804,7 @@ class Error:
 				pass
 			else:
 				if year is not None:
-					if int(year) <= 2018:
+					if int(year) <= int(acceptYears[1]):   #or pinToTest in ignorelist:
 						if ('UNAVAILABLE' in address or 'ADDRESS' in address or 'ADDDRESS' in address or 'UNKNOWN' in address or ' 00000' in address or 'NULL' in address or ('NONE' in address and 'HONONEGAH' not in address) or 'MAIL EXEMPT' in address or 'TAX EX' in address or 'UNASSIGNED' in address or 'N/A' in address) or(address in badPstladdSet) :
 							getattr(Parcel,errorType + "Errors").append("A value provided in the " + PostalAd.upper() + " field may contain an incomplete address. Please verify the value is correct or set to <Null> if complete address is unknown.")
 							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
@@ -835,7 +836,7 @@ class Error:
 				pass
 			return (Error, Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the NETPRPTA or GRSPRPTA field.  Please manually inspect the values in these fields.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the NETPRPTA or GRSPRPTA field.  Please manually inspect the values of these fields.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
