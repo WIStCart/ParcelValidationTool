@@ -14,61 +14,6 @@ function getPcnt(oldNumber, newNumber){
 };
 
 //three variables declared for sorting the data into three categories.
-const address = ["SUFFIX",
-              "STREETTYPE",
-              "STREETNAME",
-              "PREFIX",
-              "ADDNUMPREFIX",
-              "ADDNUM",
-              "ADDNUMSUFFIX",
-              "SITEADRESS",
-              "PSTLADRESS",
-              "OWNERNME1",
-              "OWNERNME2",
-              "TAXROLLYEAR",
-              "PARCELDATE",
-              "TAXPARCELID",
-              "PARCELID",
-              "STATEID"]
-const general =[
-        "LANDMARKNAME",
-        "PLACENAME",
-        "UNITTYPE",
-        "UNITID",
-        "ZIPCODE",
-        "ZIP4",
-        "STATE",
-        "SCHOOLDIST",
-        "SCHOOLDISTNO"
-      ]
-const tax = [
-        "LONGITUDE",
-        "LOADDATE",
-        "GISACRES",
-        "LATITUDE",
-        "AUXCLASS",
-        "GRSPRPTA",
-        "IMPVALUE",
-        "ASSDACRES",
-        "LNDVALUE",
-        "NETPRPTA",
-        "CONAME",
-        "PARCELSRC",
-        "DEEDACRES",
-        "IMPROVED",
-        "FORESTVALUE",
-        "CNTASSDVALUE",
-        "PARCELFIPS",
-        "ESTFMKVALUE",
-        "PROPCLASS"
-      ]
-// Variable declared for the colors for each category
-const catColors = {
-  tax: "#004282",
-  general:"#002549",
-  address:"#003466"
-}
-
 // This is the main App component
 class App extends React.Component {
   constructor(props) {
@@ -92,117 +37,7 @@ class App extends React.Component {
     }, () => console.log("State: ", this.state.validation, this.state.explanations)
   )
   }
-  //this function creates the data we want to work with for the chart out of the raw output JSON
-  data(){
-    var data=[]
-    for (let i in testValues.County_Info.Legacy){
-        // if change is zero don't display if old value is zero and new is X explain.
-        if ((testValues.County_Info.Legacy[i] === 0) && (!(testValues.Fields_Diffs[i] === "0")) ){
-          data.push({
-           name: i,
-           'Percentage of Last Years Value': 100,
 
-           cat: general.indexOf(i) > -1 ? "general" : tax.indexOf(i) > -1 ? 'tax' : 'address',
-           tell: ("There are: " + testValues.Fields_Diffs[i] + " new values since last submission.")
-           })
-        }
-        // if neither field is null push the record.
-         if ( (!(testValues.County_Info.Legacy[i] === null) && !(testValues.Fields_Diffs[i] === null)) ){
-           //console.log("Field: ", i, "LEGACY: ", testValues.County_Info.Legacy[i], "New Value: ", testValues.Fields_Diffs[i])
-           data.push({
-            name: i,
-            'Percentage of Last Years Value': getPcnt(testValues.County_Info.Legacy[i], testValues.Fields_Diffs[i]),
-            cat: general.indexOf(i) > -1 ? "general" : tax.indexOf(i) > -1 ? 'tax' : 'address',
-            tell: ("Last submission: " + (testValues.County_Info.Legacy[i]).toLocaleString(navigator.language, { minimumFractionDigits: 0 }) + "; This submission: " + (Number(testValues.Fields_Diffs[i]) +  testValues.County_Info.Legacy[i]).toLocaleString(navigator.language, { minimumFractionDigits: 0 }))
-          })
-           }
-    }
-    // filter the records for NaN percentages.
-    data = data.filter(x => (!isNaN(x['Percentage of Last Years Value']) && !(x['Percentage of Last Years Value'] === 0)) )
-    //sort the data by category so that each category is clumped on the graph.
-    data = data.sort(function(a,b){
-      var categoryA = a.cat.toLowerCase(), categoryB = b.cat.toLowerCase()
-      if (categoryA > categoryB){
-        return -1
-      }
-      if (categoryA < categoryB){
-        return 1
-      }
-    })
-    //console.log(data)
-   return data
-  }
-  // the selected bar state is changed when this function fires
-  onBarClick(bar) {
-    this.setState({selectedBar: bar});
-  }
-  // this function updates the chart info panel beside the chart whenever the selected bar changes
-  renderSelectedBar(bar) {
-    // the following code generates the unique messages for each of the breakpoints >2.5%, <2.5% and if there were new values added with no previous existing values in the legacy data.
-      var n = testValues.Fields_Diffs[bar.name]
-      var o = testValues.County_Info.Legacy[bar.name]
-      var t = testValues.County_Info.Total_Records
-      var pct = getPcnt(o, n)
-      var less = "<u><b id='less'>fewer</u></b>"
-      var more = "<u><b id='more'>more</b></u>"
-      var newV = "<u><b id='more'>new</b></u>"
-      var refName = bar.name ? "https://www.sco.wisc.edu/parcels/Submission_Documentation.pdf#nameddest=" + bar.name.toString().toLowerCase() : "blank"
-      var target = "_blank"
-
-      var total = pct.toString().replace("-", "") + "%  (" + Math.abs(Number(n)).toLocaleString(navigator.language, { minimumFractionDigits: 0 }) + " of " + Number(o).toLocaleString(navigator.language, { minimumFractionDigits: 0 }) + " records)"
-          if (pct > 2.5) {
-              var sub = pct + "% " + more + " non-null values than V4 data.<br><br>"
-              var text = "There are " + pct + "% " + more + " " + `<a href=${refName} target=${target}>` + bar.name + "</a>" + " values than the number present in the final V4 data. This condition suggests there may be a problem within the " + bar.name + " field, please examine this field. This condition may also be the result of new parcels or new values added to the data (in which case they can be left as is.)";
-          }
-          else if (pct < -2.5) {
-              pct = pct.toString().replace("-", "")
-              var sub = pct + "% " + less + "  non-null values than V4 data.<br><br>"
-              var text = "There are " + pct + "% " + less + " "+ bar.name + " values than the number present in the final V4 data. This condition suggests there may be a problem within the " + bar.name + " field, please examine this field."
-          }
-          else if (pct > -2.5 && pct < 2.5) {
-              if ((pct < 2.5) && (pct > 0)) {
-                  var sub = pct + "% " + more + " non-null values than V4 data.<br><br>"
-                  var text = "There are " + pct + "% " + more + " " + bar.name + " values than the number present in the final V4 data."
-              }
-              else if ((pct > -2.5) && (pct < 0)) {
-                  pct = pct.toString().replace("-", "")
-                  var sub = pct + "% " + less + " non-null values than V4 data.<br><br>"
-                  var text = "There are " + pct + "% " + less + " " + bar.name + " values than the number present in the final V4 data."
-              }
-
-          }
-          else if (bar.name && isNaN(pct)){
-              var sub = n + " " + newV + " non-null values added since V4 data submission. <br><br>"
-              var text = "Keep up the good work!"
-          }
-       return (
-           <div className='infoPanel'>
-               <div id="tooltip">
-                 <strong id= "infoTitle">
-                   {bar.name}
-                 </strong>
-
-                 {sub ? <div dangerouslySetInnerHTML={{ __html: "<br>" + sub}}></div> : <strong>Click on a bar to display info.</strong>}
-                 <div dangerouslySetInnerHTML={{ __html: text}}></div>
-                 {isFinite(pct) ? <footer dangerouslySetInnerHTML={{ __html: total}}></footer> :  " "}
-               </div>
-           </div>
-       );
-    }
-    // Function to add % signs to the Yaxis
-    formatY(tickitem){
-      return tickitem + "%"
-    }
-
-    startHelp =() => {
-      if (this.state.helpName == 'Stop!') {
-          this.setState({helpName:"Start Tutorial"})
-          administerTutorial("stop")
-      } else {
-          this.setState({helpName:"Stop!"})
-          administerTutorial("start")
-      }
-    }
     //main render function of the App component
    render() {
      const mr = this.state.validation.Records_Missing;
@@ -245,34 +80,6 @@ class App extends React.Component {
                 <h2>Submission Comparison</h2>
                 <p>BELOW IS A COMPARISON OF COMPLETENESS VALUES FROM YOUR PREVIOUS PARCEL SUBMISSION AND THIS CURRENT SUBMISSION. <text class='attention'>If the value shown is a seemingly large negative number, please verify that all data was joined correctly and no data was lost during processing</text>. Note: This does not necessarily mean your data is incorrect, we just want to highlight large discrepancies that could indicate missing or incorrect data. <text class="click-note">(click element for info)</text><ExtraInfo></ExtraInfo></p>
                 <div id="chart">
-
-                  <ResponsiveContainer className="chartChart" width="60%" height={350}>
-                    <BarChart  data={this.data()}
-                          margin={{top: 5, right: 30, left: 20, bottom: 5}}>
-                       <CartesianGrid strokeDasharray="2 2"/>
-                       <XAxis dataKey="name" hide="true"/>
-                       <YAxis tickCount={7} tickFormatter={this.formatY}/>
-                       <TooltipChart content={<CustomTooltip/>}/>
-                       <Legend payload={
-                        [
-                          { id: 'General', value: 'General', type: 'rect', color: catColors.general},
-                          { id: 'Address', value: 'Address', type: 'rect', color: catColors.address},
-                          { id: 'Tax', value: 'Tax', type: 'rect', color: catColors.tax},
-                        ]
-                       }/>
-                       <ReferenceLine y={0} stroke='#000'/>
-                       <Bar onClick={this.onBarClick.bind(this)} dataKey="Percentage of Last Years Value">
-                        {
-                          this.data().map((entry, index) => (
-                            <Cell  stroke={entry.name === this.state.selectedBar.name ? '#FFC90E' : "none"} strokeWidth={3} fill={entry.cat === "general" ? catColors.general : entry.cat === "tax" ? catColors.tax : catColors.address }/>
-                          ))
-                        }
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                  <ResponsiveContainer className="chartpair" width="35%" height={150} >
-                    { this.state.selectedBar ? this.renderSelectedBar(this.state.selectedBar) : undefined }
-                  </ResponsiveContainer>
                 </div>
                 <Expand>
                     <Positive positives={fd} fdexp={fdExplained}/>
@@ -286,23 +93,6 @@ class App extends React.Component {
    }
 }
 
-// This component is for the hover tooltips on the chart area.
-class CustomTooltip  extends React.Component{
-  render() {
-    const { active } = this.props;
-    if (active) {
-      const { payload, label } = this.props;
-      return (
-        <div className="custom-tooltip">
-          <p className="label"><b>{label}</b> {":" + payload[0].value}%</p>
-          <p className="intro">{payload[0].payload.tell}</p>
-          <p className="desc">Click for field details.</p>
-        </div>
-      );
-    }
-    return null;
-  }
-};
 //This component renders the "more" information above the chart.
 class ExtraInfo extends React.Component {
     constructor(){
