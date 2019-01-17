@@ -75,7 +75,7 @@ class App extends React.Component {
          <div>
              <div id="summary" className="bricks">
                <h1> {coInfo.CO_NAME.charAt(0) + coInfo.CO_NAME.slice(1).toLowerCase()} Parcel Validation Summary <img className="img-responsive" src="withumb.png" alt="" height="30" width="30"/></h1><hr/>
-               <h4 style = {{textAlign: "left"}}>Summary of possible errors found by the Validation Tool, for which you must:</h4>
+               <h4 style = {{marginLeft: 10, textAlign: "left"}}>Summary of possible errors found by the Validation Tool, for which you must:</h4>
                <ul>
                   <li style = {{textAlign: "left"}}><b>1)</b> Resolve errors in the output feature class (go back to the output feature class and resolve the error by making the data consistent wit hthe schema specs in the <a href="https://www.sco.wisc.edu/parcels/Submission_Documentation.pdf" target="_blank">submission documentation</a>)</li>
                   <li style = {{textAlign: "left"}}><b>2)</b> Provide written explanations for any legitimately missing/non-conforming data in the Explain-Certification.txt file.</li>
@@ -96,6 +96,7 @@ class App extends React.Component {
           <div id="row">
             <div id="comparison" className="bricks">
                 <h2>ATTRIBUTE COMPARISON</h2>
+                <hr/>
                 <FieldsList fields={this.state.validation.Fields_Diffs} legacyFields={this.state.validation.County_Info.Legacy} />
             </div>
             <div id="next" className="bricks">
@@ -125,7 +126,6 @@ class FieldsList extends React.Component {
   list(){
     var f = this.props.fields
     var l = this.props.legacyFields
-
     var tableArray = []
     for (var i in f)
       if (Math.abs(l[i] - f[i]) != 0){
@@ -157,10 +157,9 @@ class FieldsList extends React.Component {
 
       return (
       <div className="tablecase">
-        <hr/>
-        <tr className="table" style={{border: "1px solid black", borderWidth: ".5px .5px 1px 0px"}}>{tableHeader[0]}{tableHeader[1]}{first}</tr>
-        <tr className="table" style={{border: "1px solid black", borderWidth: ".5px .5px 1px 0px"}}>{tableHeader[0]}{tableHeader[1]}{second}</tr>
-        <tr className="table" style={{border: "1px solid black", borderWidth: ".5px .5px 1px 0px"}}>{tableHeader[0]}{tableHeader[1]}{third}</tr>
+        <tr className="table" style={{border: "1px solid black",  borderWidth: ".5px 1px 2px 0px"}}>{tableHeader[0]}{tableHeader[1]}{first}</tr>
+        <tr className="table" style={{border: "1px solid black", marginLeft: 50, borderWidth: ".5px 1px 2px 0px"}}>{tableHeader[0]}{tableHeader[1]}{second}</tr>
+        <tr className="table" style={{border: "1px solid black", marginLeft: 50, borderWidth: ".5px 1px 2px 0px"}}>{tableHeader[0]}{tableHeader[1]}{third}</tr>
       </div>
   );
   }
