@@ -12,19 +12,40 @@ function getPcnt(oldNumber, newNumber){
 var fieldStyle = {
   height: 25,
   textAlign: "left",
-  border: ".5px solid black",
-  backgroundColor: "#ffffff",
+  border: ".0px solid black",
+  backgroundColor: "#9c27b000",
   borderBottomWidth: 0,
-  borderRightWidth:.25,
+  borderRightWidth:0.0,
+  minWidth: '131px',
   verticalAlign:"bottom"
 }
 var changeStyle = {
   textAlign: "right",
-  backgroundColor: "#ffffff",
-  border: ".5px solid black",
+  backgroundColor: "#9c27b000",
+  border: ".0px solid black",
   borderBottomWidth: 0,
   borderLeftWidth:0,
+  minWidth: '62px',
   verticalAlign:"bottom"
+}
+var changeHeaderStyle = {
+  textAlign: "left",
+  backgroundColor: "#9c27b000",
+  border: ".0px solid black",
+  borderBottomWidth: 0,
+  borderLeftWidth:0,
+  minWidth: '62px',
+  verticalAlign:"bottom"
+}
+var directiveStyle = {
+  textAlign: "left",
+  backgroundColor: "#9c27b000",
+  border: ".0px solid black",
+  borderBottomWidth: 0,
+  borderLeftWidth:0,
+  minWidth: '131px',
+  verticalAlign:"bottom",
+  paddingLeft:'3px'
 }
 
 //three variables declared for sorting the data into three categories.
@@ -66,8 +87,8 @@ class App extends React.Component {
      const inL = this.state.validation.inLineErrors;
      const inLExplained = this.state.explanations.inLineErrors;
 
-     const bLL = this.state.validation.broadLevelErrors;
-     const bLLExplained = this.state.explanations.broadLevelErrors;
+     const bLL = this.state.validation;
+     const bLLExplained = this.state.explanations;
 
      const coInfo = this.state.validation.County_Info;
       return (
@@ -76,10 +97,10 @@ class App extends React.Component {
              <div id="summary" className="bricks">
                <h1> {coInfo.CO_NAME.charAt(0) + coInfo.CO_NAME.slice(1).toLowerCase()} Parcel Validation Summary <img className="img-responsive" src="withumb.png" alt="" height="30" width="30"/></h1><hr/>
                <h4 style = {{marginLeft: 10, textAlign: "left"}}>Summary of possible errors found by the Validation Tool, for which you must:</h4>
-               <ul>
-                  <li style = {{textAlign: "left"}}><b>1)</b> Resolve errors in the output feature class (go back to the output feature class and resolve the error by making the data consistent wit hthe schema specs in the <a href="https://www.sco.wisc.edu/parcels/Submission_Documentation.pdf" target="_blank">submission documentation</a>)</li>
-                  <li style = {{textAlign: "left"}}><b>2)</b> Provide written explanations for any legitimately missing/non-conforming data in the Explain-Certification.txt file.</li>
-               </ul>
+               <ol>
+                  <li style = {{textAlign: "left"}}><b>Eliminate.</b> Eliminate the flags. Go back to the output feature class to resolve each error by making the data consistent with the schema specs in <a href="https://www.sco.wisc.edu/parcels/Submission_Documentation.pdf" target="_blank">Submission Documentation</a>, or,</li>
+                  <li style = {{textAlign: "left"}}><b>Explain.</b> Provide explanations in writing for any legitimately missing/non-conforming data in the <a href="https://www.sco.wisc.edu/parcels/Submission_Documentation.pdf" target="_blank">Explain-Certification.txt</a> file.</li>
+               </ol>
              </div>
              <div id="row">
                 <div id="inline" className="bricks">
@@ -88,17 +109,15 @@ class App extends React.Component {
 
                 <div id="broad" className="bricks">
                     <BroadLevelErrors broadLevel={bLL} broadLevelexp={bLLExplained} />
-                    <hr/>
-                    <TaxRoll taxroll={tr} taxrollexp={trExplained} />
-                    <MissingRecords missing={mr} missingexp={mrExplained} />
                 </div>
               </div>
-          <div id="row">
-            <div id="comparison" className="bricks">
-                <h2>ATTRIBUTE COMPARISON</h2>
-                <hr/>
-                <FieldsList fields={this.state.validation.Fields_Diffs} legacyFields={this.state.validation.County_Info.Legacy} />
+            <div id="row">
+              <div id="comparison" className="bricks">
+                  <h2>ATTRIBUTE COMPARISON</h2>
+                  <FieldsList fields={this.state.validation.Fields_Diffs} legacyFields={this.state.validation.County_Info.Legacy} />
+              </div>
             </div>
+            <div id="row">
             <div id="next" className="bricks">
               <h2>NEXT STEPS</h2>
                 <ul className="Pdata">
@@ -112,11 +131,10 @@ class App extends React.Component {
                     <li>parcel feature class with tax roll data</li>
                     <li>other layers: PLSS, RML</li>
                     </ul></li>
-                </ul>
+                  </ul>
+              </div>
             </div>
           </div>
-
-         </div>
       );
    }
 }
@@ -127,15 +145,18 @@ class FieldsList extends React.Component {
     var f = this.props.fields
     var l = this.props.legacyFields
     var tableArray = []
-    for (var i in f)
-      if (Math.abs(l[i] - f[i]) != 0){
-        tableArray.push(
-          <tr style={{ backgroundColor: "#ffffff"}} mag= {l[i] - f[i]}>
-            <td style={fieldStyle}><a href={"https://www.sco.wisc.edu/parcels/Submission_Documentation.pdf#nameddest=" +  i.toLowerCase()} target="_blank" style={{ fontWeight: 'bold', padding: '10px'}}>{i + ": "}</a></td>
-            <td style={changeStyle}><a style={{ padding: '10px'}}>{l[i] - f[i]}</a></td>
-          </tr>
-
-        );
+    for (var i in f){
+      var directiveString = ""
+      if (Math.abs(f[i]) != 0){
+        directiveString = "records compared to last year's dataset. Inspect the "+ i +" field for possible errors/omissions."
+      } 
+      tableArray.push(
+        <tr style={{ backgroundColor: "#9c27b000"}} mag= {l[i] - f[i]}>
+          <td style={fieldStyle}><a href={"https://www.sco.wisc.edu/parcels/Submission_Documentation.pdf#nameddest=" +  i.toLowerCase()} target="_blank" style={{ fontWeight: 'bold', padding: '3px'}}>{i + ": "}</a></td>
+          <td style={changeStyle}><a style={{ padding: '3px'}}>{(Number(f[i])).toLocaleString(navigator.language, { minimumFractionDigits: 0 })}</a></td>
+          <td style={directiveStyle}>{directiveString}</td>
+        </tr>
+      );
       }
       /**
       tableArray = tableArray.sort(function(a,b){
@@ -145,21 +166,18 @@ class FieldsList extends React.Component {
        })
        **/
       return tableArray
+    
 }
   render() {
     var array = this.list()
-    var m = Math.floor(array.length / 3)
-    var n = Math.ceil(2 * array.length / 3)
-    var first = array.slice(0, m)
-    var second = array.slice(m, n)
-    var third = array.slice(n, array.length)
-    var tableHeader = [<th style={fieldStyle}><a style={{ padding: '10px'}}>Field</a></th>, <th style={changeStyle}><a style={{ padding: '10px'}}>Change</a></th>]
+    var m = Math.floor(array.length / 2)
+    var first = array.slice(0, array.length)
+    //var second = array.slice(m, array.length)
+    var tableHeader = [<th style={fieldStyle}><a style={{ padding: '3px'}}></a></th>, <th colspan='2' style={changeHeaderStyle}><a style={{ padding: '3px'}}>Difference Versus Last Year's Dataset</a></th>]
 
       return (
       <div className="tablecase">
-        <tr className="table" style={{border: "1px solid black",  borderWidth: ".5px 1px 2px 0px"}}>{tableHeader[0]}{tableHeader[1]}{first}</tr>
-        <tr className="table" style={{border: "1px solid black", marginLeft: 50, borderWidth: ".5px 1px 2px 0px"}}>{tableHeader[0]}{tableHeader[1]}{second}</tr>
-        <tr className="table" style={{border: "1px solid black", marginLeft: 50, borderWidth: ".5px 1px 2px 0px"}}>{tableHeader[0]}{tableHeader[1]}{third}</tr>
+        <tr className="table" style={{border: "0.0px solid black", borderWidth: "0px 0px 0px 0px"}}>{tableHeader[0]}{tableHeader[1]}{first}</tr>
       </div>
   );
   }
@@ -173,16 +191,20 @@ class InLineErrors extends React.Component {
       var listArray = []
       var taxOrderAray = ["General_Errors","Address_Errors","Tax_Errors","Geometric_Errors"] // Determines the order of elements from top to bottom
       for (var l in taxOrderAray){
-          var i = taxOrderAray[l]
-          var x = i.split("_").join(" ")
-          var lv = (Number(p[i])).toLocaleString(navigator.language, { minimumFractionDigits: 0 })
-
-          listArray.push(
-            <tr>
-              <td style={fieldStyle}><a style={{ fontWeight: 'bold', padding: '10px'}}>{x + ": "}</a></td>
-              <td style={changeStyle}><a style={{ padding: '10px'}}>{lv}</a></td>
-            </tr>
-          );
+        var i = taxOrderAray[l]
+        var x = i.split("_").join(" ")
+        if (Number(p[i]) == 0){
+          var lv = "None."
+        }else{
+          var lv = (Number(p[i])).toLocaleString(navigator.language, { minimumFractionDigits: 0 }) + "  possible errors found.  See the attribute table in the output feature class to resolve these."
+        }
+        
+        listArray.push(
+          <div class="general-file-errors">
+            <text style={{ fontWeight:'bold'}}>{x + ": "}</text>
+            <text style={{ padding: '1px'}}>{lv}</text>
+          </div>
+        );
       }
       return listArray
     }
@@ -190,21 +212,32 @@ class InLineErrors extends React.Component {
     return (
      <div>
        <h2 id = "smallerrors"> FLAGS IN OUTPUT FEATURE CLASS</h2>
-       <p>The following lines summarize the element-specific errors that were found while validating your parcel dataset.  The stats below are meant as a means of reviewing the output.  <text class='attention'>Please see the GeneralElementErrors, AddressElementErrors, TaxrollElementErrors, and GeometricElementErrors fields within the output feature class to address these errors individually</text>. </p>
-       <tr className="table" style={{border: "1px solid black", borderWidth: ".5px .5px 1px 0px"}}>{this.list()}</tr>
+       <div class="flags-in-fc">
+          {this.list()}
+      </div>
+       <p class="flag-note">*There are detailed error messages associated with these flags, which have been added to your output feature class. Scroll to the far right of the attribute table, sort each of the 4 error fields in descending order, and work to either <b>eliminate</b> or <b>explain</b> each error message.</p>
      </div>
     );
     }
 }
-
+var Geometric_Misplacement_Flag_Link = "Please review the directives in the documentation here: <a class='breakable' href='http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf' target='_blank'>http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf</a> (section #2) for advice on how to project native data to the Statewide Parcel CRS."
+var Coded_Domain_Fields_Link = "Please ensure that all coded domains are removed from the feature class before submitting."
+var Geometric_File_Error_Link = "Please review the directives in the documentation here: <a class='breakable' href='https://www.sco.wisc.edu/parcels/tools/Validation/Validation_and_Submission_Tool_Guide.pdf#nameddest=geometric_file_errors' target='_blank'>https://www.sco.wisc.edu/parcels/tools/Validation/Validation_and_Submission_Tool_Guide.pdf#nameddest=geometric_file_errors</a>"
+var Geometric_Misplacement_Flag_Pre = ""
+var Coded_Domain_Fields_Pre = "<text class='normal-text'>The following fields contain coded domains or subtypes: </text>"
+var Geometric_File_Error_Pre = ""
+var Geometric_Misplacement_Flag_Attn = "Geometries appear to be misplaced."
+var Coded_Domain_Fields_Attn = "Coded domains or subtypes were found."
+var Geometric_File_Error_Attn = "Click for detail."
 //This component renders the list of broad level errors items and sets up a tooltip on them to render on click.
 class BroadLevelErrors extends React.Component {
   list(){
-    var p = this.props.broadLevel
-    var e = this.props.broadLevelexp
+    /////////////////////////////
+    // Add general (broad-level) errors
+    var p = this.props.broadLevel.broadLevelErrors
+    var e = this.props.broadLevelexp.broadLevelErrors
     var listArray = []
     for (var i in p){
-
        var x = i.split("_").join(" ")
         if ((p[i] == "None")||(p[i] == "")) {
             var z = ""
@@ -214,14 +247,54 @@ class BroadLevelErrors extends React.Component {
         else if ((p[i] != "None")&&(p[i] != "")) {
             var splitable = String(p[i])
             var z = "<p>" + window[ i + "_Pre"] + "</p><p><b>" + splitable.split(" Please see ")[0] + "</b>"
-            var t = "<text class='attention-required'>Attention required! </text>" + window[ i + "_Attn"]
+            var t = "Attention required! " + window[ i + "_Attn"]
             var y = window[ i + "_Link"]
         }
         listArray.push(
-          <tr>
-            <td style={fieldStyle}><a style={{ fontWeight:'bold', padding:'10px'}}>{x + ": "}</a></td>
-            <td style={changeStyle}><a style={{ padding: '10px'}}>{t + " " + z}</a></td>
-          </tr>
+            <div class="general-file-errors">
+              <text style={{ fontWeight:'bold'}}>{x + ": "}</text>
+              <text style={{ padding: '1px'}}>{t}</text>
+            </div>
+        );
+    }
+    
+    /////////////////////////////
+    // Add missing records
+    var m = this.props.broadLevel.Records_Missing
+    for (var l in m){
+      var y = l.split("_").join(" ")
+      if (Number(m[l]) == 0){
+        var lv = "None."
+      }else{
+        var lv = (Number(m[l])).toLocaleString(navigator.language, { minimumFractionDigits: 0 }) + " missing values in this field. Please ensure that all values in the " + y + " field are populated appropriately."
+      }
+      listArray.push(
+          <div class="general-file-errors">
+            <text style={{ fontWeight:'bold'}}>{ y + ": "}</text>
+            <text style={{ padding: '1px'}}>{lv}</text>
+          </div>
+      );
+    }
+    listArray.push(
+      <div class="general-file-errors">
+        <br></br>
+        <br></br>
+      </div>
+  );
+    /////////////////////////////
+    // Add tax roll year errors
+    var p = this.props.broadLevel.Tax_Roll_Years_Pcnt
+    var orderArray = [["Expected_Taxroll_Year","TAXROLLYEAR \"2018\" (Expected year value)"], ["Previous_Taxroll_Year","TAXROLLYEAR \"2017\" (Previous year value)"], ["Future_Taxroll_Years","TAXROLLYEAR \"2019\" (Future year value)"], [ "Other_Taxroll_Years", "TAXROLLYEAR (Other year values)"]] // Determines the order to which the elements appear from top to bottom
+    for (var l in orderArray){
+      //console.log(p)
+      var i = orderArray[l][0]
+      var x = orderArray[l][1] //.split("_").join(" ")
+      var z = x.replace(/Taxroll/g, "Tax Roll")
+        listArray.push(
+            <div class="general-file-errors">
+              <text style={{ fontWeight:'bold'}}>{ z + ": "}</text>
+              <text style={{ padding: '1px'}}>{p[i]+ "%"}</text>
+            </div>
         );
     }
     return listArray
@@ -230,14 +303,13 @@ class BroadLevelErrors extends React.Component {
     return (
        <div>
         <h2 id = "smallerrors"> GENERAL FILE ERRORS</h2>
-        <p>The following lines explain any broad geometric errors that were found while validating your parcel dataset.
-        If any of the "Missing Records" values are greater than 0, please add missing values. </p>
-        <tr className="table" style={{border: "1px solid black", borderWidth: ".5px .5px 1px 0px"}} > {this.list()}</tr>
+        <div> {this.list()}</div>
        </div>
     );
   }
 }
 ////This component renders the list of Taxroll errors items and sets up a tooltip on them to render on click.
+/* TaxRoll and MissingRecords classes Removed and content added to GENERAL FILE ERRORS
 class TaxRoll extends React.Component {
     list(){
       var p = this.props.taxroll
@@ -338,7 +410,7 @@ class MissingRecords extends React.Component {
     }
 }
 // The following three components render the lists of Positive, Negative, and Zero value fields in the expandable area below the chart. They also setup a tooltip
-
+*/
 
 
 ReactDOM.render(<App/>,document.getElementById('root'));

@@ -4,12 +4,45 @@ body {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
+@media (min-width: 1185px){
+  body {
+    font-size: 12pt;
+  }
+}
+@media (min-width: 1185px){
+  @media (max-width: 1300px){
+    body {
+      font-size: 11pt !important;
+    }
+  }
+}
+@media (min-width: 1080px){
+  @media (max-width: 1184px){
+    body {
+      font-size: 10pt !important;
+    }
+  }
+}
+@media (max-width: 1080px){
+  body {
+    font-size: 10pt !important;
+  }
+  #inline{
+    overflow-y: scroll;
+  }
+  #broad{
+    overflow-y: scroll;
+  }
+}
+
 p {
     padding-left: 10px;
     padding-right: 10px;
     color: #4C4C4C;
 }
-
+a {
+  text-decoration: none;
+}
 .tippy-tooltip{
   border-radius: 0px !important;
 }
@@ -60,6 +93,10 @@ p {
     word-break: break-word;
 
 }
+#comparison  {
+  overflow: visible !important;
+}
+
 #comparison, #next  {
     display: inline-block;
     overflow: auto;
@@ -70,27 +107,40 @@ p {
 }
 
 #comparison{
-  height: 500px;
-  width: calc(64.5% - 4px);
+  height: 100%;
+  width: calc(100% - 4px);
 }
 
 #next{
-  height: 500px;
-  float:right;
-  width: calc(35% - 4px);
+  height: 100%;
+  width: calc(100% - 4px);
+  padding-bottom: 25px;
+  margin-bottom: 25px;
 }
 
 #inline{
-  height: 400px;
+  height:  315px;
   width: calc(35% - 4px);
   float: right;
 }
 #broad{
-  height: 400px;
+  height:  315px;
     display: inline-block;
    width: calc(64.5% - 4px);
 }
-
+ol {
+  counter-reset: list;
+}
+ol > li {
+  list-style: none;
+  position: relative;
+}
+ol > li:before {
+  counter-increment: list;
+  content: counter(list) ") ";
+  position: absolute;
+  left: -1.4em;
+}
 #comparison h2 {
     text-align: center;
 }
@@ -98,12 +148,16 @@ p {
 #next h2 {
   text-align: center;
 }
+.general-file-errors{
+  padding-left:10px;
+}
+
 .bricks {
     border: 2px solid #818181; /*#337ab7;*/
     border-radius: 2px;
     background-color: #ECECEC;
     margin: auto;
-    margin-top: 1%;
+    margin-top: 0.5vw;
 }
 .table{
   margin-left: 10px;
@@ -112,6 +166,7 @@ p {
 }
 .tablecase{
   padding-left: 10px;
+  margin-bottom:10px;
 }
 
 #broadlevel{
