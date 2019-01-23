@@ -235,7 +235,7 @@ class FieldsList extends React.Component {
     var m = Math.floor(array.length / 2)
     var first = array.slice(0, array.length)
     //var second = array.slice(m, array.length)
-    var tableHeader = [<th style={fieldStyle}><a style={{ padding: '3px'}}></a></th>, <th colspan='2' style={changeHeaderStyle}><a style={{ padding: '3px'}}>Difference Versus Last Year's Dataset - Click attribute name to view schema definition</a></th>]
+    var tableHeader = [<th style={fieldStyle}><a style={{ padding: '3px'}}></a></th>, <th colspan='2' style={changeHeaderStyle}><a style={{ padding: '3px'}}>Difference Compared to Last Year's Dataset - Click attribute name to view schema definition</a></th>]
 
       return (
       <div className="tablecase">
