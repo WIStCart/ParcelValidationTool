@@ -9,6 +9,51 @@ function getPcnt(oldNumber, newNumber){
     return percentDifference.toLocaleString(navigator.language, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
   }
 };
+var schemaOrder = ["STATEID",
+  "PARCELID",
+  "TAXPARCELID",
+  "PARCELDATE",
+  "TAXROLLYEAR",
+  "OWNERNME1",
+  "OWNERNME2",
+  "PSTLADRESS",
+  "SITEADRESS",
+  "ADDNUMPREFIX",
+  "ADDNUM",
+  "ADDNUMSUFFIX",
+  "PREFIX",
+  "STREETNAME",
+  "STREETTYPE",
+  "SUFFIX",
+  "LANDMARKNAME",
+  "UNITTYPE",
+  "UNITID",
+  "PLACENAME",
+  "ZIPCODE",
+  "ZIP4",
+  "STATE",
+  "SCHOOLDIST",
+  "SCHOOLDISTNO",
+  "IMPROVED",
+  "CNTASSDVALUE",
+  "LNDVALUE",
+  "IMPVALUE",
+  "FORESTVALUE",
+  "ESTFMKVALUE",
+  "NETPRPTA",
+  "GRSPRPTA",
+  "PROPCLASS",
+  "AUXCLASS",
+  "ASSDACRES",
+  "DEEDACRES",
+  "GISACRES",
+  "CONAME",
+  "LOADDATE",
+  "PARCELFIPS",
+  "PARCELSRC",
+  "LONGITUDE",
+  "LATITUDE"]
+
 var fieldStyle = {
   height: 25,
   textAlign: "left",
@@ -95,8 +140,8 @@ class App extends React.Component {
 
          <div>
              <div id="summary" className="bricks">
-               <h1> {coInfo.CO_NAME.charAt(0) + coInfo.CO_NAME.slice(1).toLowerCase()} Parcel Validation Summary <img className="img-responsive" src="withumb.png" alt="" height="30" width="30"/></h1><hr/>
-               <h4 style = {{marginLeft: 10, textAlign: "left"}}>Summary of possible errors found by the Validation Tool, for which you must:</h4>
+               <h1>Validation Summary Page - {coInfo.CO_NAME.charAt(0) + coInfo.CO_NAME.slice(1).toLowerCase()} <img className="img-responsive" src="withumb.png" alt="" height="30" width="30"/></h1>
+               <div style = {{marginLeft: 10, textAlign: "left"}}>Summary of possible errors found by the Validation Tool, for which you must:</div>
                <ol>
                   <li style = {{textAlign: "left"}}><b>Eliminate.</b> Eliminate the flags. Go back to the output feature class to resolve each error by making the data consistent with the schema specs in <a href="https://www.sco.wisc.edu/parcels/Submission_Documentation.pdf" target="_blank">Submission Documentation</a>, or,</li>
                   <li style = {{textAlign: "left"}}><b>Explain.</b> Provide explanations in writing for any legitimately missing/non-conforming data in the <a href="https://www.sco.wisc.edu/parcels/Submission_Documentation.pdf" target="_blank">Explain-Certification.txt</a> file.</li>
@@ -145,18 +190,35 @@ class FieldsList extends React.Component {
     var f = this.props.fields
     var l = this.props.legacyFields
     var tableArray = []
-    for (var i in f){
-      var directiveString = ""
-      if (Math.abs(f[i]) != 0){
-        directiveString = "records compared to last year's dataset. Inspect the "+ i +" field for possible errors/omissions."
-      } 
-      tableArray.push(
-        <tr style={{ backgroundColor: "#9c27b000"}} mag= {l[i] - f[i]}>
-          <td style={fieldStyle}><a href={"https://www.sco.wisc.edu/parcels/Submission_Documentation.pdf#nameddest=" +  i.toLowerCase()} target="_blank" style={{ fontWeight: 'bold', padding: '3px'}}>{i + ": "}</a></td>
-          <td style={changeStyle}><a style={{ padding: '3px'}}>{(Number(f[i])).toLocaleString(navigator.language, { minimumFractionDigits: 0 })}</a></td>
-          <td style={directiveStyle}>{directiveString}</td>
-        </tr>
-      );
+    var i = ""
+    for (var g in schemaOrder){ // Use schemaOrder to implement the order of the Statewide Schema
+      if(f.hasOwnProperty(schemaOrder[g])){ // some fields in the schemaOrder are not displayed (dont exist in the output .JSON from the tool)
+        i = schemaOrder[g]
+        var directiveString = ""
+        var valueString = ""
+        var negativeAddOn = "/omissions"
+        
+        if ((f[i]) > 0){
+          valueString = <text>+ {String((Number(Math.abs(f[i]))).toLocaleString(navigator.language, { minimumFractionDigits: 0 }))}</text>
+          negativeAddOn = ""
+        }else{
+          if (Math.abs(f[i]) == 0){
+            valueString = <text>{String((Number(Math.abs(f[i]))).toLocaleString(navigator.language, { minimumFractionDigits: 0 }))}</text>
+          }else{
+            valueString = <text><b>-</b> {String((Number(Math.abs(f[i]))).toLocaleString(navigator.language, { minimumFractionDigits: 0 }))}</text>
+          }
+        }
+        if (Math.abs(f[i]) != 0){
+          directiveString = "records compared to last year's dataset. Inspect the "+ i +" field for possible errors" + negativeAddOn + "."
+        } 
+        tableArray.push(
+          <tr style={{ backgroundColor: "#9c27b000"}} mag= {l[i] - f[i]}>
+            <td style={fieldStyle}><a href={"https://www.sco.wisc.edu/parcels/Submission_Documentation.pdf#nameddest=" +  i.toLowerCase()} target="_blank" style={{ fontWeight: 'bold', padding: '3px'}}>{i + ": "}</a></td>
+            <td style={changeStyle}><a style={{ padding: '3px'}}>{valueString}</a></td>
+            <td style={directiveStyle}>{directiveString}</td>
+          </tr>
+        );
+        }
       }
       /**
       tableArray = tableArray.sort(function(a,b){
@@ -173,7 +235,7 @@ class FieldsList extends React.Component {
     var m = Math.floor(array.length / 2)
     var first = array.slice(0, array.length)
     //var second = array.slice(m, array.length)
-    var tableHeader = [<th style={fieldStyle}><a style={{ padding: '3px'}}></a></th>, <th colspan='2' style={changeHeaderStyle}><a style={{ padding: '3px'}}>Difference Versus Last Year's Dataset</a></th>]
+    var tableHeader = [<th style={fieldStyle}><a style={{ padding: '3px'}}></a></th>, <th colspan='2' style={changeHeaderStyle}><a style={{ padding: '3px'}}>Difference Versus Last Year's Dataset - Click attribute name to view schema definition</a></th>]
 
       return (
       <div className="tablecase">
@@ -184,6 +246,16 @@ class FieldsList extends React.Component {
 }
 
 //This component renders the list of inline errors items and sets up a tooltip on them to render on click.
+var greater0 = {
+  padding: '0px',
+  color: '#dc143c',
+  fontWeight:'bold'
+}
+var equalLess0 = {
+  padding: '0px',
+  color: '#000000',
+  fontWeight:'bold'
+}
 class InLineErrors extends React.Component {
     list(){
       var p = this.props.inline
@@ -192,17 +264,22 @@ class InLineErrors extends React.Component {
       var taxOrderAray = ["General_Errors","Address_Errors","Tax_Errors","Geometric_Errors"] // Determines the order of elements from top to bottom
       for (var l in taxOrderAray){
         var i = taxOrderAray[l]
-        var x = i.split("_").join(" ")
+        var x = i.split("_").join(" Element ")
         if (Number(p[i]) == 0){
           var lv = "None."
+          var lv2 = ""
+          var st = equalLess0
         }else{
-          var lv = (Number(p[i])).toLocaleString(navigator.language, { minimumFractionDigits: 0 }) + "  possible errors found.  See the attribute table in the output feature class to resolve these."
+          var lv = (Number(p[i])).toLocaleString(navigator.language, { minimumFractionDigits: 0 })  
+          var lv2 = " possible errors found.  See the attribute table in the output feature class to resolve these."
+          var st = greater0
         }
         
         listArray.push(
           <div class="general-file-errors">
             <text style={{ fontWeight:'bold'}}>{x + ": "}</text>
-            <text style={{ padding: '1px'}}>{lv}</text>
+            <text style={ st }>{lv}</text>
+            <text style={{ padding: '0px' }}>{lv2}</text>
           </div>
         );
       }
@@ -215,7 +292,7 @@ class InLineErrors extends React.Component {
        <div class="flags-in-fc">
           {this.list()}
       </div>
-       <p class="flag-note">*There are detailed error messages associated with these flags, which have been added to your output feature class. Scroll to the far right of the attribute table, sort each of the 4 error fields in descending order, and work to either <b>eliminate</b> or <b>explain</b> each error message.</p>
+       <p class="flag-note">*There are detailed error messages associated with these flags, which have been added to your output feature class.<br></br><br></br> Scroll to the far right of the attribute table, sort each of the 4 error fields in descending order, and work to either <b style={{ color:'#000000'}}>eliminate</b> or <b style={{ color:'#000000'}}>explain</b> each error message.</p>
      </div>
     );
     }
@@ -257,6 +334,11 @@ class BroadLevelErrors extends React.Component {
             </div>
         );
     }
+    listArray.push(
+      <div class="general-file-errors">
+        <br></br>
+      </div>
+    );
     
     /////////////////////////////
     // Add missing records
@@ -266,7 +348,7 @@ class BroadLevelErrors extends React.Component {
       if (Number(m[l]) == 0){
         var lv = "None."
       }else{
-        var lv = (Number(m[l])).toLocaleString(navigator.language, { minimumFractionDigits: 0 }) + " missing values in this field. Please ensure that all values in the " + y + " field are populated appropriately."
+        var lv = (Number(m[l])).toLocaleString(navigator.language, { minimumFractionDigits: 0 }) + " missing values in this field. Populate " + y + " for ALL records in the dataset."
       }
       listArray.push(
           <div class="general-file-errors">
@@ -278,9 +360,8 @@ class BroadLevelErrors extends React.Component {
     listArray.push(
       <div class="general-file-errors">
         <br></br>
-        <br></br>
       </div>
-  );
+    );
     /////////////////////////////
     // Add tax roll year errors
     var p = this.props.broadLevel.Tax_Roll_Years_Pcnt
@@ -414,3 +495,4 @@ class MissingRecords extends React.Component {
 
 
 ReactDOM.render(<App/>,document.getElementById('root'));
+

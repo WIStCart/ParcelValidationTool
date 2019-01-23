@@ -3,7 +3,13 @@ body {
     margin: 0;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
-
+ol{
+  margin-top: 2px;
+  margin-left: 35px;
+}
+h2{
+  margin-bottom: 9px;
+}
 @media (min-width: 1185px){
   body {
     font-size: 12pt;
