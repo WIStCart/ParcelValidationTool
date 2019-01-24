@@ -69,7 +69,7 @@ class Error:
 				self.nextEnvelopeInterval = self.nextEnvelopeInterval + self.checkEnvelopeInterval
 		elif self.nextEnvelopeInterval < 4000000 and self.nextEnvelopeInterval >= (100 * self.checkEnvelopeInterval):
 			if self.validatedGeomCount == 0 and self.notConfirmGeomCount == 0: #no parcel geometry was checked -- likely ParcelIds are different from previous years
-				arcpy.AddMessage("The PARCELID within the dataset may not match the PARCELID submitted the previous year. \n" )
+				#arcpy.AddMessage("The PARCELID within the dataset may not match the PARCELID submitted the previous year. \n" )
 				self.nextEnvelopeInterval = 4000000
 				self.geometryNotChecked = False   # flag for county centroid check funcion
 			elif self.notConfirmGeomCount  > 0:
@@ -264,7 +264,7 @@ class Error:
 					#arcpy.AddMessage("This value is <Null>... or exists in our list...")
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("The value in the " + field.upper() + " does not appear to be in a list created from last year data. Please verify this value is appropriately placed in this field.")
+					getattr(Parcel,errorType + "Errors").append("The value in the " + field.upper() + " does not appear to be in a list created from data of last year. Please verify this value is appropriately placed in this field.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return (Error,Parcel)
 			else:
@@ -351,7 +351,7 @@ class Error:
 				if stringToTest.strip() in stNameDict[coname]:
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " does not appear in list created from last year data. Please verify this value contains only the STREETNAME and street name is correct.")
+					getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " does not appear in list created from data of last year. Please verify this value contains only the STREETNAME and street name is correct.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return(Error, Parcel)
 			else:
