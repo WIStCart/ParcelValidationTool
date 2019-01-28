@@ -167,7 +167,7 @@ var App = function (_React$Component) {
               " Provide explanations in writing for any legitimately missing/non-conforming data in the ",
               React.createElement(
                 "a",
-                { href: "https://www.sco.wisc.edu/parcels/Submission_Documentation.pdf", target: "_blank" },
+                { href: "http://www.sco.wisc.edu/parcels/Validation_Tool_Guide.pdf#nameddest=inputting_explain_certification", target: "_blank" },
                 "Explain-Certification.txt"
               ),
               " file."
@@ -214,57 +214,58 @@ var App = function (_React$Component) {
               "NEXT STEPS"
             ),
             React.createElement(
+              "h3",
+              { "class": "next-steps-h3 margin-h3" },
+              "VALIDATE WITH VALIDATION TOOL"
+            ),
+            React.createElement(
               "ul",
               { className: "Pdata" },
               React.createElement(
                 "li",
                 null,
-                "Resolve errors in output feature class and/or provide explanations for legitimate missing/non-conforming data in the Explain-Certification.txt file."
-              ),
-              React.createElement(
-                "li",
-                null,
-                "Complete and save your Explain-Certification.txt file."
-              ),
-              React.createElement(
-                "li",
-                null,
-                "Run the Validation Tool in FINAL mode. Input yout Explain-Certification.txt file in the tool in section 2."
-              ),
-              React.createElement(
-                "li",
-                null,
-                "Save the resulting \".ini\" file -- which is your ",
+                "Work to either ",
                 React.createElement(
                   "b",
-                  null,
-                  "mandatory"
+                  { style: { color: "#000000" } },
+                  "eliminate"
                 ),
-                " submission form."
+                " or ",
+                React.createElement(
+                  "b",
+                  { style: { color: "#000000" } },
+                  "explain"
+                ),
+                " each error message on this Validation_Summary_Page"
               ),
               React.createElement(
                 "li",
                 null,
-                "Zip and submit:",
-                React.createElement(
-                  "ul",
-                  null,
-                  React.createElement(
-                    "li",
-                    null,
-                    ".ini submission form"
-                  ),
-                  React.createElement(
-                    "li",
-                    null,
-                    "parcel feature class with tax roll data"
-                  ),
-                  React.createElement(
-                    "li",
-                    null,
-                    "other layers: PLSS, RML"
-                  )
-                )
+                "Run Validation Tool in FINAL mode"
+              ),
+              React.createElement(
+                "li",
+                null,
+                "Input your Explain-Certification.txt file"
+              ),
+              React.createElement(
+                "li",
+                null,
+                "Save the \".ini\" file\u2014which is your *mandatory* submission form"
+              )
+            ),
+            React.createElement(
+              "h3",
+              { "class": "next-steps-h3" },
+              "ZIP & SUBMIT"
+            ),
+            React.createElement(
+              "ul",
+              { className: "Pdata" },
+              React.createElement(
+                "li",
+                null,
+                "Submit .ini Submission Form + data"
               )
             )
           )

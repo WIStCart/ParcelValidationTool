@@ -144,7 +144,7 @@ class App extends React.Component {
                <div style = {{marginLeft: 10, textAlign: "left"}}>Summary of possible errors found by the Validation Tool, for which you must:</div>
                <ol>
                   <li style = {{textAlign: "left"}}><b>Eliminate.</b> Eliminate the flags. Go back to the output feature class to resolve each error by making the data consistent with the schema specs in <a href="https://www.sco.wisc.edu/parcels/Submission_Documentation.pdf" target="_blank">Submission Documentation</a>, or,</li>
-                  <li style = {{textAlign: "left"}}><b>Explain.</b> Provide explanations in writing for any legitimately missing/non-conforming data in the <a href="https://www.sco.wisc.edu/parcels/Submission_Documentation.pdf" target="_blank">Explain-Certification.txt</a> file.</li>
+                  <li style = {{textAlign: "left"}}><b>Explain.</b> Provide explanations in writing for any legitimately missing/non-conforming data in the <a href="http://www.sco.wisc.edu/parcels/Validation_Tool_Guide.pdf#nameddest=inputting_explain_certification" target="_blank">Explain-Certification.txt</a> file.</li>
                </ol>
              </div>
              <div id="row">
@@ -165,19 +165,18 @@ class App extends React.Component {
             <div id="row">
             <div id="next" className="bricks">
               <h2>NEXT STEPS</h2>
+              <h3 class="next-steps-h3 margin-h3">VALIDATE WITH VALIDATION TOOL</h3>
                 <ul className="Pdata">
-                  <li>Resolve errors in output feature class and/or provide explanations for legitimate missing/non-conforming data in the Explain-Certification.txt file.</li>
-                  <li>Complete and save your Explain-Certification.txt file.</li>
-                  <li>Run the Validation Tool in FINAL mode. Input yout Explain-Certification.txt file in the tool in section 2.</li>
-                  <li>Save the resulting ".ini" file -- which is your <b>mandatory</b> submission form.</li>
-                  <li>Zip and submit:
-                    <ul>
-                    <li>.ini submission form</li>
-                    <li>parcel feature class with tax roll data</li>
-                    <li>other layers: PLSS, RML</li>
-                    </ul></li>
-                  </ul>
-              </div>
+                  <li>Work to either <b style = {{color:"#000000"}}>eliminate</b> or <b style = {{color:"#000000"}}>explain</b> each error message on this Validation_Summary_Page</li>
+                  <li>Run Validation Tool in FINAL mode</li>
+                  <li>Input your Explain-Certification.txt file</li>
+                  <li>Save the ".ini" file—which is your *mandatory* submission form</li>
+                </ul>
+                <h3 class="next-steps-h3">ZIP & SUBMIT</h3>
+                <ul className="Pdata">
+                  <li>Submit .ini Submission Form + data</li>
+                </ul>
+            </div>
             </div>
           </div>
       );
