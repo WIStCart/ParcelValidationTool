@@ -167,7 +167,7 @@ var App = function (_React$Component) {
               " Provide explanations in writing for any legitimately missing/non-conforming data in the ",
               React.createElement(
                 "a",
-                { href: "http://www.sco.wisc.edu/parcels/Validation_Tool_Guide.pdf#nameddest=inputting_explain_certification", target: "_blank" },
+                { href: "https://www.sco.wisc.edu/parcels/tools/Validation/Validation_Tool_Guide.pdf#nameddest=inputting_explain_certification", target: "_blank" },
                 "Explain-Certification.txt"
               ),
               " file."

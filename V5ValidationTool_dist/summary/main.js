@@ -144,7 +144,7 @@ class App extends React.Component {
                <div style = {{marginLeft: 10, textAlign: "left"}}>Summary of possible errors found by the Validation Tool, for which you must:</div>
                <ol>
                   <li style = {{textAlign: "left"}}><b>Eliminate.</b> Eliminate the flags. Go back to the output feature class to resolve each error by making the data consistent with the schema specs in <a href="https://www.sco.wisc.edu/parcels/Submission_Documentation.pdf" target="_blank">Submission Documentation</a>, or,</li>
-                  <li style = {{textAlign: "left"}}><b>Explain.</b> Provide explanations in writing for any legitimately missing/non-conforming data in the <a href="http://www.sco.wisc.edu/parcels/Validation_Tool_Guide.pdf#nameddest=inputting_explain_certification" target="_blank">Explain-Certification.txt</a> file.</li>
+                  <li style = {{textAlign: "left"}}><b>Explain.</b> Provide explanations in writing for any legitimately missing/non-conforming data in the <a href="https://www.sco.wisc.edu/parcels/tools/Validation/Validation_Tool_Guide.pdf#nameddest=inputting_explain_certification" target="_blank">Explain-Certification.txt</a> file.</li>
                </ol>
              </div>
              <div id="row">
