@@ -364,7 +364,7 @@ class BroadLevelErrors extends React.Component {
     /////////////////////////////
     // Add tax roll year errors
     var p = this.props.broadLevel.Tax_Roll_Years_Pcnt
-    var orderArray = [["Expected_Taxroll_Year","TAXROLLYEAR \"2018\" (Expected year value)"], ["Previous_Taxroll_Year","TAXROLLYEAR \"2017\" (Previous year value)"], ["Future_Taxroll_Years","TAXROLLYEAR \"2019\" (Future year value)"], [ "Other_Taxroll_Years", "TAXROLLYEAR (Other year values)"]] // Determines the order to which the elements appear from top to bottom
+    var orderArray = [["Expected_Taxroll_Year","TAXROLLYEAR \"2018\" (Expected year value)"], ["Previous_Taxroll_Year","TAXROLLYEAR \"2017\" (Previous year value)"], ["Future_Taxroll_Years","TAXROLLYEAR \"2019 or 2020\" (Future year values)"], [ "Other_Taxroll_Years", "TAXROLLYEAR (Other year values)"]] // Determines the order to which the elements appear from top to bottom
     for (var l in orderArray){
       //console.log(p)
       var i = orderArray[l][0]
