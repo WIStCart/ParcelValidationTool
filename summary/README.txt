@@ -7,3 +7,4 @@ How to Compile the .jsx code into .js (There are other routes to achieving this 
 	b) Paste the entire content of main.js into the window to the left.
 	c) Automatically, the pure .js will populate the right window. Copy it and paste it into main_compiled.js (replacing any code that previously existed here)
 	d) Thats it, the validation.html will already include main_compiled.js so it should work right away
+4) NOTE that you could consider just editing the existing (compiled) main_compiled.js file and do away with main.js. Or re-writing from scratch, since this aspect of the tool may have some significant changes in the future. 
