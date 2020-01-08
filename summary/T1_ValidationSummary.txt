@@ -1,0 +1,85 @@
+C:\workspace\github\ParcelValidationTool\script\..\summary\T1_ValidationSummary.txt
+Validation Summary Table: 
+This validation summary table contains an overview of any errors found by the Parcel Validation Tool. Please review the contents of this file and make changes to your parcel dataset as necessary.
+
+************************************************************************
+* In-line errors
+************************************************************************
+The following lines summarized the element-specific errors that were found while validating your parcel dataset.  The stats below are meant as a means of reviewing the output.  Please see the GeneralElementErrors, AddressElementErrors, TaxrollElementErrors, and GeometricElementErrors fields to address these errors individually.
+	General Errors: 6
+	Geometric Errors: 0
+	Address Errors: 6
+	Tax Errors: 0
+
+
+************************************************************************
+* Broad-level errors:
+************************************************************************
+The following lines explain any broad geometric errors that were found while validating your parcel dataset.
+	*No broad-level geometric errors found!
+
+
+Percentage of records with various Taxroll Years
+	Previous Taxroll Year: 0.0%
+	Expected Taxroll Year: 100.0%
+	Future Taxroll Years: 0.0%
+	Other Taxroll Years: 0.0%
+
+
+Records missing CONAME, PARCELFIPS, or PARCELSOURCE
+	Missing CONAME: 0
+	Missing PARCELFIPS: 3
+	Missing PARCELSRC: 3
+
+If any of the above values are greater than 0, please add missing values.  These 3 fields should be populated for all records submitted.
+
+
+BELOW IS A COMPARISON OF COMPLETENESS VALUES FROM YOUR PREVIOUS PARCEL SUBMISSION AND THIS CURRENT SUBMISSION.
+-->If the value shown is a seemingly large negative number, please verify that all data was joined correctly and no data was lost during processing.
+-->Note: This does not necessarily mean your data is incorrect, we just want to highlight large discrepancies that could indicate missing or incorrect data.
+
+          FIELD     DIFFERENCE
+         ------     ----------
+       PARCELID:  -26840
+    TAXPARCELID:  0
+     PARCELDATE:  -26242
+    TAXROLLYEAR:  -26840
+      OWNERNME1:  -26006
+      OWNERNME2:  -4160
+     PSTLADRESS:  -25783
+     SITEADRESS:  -10251
+   ADDNUMPREFIX:  -6727
+         ADDNUM:  -10251
+   ADDNUMSUFFIX:  -618
+         PREFIX:  -3963
+     STREETNAME:  -10251
+     STREETTYPE:  -8231
+         SUFFIX:  -41
+   LANDMARKNAME:  0
+       UNITTYPE:  0
+         UNITID:  -5
+      PLACENAME:  -26846
+        ZIPCODE:  -10237
+           ZIP4:  -562
+     SCHOOLDIST:  -26028
+   SCHOOLDISTNO:  -26028
+   CNTASSDVALUE:  -22927
+       LNDVALUE:  -22927
+       IMPVALUE:  -23843
+    FORESTVALUE:  -2659
+    ESTFMKVALUE:  -10496
+       NETPRPTA:  -23820
+       GRSPRPTA:  -23820
+      PROPCLASS:  -22927
+       AUXCLASS:  -4579
+      ASSDACRES:  -25749
+      DEEDACRES:  147
+       GISACRES:  -26840
+         CONAME:  -26840
+     PARCELFIPS:  -26843
+      PARCELSRC:  -26843
+
+
+
+* Within: C:\workspace\github\ParcelValidationTool\script\..\summary\T1
+************************************************************************
