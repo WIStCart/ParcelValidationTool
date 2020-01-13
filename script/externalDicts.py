@@ -4,11 +4,11 @@
 fieldNames = ["OID@","SHAPE@","STATEID","PARCELID","TAXPARCELID","PARCELDATE","TAXROLLYEAR",
 "OWNERNME1","OWNERNME2","PSTLADRESS","SITEADRESS","ADDNUMPREFIX","ADDNUM","ADDNUMSUFFIX","PREFIX","STREETNAME",
 "STREETTYPE","SUFFIX","LANDMARKNAME","UNITTYPE","UNITID","PLACENAME","ZIPCODE","ZIP4","STATE","SCHOOLDIST",
-"SCHOOLDISTNO","CNTASSDVALUE","LNDVALUE","IMPVALUE","FORESTVALUE","ESTFMKVALUE","NETPRPTA","GRSPRPTA",
+"SCHOOLDISTNO","CNTASSDVALUE","LNDVALUE","IMPVALUE","MFLVALUE","ESTFMKVALUE","NETPRPTA","GRSPRPTA",
 "PROPCLASS","AUXCLASS","ASSDACRES","DEEDACRES","GISACRES","CONAME","LOADDATE","PARCELFIPS","PARCELSRC",
 "SHAPE@LENGTH","SHAPE@AREA","SHAPE@XY","GeneralElementErrors","AddressElementErrors","TaxrollElementErrors","GeometricElementErrors"]
 
-fieldListPass = ["OID","OID@","SHAPE","SHAPE@","SHAPE_LENGTH","SHAPE_AREA","SHAPE_XY","SHAPE@LENGTH","SHAPE@AREA","SHAPE@XY","LONGITUDE","LATITUDE","IMPROVED","GENERALELEMENTERRORS","ADDRESSELEMENTERRORS","TAXROLLELEMENTERRORS","GEOMETRICELEMENTERRORS"]
+fieldListPass = ["OID","OID@","SHAPE","SHAPE@","SHAPE_LENGTH","SHAPE_AREA","SHAPE_XY","SHAPE@LENGTH","SHAPE@AREA","SHAPE@XY","LONGITUDE","LATITUDE","IMPROVED","FORESTVALUE","MFLVALUE","GENERALELEMENTERRORS","ADDRESSELEMENTERRORS","TAXROLLELEMENTERRORS","GEOMETRICELEMENTERRORS"]
 
 #V3 schema requirements
 parcelSchemaReq = {
@@ -41,7 +41,7 @@ parcelSchemaReq = {
 	'CNTASSDVALUE':[['String','Double'],[50,8]],
 	'LNDVALUE':[['String','Double'],[50,8]],
 	'IMPVALUE':[['String','Double'],[50,8]],
-	'FORESTVALUE':[['String','Double'],[50,8]],
+	'MFLVALUE':[['String','Double'],[50,8]],
 	'ESTFMKVALUE':[['String','Double'],[50,8]],
 	'NETPRPTA':[['String','Double'],[50,8]],
 	'GRSPRPTA':[['String','Double'],[50,8]],
@@ -95,7 +95,7 @@ fieldNamesBadChars = {
 "CNTASSDVALUE": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',',"\-"],
 "LNDVALUE": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',',"\-"],
 "IMPVALUE": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")",',',"\-"],
-"FORESTVALUE": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',',"\-"],
+"MFLVALUE": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',',"\-"],
 "ESTFMKVALUE": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',',"\-"],
 "NETPRPTA": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',',"\-"],
 "GRSPRPTA": ["\n","\r","$","^","=","<",">","@","#","%","&","?","`","!","*","~","(",")","\\",'/',',',"\-"],
@@ -147,7 +147,7 @@ v3CompDict = {
 	'CNTASSDVALUE':0,
 	'LNDVALUE':0,
 	'IMPVALUE':0,
-	'FORESTVALUE':0,
+	'MFLVALUE':0,
 	'ESTFMKVALUE':0,
 	'NETPRPTA':0,
 	'GRSPRPTA':0,

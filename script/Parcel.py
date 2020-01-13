@@ -37,7 +37,7 @@ class Parcel:
 		self.cntassdvalue = row[fieldNames.index("CNTASSDVALUE")]
 		self.lndvalue = row[fieldNames.index("LNDVALUE")]
 		self.impvalue = row[fieldNames.index("IMPVALUE")]
-		self.forestvalue = row[fieldNames.index("FORESTVALUE")]
+		self.mflvalue = row[fieldNames.index("MFLVALUE")]
 		self.estfmkvalue = row[fieldNames.index("ESTFMKVALUE")]
 		self.netprpta = row[fieldNames.index("NETPRPTA")]
 		self.grsprpta = row[fieldNames.index("GRSPRPTA")]

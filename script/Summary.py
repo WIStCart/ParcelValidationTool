@@ -68,7 +68,7 @@ class Summary:
 					'CNTASSDVALUE':  str(totError.comparisonDict["CNTASSDVALUE"]),
 					'LNDVALUE':  str(totError.comparisonDict["LNDVALUE"]),
 					'IMPVALUE':  str(totError.comparisonDict["IMPVALUE"]),
-					'FORESTVALUE':  str(totError.comparisonDict["FORESTVALUE"]),
+					#'FORESTVALUE':  str(totError.comparisonDict["FORESTVALUE"]),
 					'ESTFMKVALUE':  str(totError.comparisonDict["ESTFMKVALUE"]),
 					'NETPRPTA':  str(totError.comparisonDict["NETPRPTA"]),
 					'GRSPRPTA':  str(totError.comparisonDict["GRSPRPTA"]),
@@ -156,7 +156,7 @@ class Summary:
 			Summary.errorSummaryFile.write("   CNTASSDVALUE:  " + str(totError.comparisonDict["CNTASSDVALUE"]) + '\n')
 			Summary.errorSummaryFile.write("       LNDVALUE:  " + str(totError.comparisonDict["LNDVALUE"]) + '\n')
 			Summary.errorSummaryFile.write("       IMPVALUE:  " + str(totError.comparisonDict["IMPVALUE"]) + '\n')
-			Summary.errorSummaryFile.write("    FORESTVALUE:  " + str(totError.comparisonDict["FORESTVALUE"]) + '\n')
+			#Summary.errorSummaryFile.write("    FORESTVALUE:  " + str(totError.comparisonDict["FORESTVALUE"]) + '\n')
 			Summary.errorSummaryFile.write("    ESTFMKVALUE:  " + str(totError.comparisonDict["ESTFMKVALUE"]) + '\n')
 			Summary.errorSummaryFile.write("       NETPRPTA:  " + str(totError.comparisonDict["NETPRPTA"]) + '\n')
 			Summary.errorSummaryFile.write("       GRSPRPTA:  " + str(totError.comparisonDict["GRSPRPTA"]) + '\n')
