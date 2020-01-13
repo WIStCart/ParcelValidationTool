@@ -424,7 +424,7 @@ class Error:
 			elif (imprTest == None and impValue is not None) or (imprTest is not None and impValue is None):
 				getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " does not correspond with 'IMPVALUE' for this record - please verify.")
 				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-			elif (imprTest.upper() == 'NO' and float(impValue) <>  0):
+			elif (imprTest.upper() == 'NO' and float(impValue) <> 0):
 				getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " does not correspond with 'IMPVALUE' for this record - please verify.")
 				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 			elif (imprTest.upper() == 'YES' and float(impValue) <= 0):

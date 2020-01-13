@@ -119,7 +119,7 @@ if inputDict['isSearchable'] == 'true':
 			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"cntassdvalue","tax",True)
 			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"lndvalue","tax",True)
 			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"impvalue","tax",True)
-			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"forestvalue","tax",True)
+			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"mflvalue","tax",True)
 			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"estfmkvalue","tax",True)
 			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"netprpta","tax",True)
 			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"grsprpta","tax",True)
