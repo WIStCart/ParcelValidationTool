@@ -149,7 +149,7 @@ if inputDict['isSearchable'] == 'true':
 			arcpy.AddMessage('On record:'+ str(currParcel.objectid))
 			totError,currParcel = Error.totalAssdValueCheck(totError,currParcel,'cntassdvalue','lndvalue','impvalue','tax')
 			# PROPCLASS of 4,5, or 5m should not contain an ESTFMKVALUE, thus this function is not applied
-			#totError,currParcel = Error.fairMarketCheck(totError,currParcel,'propclass','estfmkvalue','tax')
+			totError,currParcel = Error.fairMarketCheck(totError,currParcel,'propclass','auxclass','estfmkvalue','tax')
 			totError,currParcel = Error.matchContrib(totError,currParcel,"coname","parcelfips","parcelsrc",county_nameNo_dict,county_noName_dict,False,"general")
 			totError,currParcel = Error.netVsGross(totError,currParcel,"netprpta","grsprpta","tax")
 			totError,currParcel = Error.schoolDistCheck(totError,currParcel,"parcelid","schooldist","schooldistno",schoolDist_noName_dict,schoolDist_nameNo_dict,"tax",pinSkips,"taxrollyear")
