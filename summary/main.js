@@ -38,7 +38,6 @@ var schemaOrder = ["STATEID",
   "CNTASSDVALUE",
   "LNDVALUE",
   "IMPVALUE",
-  "FORESTVALUE",
   "ESTFMKVALUE",
   "NETPRPTA",
   "GRSPRPTA",
@@ -196,7 +195,7 @@ class FieldsList extends React.Component {
         var directiveString = ""
         var valueString = ""
         var negativeAddOn = "/omissions"
-        
+
         if ((f[i]) > 0){
           valueString = <text>+ {String((Number(Math.abs(f[i]))).toLocaleString(navigator.language, { minimumFractionDigits: 0 }))}</text>
           negativeAddOn = ""
@@ -209,7 +208,7 @@ class FieldsList extends React.Component {
         }
         if (Math.abs(f[i]) != 0){
           directiveString = "records compared to last year's dataset. Inspect the "+ i +" field for possible errors" + negativeAddOn + "."
-        } 
+        }
         tableArray.push(
           <tr style={{ backgroundColor: "#9c27b000"}} mag= {l[i] - f[i]}>
             <td style={fieldStyle}><a href={"https://www.sco.wisc.edu/parcels/Submission_Documentation.pdf#nameddest=" +  i.toLowerCase()} target="_blank" style={{ fontWeight: 'bold', padding: '3px'}}>{i + ": "}</a></td>
@@ -227,7 +226,7 @@ class FieldsList extends React.Component {
        })
        **/
       return tableArray
-    
+
 }
   render() {
     var array = this.list()
@@ -269,11 +268,11 @@ class InLineErrors extends React.Component {
           var lv2 = ""
           var st = equalLess0
         }else{
-          var lv = (Number(p[i])).toLocaleString(navigator.language, { minimumFractionDigits: 0 })  
+          var lv = (Number(p[i])).toLocaleString(navigator.language, { minimumFractionDigits: 0 })
           var lv2 = " possible errors found.  See the attribute table in the output feature class to resolve these."
           var st = greater0
         }
-        
+
         listArray.push(
           <div class="general-file-errors">
             <text style={{ fontWeight:'bold'}}>{x + ": "}</text>
@@ -338,7 +337,7 @@ class BroadLevelErrors extends React.Component {
         <br></br>
       </div>
     );
-    
+
     /////////////////////////////
     // Add missing records
     var m = this.props.broadLevel.Records_Missing
@@ -494,4 +493,3 @@ class MissingRecords extends React.Component {
 
 
 ReactDOM.render(<App/>,document.getElementById('root'));
-

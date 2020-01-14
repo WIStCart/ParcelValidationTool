@@ -567,17 +567,19 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
-	#checking ESTFMKVALUE field against PROPCLASS field for erroneous not null values when PROPCLASS of 4 is present with another value
- 	def fairMarketCheck(Error,Parcel,propClass,estFmkValue,errorType):
+	#checking ESTFMKVALUE field against PROPCLASS field for erroneous not null values when PROPCLASS of 4, 5, 5M or AUXCLASS field
+	# for erroneous not null values when AUXCLASS of x1-x4 or w1-w9 is present with another value
+ 	def fairMarketCheck(Error,Parcel,propClass,auxClass,estFmkValue,errorType):
  		try:
 			propClassTest = str(getattr(Parcel,propClass)).replace(" ","")
+			auxClassTest = str(getattr(Parcel,auxClass)).replace(" ","")
 			estFmkValueTest = getattr(Parcel,estFmkValue)
 			if estFmkValueTest is not None:
-				if re.search('4,', propClassTest) is not None or re.search('4', propClassTest) is not None:
+				if re.search('4', propClassTest) is not None or re.search('5', propClassTest) is not None:
 					getattr(Parcel, errorType + "Errors").append("<Null> value in " + estFmkValue.upper() + " field is expected according to value in " + propClass.upper() + " field.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-				elif re.search(',4', propClassTest) is not None:
-					getattr(Parcel, errorType + "Errors").append("<Null> value in " + estFmkValue.upper() + " field is expected according to value in " + propClass.upper() + " field.")
+				elif re.search('W', auxClassTest) is not None or re.search('X', auxClassTest) is not None:
+					getattr(Parcel, errorType + "Errors").append("<Null> value in " + estFmkValue.upper() + " field is expected according to value in " + auxClass.upper() + " field.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				else:
 					pass
