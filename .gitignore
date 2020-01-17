@@ -1,5 +1,5 @@
 # "Compiled" python code
 *.pyc
 *.lock
-TEST_DATASET_PARCELS_2019/
 .vscode/
+V6_ValidationTool_dist/TEST_DATASET_PARCELS_2019/
