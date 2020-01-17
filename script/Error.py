@@ -852,7 +852,7 @@ class Error:
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return(Error, Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the MFLVALUE???field.  Please manually inspect these fields.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the MFLVALUE field.  Please manually inspect these fields.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
