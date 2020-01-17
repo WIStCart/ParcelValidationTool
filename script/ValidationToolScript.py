@@ -134,7 +134,7 @@ if inputDict['isSearchable'] == 'true':
 			totError,currParcel = Error.checkDomainString(totError,currParcel,"unitid","address",True,unitIdTypes)
 			totError,currParcel = Error.checkDomainString(totError,currParcel,"placename","general",True,lsadDomains)
 			totError,currParcel = Error.checkDomainString(totError,currParcel,"suffix","address",True, suffixDomains)
-            totError,currParcel = Error.badChars(totError,currParcel,fieldNames,fieldNamesBadChars,'general')
+            #totError,currParcel = Error.badChars(totError,currParcel,fieldNames,fieldNamesBadChars,'general')
 			totError,currParcel = Error.trYear(totError,currParcel,"taxrollyear","parcelid","tax",False,pinSkips,taxRollYears)
 			totError,currParcel = Error.taxrollYrCheck(totError,currParcel,"taxrollyear","tax",False,pinSkips,taxRollYears)
 			totError,currParcel = Error.streetNameCheck(totError,currParcel,"streetname","siteadress","address",True,stNameDict,inputDict['county'])
@@ -152,7 +152,7 @@ if inputDict['isSearchable'] == 'true':
 			totError,currParcel = Error.totalAssdValueCheck(totError,currParcel,'cntassdvalue','lndvalue','impvalue','tax')
 			totError,currParcel = Error.fairMarketCheck(totError,currParcel,'propclass','auxclass','estfmkvalue','tax')
 			totError,currParcel = Error.mfLValueCheck(totError,currParcel,'mflvalue','lndvalue','cntassdvalue','impvalue','auxclass','tax')
-
+			totError,currParcel = Error.auxclassTaxrollCheck (totError,currParcel,'auxclass', 'tax')
 			totError,currParcel = Error.matchContrib(totError,currParcel,"coname","parcelfips","parcelsrc",county_nameNo_dict,county_noName_dict,False,"general")
 			totError,currParcel = Error.netVsGross(totError,currParcel,"netprpta","grsprpta","tax")
 			totError,currParcel = Error.schoolDistCheck(totError,currParcel,"parcelid","schooldist","schooldistno",schoolDist_noName_dict,schoolDist_nameNo_dict,"tax",pinSkips,"taxrollyear")
