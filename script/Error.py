@@ -557,8 +557,6 @@ class Error:
 					for val in checkAuxVal:
 						if val.strip() not in auxDomainList:
 							getattr(Parcel,errorType + "Errors").append("A value provided in " + auxField.upper() + " field is not in AUXCLASS domain list. Please standardize AUXCLASS values or provide mappings for these values in the 'Explain/Certification' submission form.")
-
-							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 						elif val.strip() in testListAux:
 							getattr(Parcel,errorType + "Errors").append("Duplicate values exist in " + auxField.upper() + " field.")
 							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
@@ -834,6 +832,27 @@ class Error:
 			return(Error,Parcel)
 		except:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred when comparing your CNTASSDVALUE value to the sum of LNDVALUE and IMPVALUE.  Please manually inspect these fields.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
+
+	def mfLValueCheck(Error, Parcel, mflvalue, lndvalue, cntvalue, impvalue, auxField, errorType):
+		try:
+			cnt = getattr(Parcel,cntvalue)
+			imp = getattr(Parcel,impvalue)
+			mflValueTest = getattr(Parcel,mflvalue)
+			lnd = getattr(Parcel,lndvalue)
+			auxToTest = getattr(Parcel,auxField)
+			if mflValueTest is None:
+				pass
+			elif (mflValueTest is not None) and (float(mflValueTest) > 0.0):
+			 	if auxToTest is not None and re.search('W', auxToTest) is not None and re.search('W4', auxToTest) is  None:
+					pass
+				else:
+					getattr(Parcel, errorType + "Errors").append("The values provided in AUXCLASS field are not expected according to value in MFLVALUE field. See Validation_and_Submission_Tool_Guide.pdf for further information.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				return(Error, Parcel)
+		except:
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the MFLVALUE???field.  Please manually inspect these fields.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
