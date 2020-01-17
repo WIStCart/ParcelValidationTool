@@ -610,7 +610,7 @@ class Error:
 							testList.append(val.strip())
 					else:
 						if val.strip() not in domainList:
-							getattr(Parcel,errorType + "Errors").append("A value provided in " + field.upper() + " field is not in AUXCLASS domain list. Please ensure mappings for these values are provided in the 'Explain/Certification' box of submission form.")
+							getattr(Parcel,errorType + "Errors").append("A value provided in " + field.upper() + " field is not in AUXCLASS domain list. Please standardize AUXCLASS values or provide mappings for these values in the 'Explain/Certification' submission form.")
 							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 						elif val.strip() in testList:
 							getattr(Parcel,errorType + "Errors").append("Duplicate values exist in " + field.upper() + " field.")
