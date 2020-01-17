@@ -321,7 +321,9 @@ class Error:
 	def taxrollYrCheck(Error,Parcel,field,errorType,acceptNull,pinField,acceptYears):
 		try:
 			taxRollYear = getattr(Parcel,field)
-			taxRollFields = {'IMPVALUE': getattr(Parcel, "impvalue"), 'CNTASSDVALUE': getattr(Parcel, "cntassdvalue"), 'LNDVALUE': getattr(Parcel, "lndvalue"), 'ESTFMKVALUE': getattr(Parcel, "estfmkvalue"), 'NETPRPTA': getattr(Parcel, "netprpta"), 'GRSPRPTA': getattr(Parcel, "grsprpta"), 'PROPCLASS': getattr(Parcel, "propclass"), 'AUXCLASS': getattr(Parcel, "auxclass")}
+			taxRollFields = {'IMPVALUE': getattr(Parcel, "impvalue"), 'CNTASSDVALUE': getattr(Parcel, "cntassdvalue"),
+			'LNDVALUE': getattr(Parcel, "lndvalue"), 'MFLVALUE': getattr(Parcel, "lndvalue"), 'ESTFMKVALUE': getattr(Parcel, "estfmkvalue"), 'NETPRPTA': getattr(Parcel, "netprpta"), 'GRSPRPTA': getattr(Parcel, "grsprpta"),
+			'PROPCLASS': getattr(Parcel, "propclass"), 'AUXCLASS': getattr(Parcel, "auxclass")}
 			probFields = []
 			if taxRollYear is not None:
 				if taxRollYear == acceptYears[2] or taxRollYear == acceptYears[3]:
@@ -554,7 +556,8 @@ class Error:
 					checkAuxVal = auxToTest.split(",")
 					for val in checkAuxVal:
 						if val.strip() not in auxDomainList:
-							getattr(Parcel,errorType + "Errors").append("A value provided in " + auxField.upper() + " field is not in acceptable domain list.")
+							getattr(Parcel,errorType + "Errors").append("A value provided in " + auxField.upper() + " field is not in AUXCLASS domain list. Please standardize AUXCLASS values or provide mappings for these values in the 'Explain/Certification' submission form.")
+
 							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 						elif val.strip() in testListAux:
 							getattr(Parcel,errorType + "Errors").append("Duplicate values exist in " + auxField.upper() + " field.")
@@ -576,10 +579,10 @@ class Error:
 			estFmkValueTest = getattr(Parcel,estFmkValue)
 			if estFmkValueTest is not None:
 				if re.search('4', propClassTest) is not None or re.search('5', propClassTest) is not None:
-					getattr(Parcel, errorType + "Errors").append("<Null> value in " + estFmkValue.upper() + " field is expected according to value in " + propClass.upper() + " field.")
+					getattr(Parcel, errorType + "Errors").append("A <Null> value in " + estFmkValue.upper() + " field is expected according to value in " + propClass.upper() + " field.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				elif re.search('W', auxClassTest) is not None or re.search('X', auxClassTest) is not None:
-					getattr(Parcel, errorType + "Errors").append("<Null> value in " + estFmkValue.upper() + " field is expected according to value in " + auxClass.upper() + " field.")
+					getattr(Parcel, errorType + "Errors").append("A <Null> value in " + estFmkValue.upper() + " field is expected according to value in " + auxClass.upper() + " field.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				else:
 					pass
@@ -818,6 +821,7 @@ class Error:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the PSTLADRESS field.  Please manually inspect this field.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
+
 
 	def totalAssdValueCheck(Error,Parcel,cnt,lnd,imp,errorType):
 		try:
