@@ -935,3 +935,13 @@ class Error:
 			arcpy.AddMessage("PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
 			arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 			exit()
+
+
+	def mflLndValueCheck(Error,Parcel,lnd,mfl,errorType):
+		lnd = 0 if (getattr(Parcel,lnd) is None) else int(getattr(Parcel,lnd))
+		mfl = 0 if (getattr(Parcel,mfl) is None) else int(getattr(Parcel,mfl))
+		if lnd == mfl and (lnd <> 0 and mfl <> 0):
+			getattr(Parcel,errorType + "Errors").append("MFLVALUE should not equal LNDVALUE in most cases.  Please correct this issue and refer to the submission documentation for futher clarification as needed.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return(Error,Parcel)
+
