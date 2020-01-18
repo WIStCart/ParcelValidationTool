@@ -557,8 +557,6 @@ class Error:
 					for val in checkAuxVal:
 						if val.strip() not in auxDomainList:
 							getattr(Parcel,errorType + "Errors").append("A value provided in " + auxField.upper() + " field is not in AUXCLASS domain list. Please standardize AUXCLASS values or provide mappings for these values in the 'Explain/Certification' submission form.")
-
-							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 						elif val.strip() in testListAux:
 							getattr(Parcel,errorType + "Errors").append("Duplicate values exist in " + auxField.upper() + " field.")
 							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
@@ -837,6 +835,52 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
+	def mfLValueCheck(Error, Parcel, mflvalue, lndvalue, cntvalue, impvalue, auxField, errorType):
+		try:
+			cnt = getattr(Parcel,cntvalue)
+			imp = getattr(Parcel,impvalue)
+			mflValueTest = getattr(Parcel,mflvalue)
+			lnd = getattr(Parcel,lndvalue)
+			auxToTest = getattr(Parcel,auxField)
+			if mflValueTest is None:
+				pass
+			elif (mflValueTest is not None) and (float(mflValueTest) > 0.0):
+			 	if auxToTest is not None and re.search('W', auxToTest) is not None and re.search('W4', auxToTest) is  None:
+					pass
+				else:
+					getattr(Parcel, errorType + "Errors").append("The value(s) provided in AUXCLASS field is/are not expected according to value in MFLVALUE field. See Validation_and_Submission_Tool_Guide.pdf for further information.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				return(Error, Parcel)
+		except:
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the MFLVALUE field.  Please manually inspect these fields.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
+
+	# checks that parcels with auxclass x1-x4  have taxroll values = <null>
+	def auxclassTaxrollCheck (Error,Parcel,auxclassField,errorType):
+		try:
+			auxclass = getattr(Parcel,auxclassField)
+			taxRollFields = {'IMPVALUE': getattr(Parcel, "impvalue"), 'CNTASSDVALUE': getattr(Parcel, "cntassdvalue"),
+			'LNDVALUE': getattr(Parcel, "lndvalue"), 'MFLVALUE': getattr(Parcel, "lndvalue"), 'ESTFMKVALUE': getattr(Parcel, "estfmkvalue")	}
+			probFields = []
+			if auxclass is not None:
+				if re.search('X', auxclass) is not None:
+					for key, val in taxRollFields.iteritems():
+						if val is not None:
+							probFields.append(key)
+					if len(probFields) > 0:
+						getattr(Parcel,errorType + "Errors").append("AUXCLASS (" + str(auxclass) + ") found and " + " / ".join(probFields) + " field(s) is/are not <Null>. A <Null> value is expected in all tax roll data for parcels with tax except values. Please correct.")
+						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				else:  #W values are okay
+					pass
+				return (Error, Parcel)
+
+		except: # using generic error handling because we don't know what errors to expect yet.
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect the value of this field.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
+
+
 	#check for instances of net > gross
 	def netVsGross(Error,Parcel,netField,grsField,errorType):
 		try:
@@ -891,3 +935,13 @@ class Error:
 			arcpy.AddMessage("PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
 			arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 			exit()
+
+
+	def mflLndValueCheck(Error,Parcel,lnd,mfl,errorType):
+		lnd = 0 if (getattr(Parcel,lnd) is None) else int(getattr(Parcel,lnd))
+		mfl = 0 if (getattr(Parcel,mfl) is None) else int(getattr(Parcel,mfl))
+		if lnd == mfl and (lnd <> 0 and mfl <> 0):
+			getattr(Parcel,errorType + "Errors").append("MFLVALUE should not equal LNDVALUE in most cases.  Please correct this issue and refer to the submission documentation for futher clarification as needed.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return(Error,Parcel)
+
