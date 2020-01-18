@@ -111,7 +111,8 @@ if inputDict['isSearchable'] == 'true':
 
 			#Execute in-cursor error tests
 			totError,currParcel = Error.checkGeometricQuality(totError,currParcel, pinSkips)
-			'''totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"addnum","address", True)
+
+			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"addnum","address", True)
 			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"parcelfips","general", False)
 			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"zipcode","address", True)
 			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"zip4","address", True)
