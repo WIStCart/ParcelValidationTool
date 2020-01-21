@@ -735,13 +735,14 @@ class Error:
 		return(Error,Parcel)
 
 
-	def fieldCompletenessComparison(Error,Parcel,fieldList,passList,currentStatDict,previousStatDict):
+	def fieldCompletenessComparison(Error,fieldList,passList,currentStatDict,previousStatDict):
 		for field in fieldList:
 			if field.upper() in passList:
 				pass
 			else:
+				#arcpy.AddMessage("hello " + str(currentStatDict[field] - previousStatDict[field]))
 				Error.comparisonDict[field] = currentStatDict[field] - previousStatDict[field]
-		return(Error,Parcel)
+		return(Error)
 
 
 	#checkSchemaFunction
@@ -944,4 +945,3 @@ class Error:
 			getattr(Parcel,errorType + "Errors").append("MFLVALUE should not equal LNDVALUE in most cases.  Please correct this issue and refer to the submission documentation for futher clarification as needed.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return(Error,Parcel)
-
