@@ -116,8 +116,8 @@ copDomains = ['1','2','3','4','5','6','7','5M','M']
 #acceptable AUXCOP domains
 auxDomains = ['W1','W2','W3','W4','W5','W6','W7','W8','W9','X1','X2','X3','X4','X5','AW','AWO','XTEL']
 
-#dictionary for V3 completeness collection
-v3CompDict = {
+#dictionary for completeness collection
+CompDict = {
 	'STATEID':0,
 	'PARCELID':0,
 	'TAXPARCELID':0,

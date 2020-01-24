@@ -55,7 +55,7 @@ if inputDict['isSearchable'] == 'true':
 	unitTypes = [line.strip() for line in open(os.path.join(base, '..\data\V4_UnitType_Simplified.txt'),'r')] #unit type domain list
 	lsadDomains = [line.strip() for line in open(os.path.join(base, '..\data\LSAD_Simplified.txt'),'r')] #lsad domain list
 	taxRollYears = [line.strip() for line in open(os.path.join(base, '..\data\V5_TaxRollYears.txt'),'r')] #taxroll years to test (past,expected,future1,future2)
-	suffixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V4_SuffixDomains_Simplified.txt'),'r')] #suffix domain list
+	suffixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V5_SuffixDomains_Simplified.txt'),'r')] #suffix domain list
 	prefixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V5_PrefixDomains_Simplified.txt'),'r')] #prefix domain list
 	pinSkips = [line.strip() for line in open(os.path.join(base, '..\data\V4_PinSkips.txt'),'r')] #list of non-parcelid values found in field to ignore when checking for dups (and use in other functions)
 
@@ -157,14 +157,14 @@ if inputDict['isSearchable'] == 'true':
 			totError,currParcel = Error.netVsGross(totError,currParcel,"netprpta","grsprpta","tax")
 			totError,currParcel = Error.schoolDistCheck(totError,currParcel,"parcelid","schooldist","schooldistno",schoolDist_noName_dict,schoolDist_nameNo_dict,"tax",pinSkips,"taxrollyear")
 			totError,currParcel = Error.mflLndValueCheck(totError,currParcel,"lndvalue","mflvalue","tax")
-			totError,currParcel = Error.fieldCompleteness(totError,currParcel,fieldNames,fieldListPass,v3CompDict)
+			totError,currParcel = Error.fieldCompleteness(totError,currParcel,fieldNames,fieldListPass,CompDict)
 			#totError,currParcel = Error.fieldCompletenessComparison(totError,currParcel,fieldNames,fieldListPass,v3CompDict,getattr(LegacyCountyStats, (inputDict['county'].replace(" ","_").replace(".",""))+"LegacyDict"))
 
 			#End of loop, finalize errors with the writeErrors function, then clear parcel
 			currParcel.writeErrors(row,cursor, fieldNames)
 			currParcel = None
 
-	totError = Error.fieldCompletenessComparison(totError,fieldNames,fieldListPass,v3CompDict,getattr(LegacyCountyStats, (inputDict['county'].replace(" ","_").replace(".",""))+"LegacyDict"))
+	totError = Error.fieldCompletenessComparison(totError,fieldNames,fieldListPass,CompDict,getattr(LegacyCountyStats, (inputDict['county'].replace(" ","_").replace(".",""))+"LegacyDict"))
 
 	if totError.geometryNotChecked == False:
 		Error.ctyExtentCentCheck(totError, inputDict['inFC'], ctyCentroidDict)

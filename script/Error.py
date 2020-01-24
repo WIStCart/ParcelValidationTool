@@ -681,7 +681,7 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
-	def fieldCompleteness(Error,Parcel,fieldList,passList,v3Dict):
+	def fieldCompleteness(Error,Parcel,fieldList,passList,CompDict):
 		for field in fieldList:
 			if field.upper() in passList:
 				pass
@@ -691,7 +691,7 @@ class Error:
 					pass
 				else:
 					if stringToTest is not None or stringToTest != '':
-						v3Dict[field] = v3Dict[field]+1
+						CompDict[field] = CompDict[field]+1
 		return(Error,Parcel)
 
 
