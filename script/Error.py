@@ -591,46 +591,6 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
-	# FUNCTION NO LONGER USED. checking propclass and auxclass for acceptable domains and duplicate values
-	def classOfPropCheck(Error,Parcel,field,domainList,errorType,acceptNull):
-		try:
-			arcpy.AddMessage("hello")
-			stringToTest = getattr(Parcel,field)
-			testList = []
-			if stringToTest is not None:
-				checkVal = stringToTest.split(",")
-				for val in checkVal:
-					if field == 'propclass':
-						if val.strip() not in domainList:
-							getattr(Parcel,errorType + "Errors").append("A value provided in " + field.upper() + " field is not in acceptable domain list.")
-							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-						elif val.strip() in testList:
-							getattr(Parcel,errorType + "Errors").append("Duplicate values exist in " + field.upper() + " field.")
-							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-						else:
-							testList.append(val.strip())
-					else:
-						if val.strip() not in domainList:
-							getattr(Parcel,errorType + "Errors").append("A value provided in " + field.upper() + " field is not in AUXCLASS domain list. Please standardize AUXCLASS values or provide mappings for these values in the 'Explain/Certification' submission form.")
-							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-						elif val.strip() in testList:
-							getattr(Parcel,errorType + "Errors").append("Duplicate values exist in " + field.upper() + " field.")
-							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-						else:
-							testList.append(val.strip())
-				return(Error,Parcel)
-			else:
-				if acceptNull:
-					pass
-				else:
-					getattr(Parcel,errorType + "Errors").append("Null Found on " + field.upper())
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-				return(Error,Parcel)
-		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please manually inspect the value of this field.")
-			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-		return (Error, Parcel)
-
 	#checking CONAME, PARCELFIPS and PARCELSRC fields to ensure they match expected and meet domain requirements
 	def matchContrib(Error,Parcel,coNamefield,fipsfield,srcfield,coNameDict,coNumberDict,acceptNull,errorType ):
 		nullList = ["<Null>", "<NULL>", "NULL", ""]
