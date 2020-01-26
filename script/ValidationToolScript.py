@@ -159,7 +159,7 @@ if inputDict['isSearchable'] == 'true':
 			totError,currParcel = Error.mflLndValueCheck(totError,currParcel,"lndvalue","mflvalue","tax")
 			totError,currParcel = Error.fieldCompleteness(totError,currParcel,fieldNames,fieldListPass,CompDict)
 			#totError,currParcel = Error.fieldCompletenessComparison(totError,currParcel,fieldNames,fieldListPass,v3CompDict,getattr(LegacyCountyStats, (inputDict['county'].replace(" ","_").replace(".",""))+"LegacyDict"))
-
+			totError,currParcel = Error.propClassCntCheck(totError,currParcel,"propclass","cntassdvalue","tax")
 			#End of loop, finalize errors with the writeErrors function, then clear parcel
 			currParcel.writeErrors(row,cursor, fieldNames)
 			currParcel = None

@@ -322,7 +322,7 @@ class Error:
 		try:
 			taxRollYear = getattr(Parcel,field)
 			taxRollFields = {'IMPVALUE': getattr(Parcel, "impvalue"), 'CNTASSDVALUE': getattr(Parcel, "cntassdvalue"),
-			'LNDVALUE': getattr(Parcel, "lndvalue"), 'MFLVALUE': getattr(Parcel, "lndvalue"), 'ESTFMKVALUE': getattr(Parcel, "estfmkvalue"), 'NETPRPTA': getattr(Parcel, "netprpta"), 'GRSPRPTA': getattr(Parcel, "grsprpta"),
+			'LNDVALUE': getattr(Parcel, "lndvalue"), 'MFLVALUE': getattr(Parcel, "mflvalue"), 'ESTFMKVALUE': getattr(Parcel, "estfmkvalue"), 'NETPRPTA': getattr(Parcel, "netprpta"), 'GRSPRPTA': getattr(Parcel, "grsprpta"),
 			'PROPCLASS': getattr(Parcel, "propclass"), 'AUXCLASS': getattr(Parcel, "auxclass")}
 			probFields = []
 			if taxRollYear is not None:
@@ -556,7 +556,8 @@ class Error:
 					checkAuxVal = auxToTest.split(",")
 					for val in checkAuxVal:
 						if val.strip() not in auxDomainList:
-							getattr(Parcel,errorType + "Errors").append("A value provided in " + auxField.upper() + " field is not in AUXCLASS domain list. Please standardize AUXCLASS values or provide mappings for these values in the 'Explain/Certification' submission form.")
+							getattr(Parcel,errorType + "Errors").append("A value provided in " + auxField.upper() + " field is not in AUXCLASS domain list. Standardize values for AUXCLASS domains.")
+							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 						elif val.strip() in testListAux:
 							getattr(Parcel,errorType + "Errors").append("Duplicate values exist in " + auxField.upper() + " field.")
 							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
@@ -796,12 +797,9 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
-	def mfLValueCheck(Error, Parcel, mflvalue, lndvalue, cntvalue, impvalue, auxField, errorType):
+	def mfLValueCheck(Error, Parcel, mflvalue, auxField, errorType):
 		try:
-			cnt = getattr(Parcel,cntvalue)
-			imp = getattr(Parcel,impvalue)
 			mflValueTest = getattr(Parcel,mflvalue)
-			lnd = getattr(Parcel,lndvalue)
 			auxToTest = getattr(Parcel,auxField)
 			if mflValueTest is None:
 				pass
@@ -822,7 +820,7 @@ class Error:
 		try:
 			auxclass = getattr(Parcel,auxclassField)
 			taxRollFields = {'IMPVALUE': getattr(Parcel, "impvalue"), 'CNTASSDVALUE': getattr(Parcel, "cntassdvalue"),
-			'LNDVALUE': getattr(Parcel, "lndvalue"), 'MFLVALUE': getattr(Parcel, "lndvalue"), 'ESTFMKVALUE': getattr(Parcel, "estfmkvalue")	}
+			'LNDVALUE': getattr(Parcel, "lndvalue"), 'MFLVALUE': getattr(Parcel, "mflvalue")}
 			probFields = []
 			if auxclass is not None:
 				if re.search('X', auxclass) is not None:
@@ -830,7 +828,7 @@ class Error:
 						if val is not None:
 							probFields.append(key)
 					if len(probFields) > 0:
-						getattr(Parcel,errorType + "Errors").append("AUXCLASS (" + str(auxclass) + ") found and " + " / ".join(probFields) + " field(s) is/are not <Null>. A <Null> value is expected in all tax roll data for parcels with tax except values. Please correct.")
+						getattr(Parcel,errorType + "Errors").append("AUXCLASS (" + str(auxclass) + ") found and " + " / ".join(probFields) + " field(s) is/are not <Null>. A <Null> value is expected in the field(s for tax exempt parcels. Please correct.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				else:  #W values are okay
 					pass
@@ -905,3 +903,23 @@ class Error:
 			getattr(Parcel,errorType + "Errors").append("MFLVALUE should not equal LNDVALUE in most cases.  Please correct this issue and refer to the submission documentation for futher clarification as needed.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return(Error,Parcel)
+
+	#Check that parcels with propclass values of 1-7 have CNTASSDVALUE > 0
+	def propClassCntCheck(Error,Parcel,propClass,cntValue,errorType):
+		try:
+			cnt = getattr(Parcel,cntValue)
+			propClassTest = getattr(Parcel,propClass)
+			if cnt is  None or float(cnt) == 0:
+				if propClassTest in ['1', '2', '3', '4', '5', '5M', '6', '7' ]:
+					getattr(Parcel, errorType + "Errors").append("A value greater than zero in CNTASSDVALUE field is expected according to value(s) in PROPCLASS field. Please verify.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				else:
+					pass
+			elif cnt is not None and float(cnt) > 0:
+				if propClassTest is None:
+					getattr(Parcel, errorType + "Errors").append("A value greater than zero provided in CNTASSDVALUE does not correspond to a <Null> value in PROPCLASS field. Please verify.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		except:
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the CNTASSDVALUE field.  Please manually inspect the values of these fields.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
