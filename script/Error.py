@@ -322,7 +322,8 @@ class Error:
 		try:
 			taxRollYear = getattr(Parcel,field)
 			taxRollFields = {'IMPVALUE': getattr(Parcel, "impvalue"), 'CNTASSDVALUE': getattr(Parcel, "cntassdvalue"),
-			'LNDVALUE': getattr(Parcel, "lndvalue"), 'MFLVALUE': getattr(Parcel, "mflvalue"), 'ESTFMKVALUE': getattr(Parcel, "estfmkvalue"), 'NETPRPTA': getattr(Parcel, "netprpta"), 'GRSPRPTA': getattr(Parcel, "grsprpta"),
+			'LNDVALUE': getattr(Parcel, "lndvalue"), 'MFLVALUE': getattr(Parcel, "mflvalue"), 'ESTFMKVALUE': getattr(Parcel, "estfmkvalue"),
+			'NETPRPTA': getattr(Parcel, "netprpta"), 'GRSPRPTA': getattr(Parcel, "grsprpta"),
 			'PROPCLASS': getattr(Parcel, "propclass"), 'AUXCLASS': getattr(Parcel, "auxclass")}
 			probFields = []
 			if taxRollYear is not None:
@@ -578,10 +579,10 @@ class Error:
 			estFmkValueTest = getattr(Parcel,estFmkValue)
 			if estFmkValueTest is not None:
 				if re.search('4', propClassTest) is not None or re.search('5', propClassTest) is not None:
-					getattr(Parcel, errorType + "Errors").append("A <Null> value in " + estFmkValue.upper() + " field is expected according to value in " + propClass.upper() + " field.")
+					getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in " + estFmkValue.upper() + " field according to value(s) in " + propClass.upper() + " field.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				elif re.search('W', auxClassTest) is not None or re.search('X', auxClassTest) is not None:
-					getattr(Parcel, errorType + "Errors").append("A <Null> value in " + estFmkValue.upper() + " field is expected according to value in " + auxClass.upper() + " field.")
+					getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in " + estFmkValue.upper() + " field according to value(s) in " + auxClass.upper() + " field.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				else:
 					pass
@@ -806,13 +807,16 @@ class Error:
 			auxToTest = getattr(Parcel,auxField)
 			if mflValueTest is None:
 				pass
-			elif (mflValueTest is not None) and (float(mflValueTest) > 0.0):
+			elif (mflValueTest is None) or (float(mflValueTest) == 0.0):
 			 	if auxToTest is not None and re.search('W', auxToTest) is not None and re.search('W4', auxToTest) is  None:
-					pass
-				else:
-					getattr(Parcel, errorType + "Errors").append("The value(s) provided in AUXCLASS field is/are not expected according to value in MFLVALUE field. See Validation_and_Submission_Tool_Guide.pdf for further information.")
+					getattr(Parcel, errorType + "Errors").append("A value in MFLVALUE field does not match the value(s) provided in AUXCLASS field. See Validation_and_Submission_Tool_Guide.pdf for further information.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-				return(Error, Parcel)
+			elif (mflValueTest is not None) and (float(mflValueTest) > 0.0 and auxToTest is None):
+					getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in the MFLVALUE field according to the AUXCLASS field. Please verify.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+			else:
+				pass
+			return(Error, Parcel)
 		except:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the MFLVALUE field.  Please manually inspect these fields.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
@@ -823,7 +827,9 @@ class Error:
 		try:
 			auxclass = getattr(Parcel,auxclassField)
 			taxRollFields = {'IMPVALUE': getattr(Parcel, "impvalue"), 'CNTASSDVALUE': getattr(Parcel, "cntassdvalue"),
-			'LNDVALUE': getattr(Parcel, "lndvalue"), 'MFLVALUE': getattr(Parcel, "mflvalue")}
+			'LNDVALUE': getattr(Parcel, "lndvalue"), 'MFLVALUE': getattr(Parcel, "mflvalue"),
+			'NETPRPTA': getattr(Parcel, "netprpta"), 'GRSPRPTA': getattr(Parcel, "grsprpta")}
+
 			probFields = []
 			if auxclass is not None:
 				if re.search('X', auxclass) is not None:
@@ -903,7 +909,7 @@ class Error:
 		lnd = 0 if (getattr(Parcel,lnd) is None) else int(getattr(Parcel,lnd))
 		mfl = 0 if (getattr(Parcel,mfl) is None) else int(getattr(Parcel,mfl))
 		if lnd == mfl and (lnd <> 0 and mfl <> 0):
-			getattr(Parcel,errorType + "Errors").append("MFLVALUE should not equal LNDVALUE in most cases.  Please correct this issue and refer to the submission documentation for futher clarification as needed.")
+			getattr(Parcel,errorType + "Errors").append("MFLVALUE should not equal LNDVALUE in most cases.  Please correct this issue and refer to the submission documentation for further clarification as needed.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return(Error,Parcel)
 
@@ -912,17 +918,17 @@ class Error:
 		try:
 			cnt = getattr(Parcel,cntValue)
 			propClassTest = getattr(Parcel,propClass)
-			if cnt is  None or float(cnt) == 0:
+			if cnt is None or float(cnt) == 0:
 				if propClassTest in ['1', '2', '3', '4', '5', '5M', '6', '7' ]:
-					getattr(Parcel, errorType + "Errors").append("A value greater than zero in CNTASSDVALUE field is expected according to value(s) in PROPCLASS field. Please verify.")
+					getattr(Parcel, errorType + "Errors").append("A value greater than zero is expected in CNTASSDVALUE field according to value(s) in PROPCLASS field. Please verify.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				else:
 					pass
 			elif cnt is not None and float(cnt) > 0:
 				if propClassTest is None:
-					getattr(Parcel, errorType + "Errors").append("A value greater than zero provided in CNTASSDVALUE does not correspond to a <Null> value in PROPCLASS field. Please verify.")
+					getattr(Parcel, errorType + "Errors").append("A value greater than zero provided in CNTASSDVALUE does not correspond to the PROPCLASS field value(s). Please verify.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the CNTASSDVALUE field.  Please manually inspect the values of these fields.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the CNTASSDVALUE field.  Please manually inspect the <Null> value provided in PROPCLASS.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
