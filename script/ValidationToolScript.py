@@ -151,7 +151,7 @@ if inputDict['isSearchable'] == 'true':
 			#arcpy.AddMessage('On record:'+ str(currParcel.objectid))
 			totError,currParcel = Error.totalAssdValueCheck(totError,currParcel,'cntassdvalue','lndvalue','impvalue','tax')
 			totError,currParcel = Error.fairMarketCheck(totError,currParcel,'propclass','auxclass','estfmkvalue','tax')
-			totError,currParcel = Error.mfLValueCheck(totError,currParcel,'mflvalue','lndvalue','cntassdvalue','impvalue','auxclass','tax')
+			totError,currParcel = Error.mfLValueCheck(totError,currParcel,'mflvalue','auxclass','tax')
 			totError,currParcel = Error.auxclassTaxrollCheck (totError,currParcel,'auxclass', 'tax')
 			totError,currParcel = Error.matchContrib(totError,currParcel,"coname","parcelfips","parcelsrc",county_nameNo_dict,county_noName_dict,False,"general")
 			totError,currParcel = Error.netVsGross(totError,currParcel,"netprpta","grsprpta","tax")

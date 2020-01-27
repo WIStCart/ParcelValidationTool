@@ -702,7 +702,10 @@ class Error:
 				pass
 			else:
 				#arcpy.AddMessage("hello " + str(currentStatDict[field] - previousStatDict[field]))
-				Error.comparisonDict[field] = currentStatDict[field] - previousStatDict[field]
+				#Error.comparisonDict[field] = currentStatDict[field] - previousStatDict[field]
+				Error.comparisonDict[field] = round(
+				        ((currentStatDict[field] - previousStatDict[field])/
+						(Error.recordTotalCount - Error.pinSkipCount)*100),2)
 		return(Error)
 
 

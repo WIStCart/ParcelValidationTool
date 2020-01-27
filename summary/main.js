@@ -1,6 +1,6 @@
 
 // simple function for getting percent change negative or positive.
-function getPcnt(oldNumber, newNumber){
+/*function getPcnt(oldNumber, newNumber){
   if (newNumber == null){
     return 0;
   }else{
@@ -8,7 +8,7 @@ function getPcnt(oldNumber, newNumber){
     var percentDifference = (newNumber / oldNumber) * 100
     return percentDifference.toLocaleString(navigator.language, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
   }
-};
+};*/
 var schemaOrder = ["STATEID",
   "PARCELID",
   "TAXPARCELID",
@@ -107,14 +107,14 @@ class App extends React.Component {
     };
   }
   // when the component mounts we set the state to contain the values from the output JSON, they are in the console in a callback funtion.
-  componentWillMount(){
+/*  componentWillMount(){
     this.setState({
       validation: testValues,
       explanations: explain
     // callback function for the asyncronous setState call.
     }, () => console.log("State: ", this.state.validation, this.state.explanations)
   )
-  }
+}*/
 
     //main render function of the App component
    render() {
@@ -185,7 +185,7 @@ class App extends React.Component {
 class FieldsList extends React.Component {
   list(){
     var f = this.props.fields
-    var l = this.props.legacyFields
+    /*var l = this.props.legacyFields*/
     var tableArray = []
     var i = ""
     for (var g in schemaOrder){ // Use schemaOrder to implement the order of the Statewide Schema
@@ -217,13 +217,13 @@ class FieldsList extends React.Component {
         );
         }
       }
-      /**
+      /*
       tableArray = tableArray.sort(function(a,b){
         var mag_a = a.props.mag;
         var mag_b = b.props.mag;
         return mag_b - mag_a;
        })
-       **/
+       */
       return tableArray
 
 }
