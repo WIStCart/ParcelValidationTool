@@ -581,9 +581,9 @@ class Error:
 				if re.search('4', propClassTest) is not None or re.search('5', propClassTest) is not None:
 					getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in " + estFmkValue.upper() + " field according to value(s) in " + propClass.upper() + " field.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-				elif re.search('W', auxClassTest) is not None or re.search('X', auxClassTest) is not None:
-					getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in " + estFmkValue.upper() + " field according to value(s) in " + auxClass.upper() + " field.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				#elif re.search('W', auxClassTest) is not None or re.search('X', auxClassTest) is not None:
+				#	getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in " + estFmkValue.upper() + " field according to value(s) in " + auxClass.upper() + " field.")
+				#	setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				else:
 					pass
 				return(Error,Parcel)
@@ -828,6 +828,7 @@ class Error:
 			auxclass = getattr(Parcel,auxclassField)
 			taxRollFields = {'IMPVALUE': getattr(Parcel, "impvalue"), 'CNTASSDVALUE': getattr(Parcel, "cntassdvalue"),
 			'LNDVALUE': getattr(Parcel, "lndvalue"), 'MFLVALUE': getattr(Parcel, "mflvalue"),
+			'ESTFMKVALUE': getattr(Parcel, "estfmkvalue"),
 			'NETPRPTA': getattr(Parcel, "netprpta"), 'GRSPRPTA': getattr(Parcel, "grsprpta")}
 
 			probFields = []
