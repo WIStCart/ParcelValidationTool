@@ -579,7 +579,7 @@ class Error:
 			estFmkValueTest = getattr(Parcel,estFmkValue)
 			if estFmkValueTest is not None:
 				if re.search('4', propClassTest) is not None or re.search('5', propClassTest) is not None:
-					getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in " + estFmkValue.upper() + " field according to value(s) in " + propClass.upper() + " field.")
+					getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in " + estFmkValue.upper() + " field according to value(s) in " + propClass.upper() + " field. ")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				#elif re.search('W', auxClassTest) is not None or re.search('X', auxClassTest) is not None:
 				#	getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in " + estFmkValue.upper() + " field according to value(s) in " + auxClass.upper() + " field.")
@@ -700,13 +700,12 @@ class Error:
 	def fieldCompletenessComparison(Error,fieldList,passList,currentStatDict,previousStatDict):
 		for field in fieldList:
 			if field.upper() in passList:
-				pass
+				arcpy.AddMessage("hello " + str(field)) #pass
 			else:
-				#arcpy.AddMessage("hello " + str(currentStatDict[field] - previousStatDict[field]))
+				# + str(currentStatDict[field] - previousStatDict[field]))
 				#Error.comparisonDict[field] = currentStatDict[field] - previousStatDict[field]
-				Error.comparisonDict[field] = round(
-				        ((currentStatDict[field] - previousStatDict[field])/
-						(Error.recordTotalCount - Error.pinSkipCount)*100),2)
+				Error.comparisonDict[field] = round((100*(currentStatDict[field] - previousStatDict[field])/(Error.recordTotalCount - Error.pinSkipCount)),2)
+				arcpy.AddMessage("compare: this " + str(field) + " "+str(Error.comparisonDict[field]))
 		return(Error)
 
 
@@ -801,18 +800,22 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
+	# parcels with MFLValue should have auxclass of W1-W3 or W5-W9
 	def mfLValueCheck(Error, Parcel, mflvalue, auxField, errorType):
 		try:
 			mflValueTest = getattr(Parcel,mflvalue)
 			auxToTest = getattr(Parcel,auxField)
-			if mflValueTest is None:
-				pass
-			elif (mflValueTest is None) or (float(mflValueTest) == 0.0):
-			 	if auxToTest is not None and re.search('W', auxToTest) is not None and re.search('W4', auxToTest) is  None:
-					getattr(Parcel, errorType + "Errors").append("A value in MFLVALUE field does not match the value(s) provided in AUXCLASS field. See Validation_and_Submission_Tool_Guide.pdf for further information.")
+
+			if mflValueTest is None or float(mflValueTest) == 0.0:
+			 	if auxToTest is not None and re.search('W', auxToTest) is not None and re.search('AW', auxToTest) is  None and re.search('W4', auxToTest) is  None:
+					getattr(Parcel, errorType + "Errors").append("A <null> value provided in MFLVALUE field does not match the (" + str(auxToTest) + ") AUXCLASS value(s). See Validation_and_Submission_Tool_Guide.pdf for information.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-			elif (mflValueTest is not None) and (float(mflValueTest) > 0.0 and auxToTest is None):
+			elif mflValueTest is not None and float(mflValueTest) > 0.0:
+				if auxToTest is None:
 					getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in the MFLVALUE field according to the AUXCLASS field. Please verify.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				elif re.search('W4', auxToTest) is not None:
+					getattr(Parcel, errorType + "Errors").append("MFLVALUE does not include properties with AUXCLASS value of W4. Please verify.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 			else:
 				pass
@@ -821,6 +824,15 @@ class Error:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the MFLVALUE field.  Please manually inspect these fields.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
+
+	def mflLndValueCheck(Error,Parcel,lnd,mfl,errorType):
+		lnd = 0 if (getattr(Parcel,lnd) is None) else int(getattr(Parcel,lnd))
+		mfl = 0 if (getattr(Parcel,mfl) is None) else int(getattr(Parcel,mfl))
+		if lnd == mfl and (lnd <> 0 and mfl <> 0):
+			getattr(Parcel,errorType + "Errors").append("MFLVALUE should not equal LNDVALUE in most cases.  Please correct this issue and refer to the submission documentation for further clarification as needed.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return(Error,Parcel)
+
 
 	# checks that parcels with auxclass x1-x4  have taxroll values = <null>
 	def auxclassTaxrollCheck (Error,Parcel,auxclassField,errorType):
@@ -838,7 +850,7 @@ class Error:
 						if val is not None:
 							probFields.append(key)
 					if len(probFields) > 0:
-						getattr(Parcel,errorType + "Errors").append("AUXCLASS (" + str(auxclass) + ") found and " + " / ".join(probFields) + " field(s) is/are not <Null>. A <Null> value is expected in the field(s for tax exempt parcels. Please correct.")
+						getattr(Parcel,errorType + "Errors").append("AUXCLASS (" + str(auxclass) + ") found and " + " / ".join(probFields) + " field(s) is/are not <Null>. A <Null> value is expected in the field(s) for tax exempt parcels. Please correct.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				else:  #W values are okay
 					pass
@@ -849,6 +861,25 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
+	#Check that parcels with propclass values of 1-7 have CNTASSDVALUE > 0
+	def propClassCntCheck(Error,Parcel,propClass,cntValue,errorType):
+		try:
+			cnt = getattr(Parcel,cntValue)
+			propClassTest = getattr(Parcel,propClass)
+			if cnt is None or float(cnt) == 0:
+				if propClassTest in ['1', '2', '3', '4', '5', '5M', '6', '7' ]:
+					getattr(Parcel, errorType + "Errors").append("A value greater than zero is expected in CNTASSDVALUE field according to PROPCLASS (" + str(propClassTest) + ") value(s). Please verify.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				else:
+					pass
+			elif cnt is not None and float(cnt) > 0:
+				if propClassTest is None:
+					getattr(Parcel, errorType + "Errors").append("A value greater than zero provided in CNTASSDVALUE does not correspond to the PROPCLASS field value(s). Please verify.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		except:
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the CNTASSDVALUE field.  Please manually inspect the <Null> value provided in PROPCLASS.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
 
 	#check for instances of net > gross
 	def netVsGross(Error,Parcel,netField,grsField,errorType):
@@ -859,7 +890,7 @@ class Error:
 				if float(grsIn) >= float(netIn):
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("The NETPRPTA value is greater than the GRSPRPTA value.  See Validation_and_Submission_Tool_Guide.pdf for further information.")
+					getattr(Parcel,errorType + "Errors").append("The NETPRPTA value is greater than the GRSPRPTA value.  See Validation_and_Submission_Tool_Guide.pdf for verification.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					Error.netMoreGrsCnt += 1
 				return (Error,Parcel)
@@ -904,32 +935,3 @@ class Error:
 			arcpy.AddMessage("PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
 			arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 			exit()
-
-
-	def mflLndValueCheck(Error,Parcel,lnd,mfl,errorType):
-		lnd = 0 if (getattr(Parcel,lnd) is None) else int(getattr(Parcel,lnd))
-		mfl = 0 if (getattr(Parcel,mfl) is None) else int(getattr(Parcel,mfl))
-		if lnd == mfl and (lnd <> 0 and mfl <> 0):
-			getattr(Parcel,errorType + "Errors").append("MFLVALUE should not equal LNDVALUE in most cases.  Please correct this issue and refer to the submission documentation for further clarification as needed.")
-			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-		return(Error,Parcel)
-
-	#Check that parcels with propclass values of 1-7 have CNTASSDVALUE > 0
-	def propClassCntCheck(Error,Parcel,propClass,cntValue,errorType):
-		try:
-			cnt = getattr(Parcel,cntValue)
-			propClassTest = getattr(Parcel,propClass)
-			if cnt is None or float(cnt) == 0:
-				if propClassTest in ['1', '2', '3', '4', '5', '5M', '6', '7' ]:
-					getattr(Parcel, errorType + "Errors").append("A value greater than zero is expected in CNTASSDVALUE field according to value(s) in PROPCLASS field. Please verify.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-				else:
-					pass
-			elif cnt is not None and float(cnt) > 0:
-				if propClassTest is None:
-					getattr(Parcel, errorType + "Errors").append("A value greater than zero provided in CNTASSDVALUE does not correspond to the PROPCLASS field value(s). Please verify.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the CNTASSDVALUE field.  Please manually inspect the <Null> value provided in PROPCLASS.")
-			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-		return (Error, Parcel)
