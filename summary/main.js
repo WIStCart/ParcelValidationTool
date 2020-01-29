@@ -196,17 +196,17 @@ class FieldsList extends React.Component {
         var negativeAddOn = "/omissions"
 
         if ((f[i]) > 0){
-          valueString = <text>+ {String((Number(Math.abs(f[i]))).toLocaleString(navigator.language, { minimumFractionDigits: 0 }))}</text>
+          valueString = <text>+ {String((Number(Math.abs(f[i]))).toLocaleString(navigator.language, { minimumFractionDigits: 2 }))}</text>
           negativeAddOn = ""
         }else{
           if (Math.abs(f[i]) == 0){
-            valueString = <text>{String((Number(Math.abs(f[i]))).toLocaleString(navigator.language, { minimumFractionDigits: 0 }))}</text>
+            valueString = <text>{String((Number(Math.abs(f[i]))).toLocaleString(navigator.language, { minimumFractionDigits: 2 }))}</text>
           }else{
-            valueString = <text><b>-</b> {String((Number(Math.abs(f[i]))).toLocaleString(navigator.language, { minimumFractionDigits: 0 }))}</text>
+            valueString = <text><b>-</b> {String((Number(Math.abs(f[i]))).toLocaleString(navigator.language, { minimumFractionDigits: 2 }))}</text>
           }
         }
         if (Math.abs(f[i]) != 0){
-          directiveString = "records compared to last year's dataset. Inspect the "+ i +" field for possible errors" + negativeAddOn + "."
+          directiveString = "% records compared to last year's dataset. Inspect the "+ i +" field for possible errors" + negativeAddOn + "."
         }
         tableArray.push(
           <tr style={{ backgroundColor: "#9c27b000"}} mag= {l[i] - f[i]}>
@@ -217,13 +217,13 @@ class FieldsList extends React.Component {
         );
         }
       }
-      /**
+      /*
       tableArray = tableArray.sort(function(a,b){
         var mag_a = a.props.mag;
         var mag_b = b.props.mag;
         return mag_b - mag_a;
        })
-       **/
+      */
       return tableArray
 
 }
@@ -232,7 +232,7 @@ class FieldsList extends React.Component {
     var m = Math.floor(array.length / 2)
     var first = array.slice(0, array.length)
     //var second = array.slice(m, array.length)
-    var tableHeader = [<th style={fieldStyle}><a style={{ padding: '3px'}}></a></th>, <th colspan='2' style={changeHeaderStyle}><a style={{ padding: '3px'}}>Difference Compared to Last Year's Dataset - Click attribute name to view schema definition</a></th>]
+    var tableHeader = [<th style={fieldStyle}><a style={{ padding: '3px'}}></a></th>, <th colspan='2' style={changeHeaderStyle}><a style={{ padding: '3px'}}>Percentage Difference Compared to Last Year's Dataset - Click attribute name to view schema definition</a></th>]
 
       return (
       <div className="tablecase">

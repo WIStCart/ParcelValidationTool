@@ -171,6 +171,7 @@ class Summary:
 			Summary.errorSummaryFile.write("\n\n\n* Within: " + outDirTxt + "\\" + outName  + "\n")
 			Summary.errorSummaryFile.write("************************************************************************\n")
 			Summary.errorSummaryFile.close()
+			# outJSON - # full (hard coded) path to the output .json file summary.js
 			with open(outJSON, 'w') as outfile:
 				outfile.write("var testValues = ")
 				json.dump(Validation_JSON, outfile)

@@ -700,12 +700,10 @@ class Error:
 	def fieldCompletenessComparison(Error,fieldList,passList,currentStatDict,previousStatDict):
 		for field in fieldList:
 			if field.upper() in passList:
-				arcpy.AddMessage("hello " + str(field)) #pass
+				pass
 			else:
-				# + str(currentStatDict[field] - previousStatDict[field]))
 				#Error.comparisonDict[field] = currentStatDict[field] - previousStatDict[field]
 				Error.comparisonDict[field] = round((100*(currentStatDict[field] - previousStatDict[field])/(Error.recordTotalCount - Error.pinSkipCount)),2)
-				arcpy.AddMessage("compare: this " + str(field) + " "+str(Error.comparisonDict[field]))
 		return(Error)
 
 
