@@ -264,7 +264,7 @@ class Error:
 					#arcpy.AddMessage("This value is <Null>... or exists in our list...")
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("The value in the " + field.upper() + " does not appear to be in a list created from data of last year. Please verify this value is appropriately placed in this field.")
+					getattr(Parcel,errorType + "Errors").append("The value in " + field.upper() + " is not in standardized domain list. Please standarize/spell out values for affected records.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return (Error,Parcel)
 			else:
@@ -579,7 +579,7 @@ class Error:
 			estFmkValueTest = getattr(Parcel,estFmkValue)
 			if estFmkValueTest is not None:
 				if re.search('4', propClassTest) is not None or re.search('5', propClassTest) is not None:
-					getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in " + estFmkValue.upper() + " field according to value(s) in " + propClass.upper() + " field. ")
+					getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in " + estFmkValue.upper() + " for properties with PROPCLASS values of 4, 5 and 5M. Correct or verify.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				#elif re.search('W', auxClassTest) is not None or re.search('X', auxClassTest) is not None:
 				#	getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in " + estFmkValue.upper() + " field according to value(s) in " + auxClass.upper() + " field.")
@@ -792,7 +792,7 @@ class Error:
 			lnd = 0 if (getattr(Parcel,lnd) is None) else int(getattr(Parcel,lnd))
 			imp = 0 if (getattr(Parcel,imp) is None) else int(getattr(Parcel,imp))
 			if lnd + imp <> cnt:
-				getattr(Parcel,errorType + "Errors").append("CNTASSDVALUE is not equal to LNDVALUE + IMPVALUE as expected.  Please correct this issue and refer to the submission documentation for futher clarification as needed.")
+				getattr(Parcel,errorType + "Errors").append("CNTASSDVALUE is not equal to LNDVALUE + IMPVALUE as expected.  Correct this issue and refer to the submission documentation for futher clarification as needed.")
 				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 			return(Error,Parcel)
 		except:
@@ -808,7 +808,7 @@ class Error:
 
 			if mflValueTest is None or float(mflValueTest) == 0.0:
 			 	if auxToTest is not None and re.search('W', auxToTest) is not None and re.search('AW', auxToTest) is  None and re.search('W4', auxToTest) is  None:
-					getattr(Parcel, errorType + "Errors").append("A <null> value provided in MFLVALUE field does not match the (" + str(auxToTest) + ") AUXCLASS value(s). See Validation_and_Submission_Tool_Guide.pdf for information.")
+					getattr(Parcel, errorType + "Errors").append("A <null> value provided in MFLVALUE field does not match the (" + str(auxToTest) + ") AUXCLASS value(s). Refer to submission documentation for verification.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 			elif mflValueTest is not None and float(mflValueTest) > 0.0:
 				if auxToTest is None:
@@ -868,13 +868,13 @@ class Error:
 			propClassTest = getattr(Parcel,propClass)
 			if cnt is None or float(cnt) == 0:
 				if propClassTest in ['1', '2', '3', '4', '5', '5M', '6', '7' ]:
-					getattr(Parcel, errorType + "Errors").append("A value greater than zero is expected in CNTASSDVALUE field according to PROPCLASS (" + str(propClassTest) + ") value(s). Please verify.")
+					getattr(Parcel, errorType + "Errors").append("A non <Null> is expected in CNTASSDVALUE for records with PROPCLASS of (" + str(propClassTest) + "). Verify value.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				else:
 					pass
 			elif cnt is not None and float(cnt) > 0:
 				if propClassTest is None:
-					getattr(Parcel, errorType + "Errors").append("A value greater than zero provided in CNTASSDVALUE does not correspond to the PROPCLASS field value(s). Please verify.")
+					getattr(Parcel, errorType + "Errors").append("The value provided in CNTASSDVALUE does not correspond with PROPCLASS value(s) of (" + str(propClassTest) + "). Please verify.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		except:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the CNTASSDVALUE field.  Please manually inspect the <Null> value provided in PROPCLASS.")
