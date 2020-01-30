@@ -51,8 +51,8 @@ if inputDict['isSearchable'] == 'true':
 	#Load files for current domain lists
 	#streetNames = [line.strip() for line in open(os.path.join(base, '..\data\V3_StreetName_Simplified.txt'), 'r')] #street name list
 	streetTypes = [line.strip() for line in open(os.path.join(base, '..\data\V5_StreetType_Simplified.txt'), 'r')] #street types domain list
-	unitIdTypes = [line.strip() for line in open(os.path.join(base, '..\data\V4_UnitId_Simplified.txt'),'r')] #unitid domain list
-	unitTypes = [line.strip() for line in open(os.path.join(base, '..\data\V4_UnitType_Simplified.txt'),'r')] #unit type domain list
+	unitIdTypes = [line.strip() for line in open(os.path.join(base, '..\data\V5_UnitId_Simplified.txt'),'r')] #unitid domain list
+	unitTypes = [line.strip() for line in open(os.path.join(base, '..\data\V5_UnitType_Simplified.txt'),'r')] #unit type domain list
 	lsadDomains = [line.strip() for line in open(os.path.join(base, '..\data\LSAD_Simplified.txt'),'r')] #lsad domain list
 	taxRollYears = [line.strip() for line in open(os.path.join(base, '..\data\V5_TaxRollYears.txt'),'r')] #taxroll years to test (past,expected,future1,future2)
 	suffixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V5_SuffixDomains_Simplified.txt'),'r')] #suffix domain list
