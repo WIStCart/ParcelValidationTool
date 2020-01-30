@@ -189,24 +189,28 @@ class FieldsList extends React.Component {
     var tableArray = []
     var i = ""
     for (var g in schemaOrder){ // Use schemaOrder to implement the order of the Statewide Schema
-      if(f.hasOwnProperty(schemaOrder[g])){ // some fields in the schemaOrder are not displayed (dont exist in the output .JSON from the tool)
+      if(f.hasOwnProperty(schemaOrder[g]))  { // some fields in the schemaOrder are not displayed (dont exist in the output .JSON from the tool)     (Math.abs(f[i]) == 0)
         i = schemaOrder[g]
         var directiveString = ""
         var valueString = ""
         var negativeAddOn = "/omissions"
+        var less_more = "LESS"
 
         if ((f[i]) > 0){
           valueString = <text>+ {String((Number(Math.abs(f[i]))).toLocaleString(navigator.language, { minimumFractionDigits: 2 }))}</text>
           negativeAddOn = ""
+          less_more = "MORE"
         }else{
           if (Math.abs(f[i]) == 0){
-            valueString = <text>{String((Number(Math.abs(f[i]))).toLocaleString(navigator.language, { minimumFractionDigits: 2 }))}</text>
+            //valueString = <text>{String((Number(Math.abs(f[i]))).toLocaleString(navigator.language, { minimumFractionDigits: 2 }))}</text>
+            //valueString = <text> <b>-</b> {String((Number(Math.abs(f[i]))).toLocaleString(navigator.language, { minimumFractionDigits: 2 }))}</text>
           }else{
-            valueString = <text><b>-</b> {String((Number(Math.abs(f[i]))).toLocaleString(navigator.language, { minimumFractionDigits: 2 }))}</text>
+            valueString = <text><b>- </b>{String((Number(Math.abs(f[i]))).toLocaleString(navigator.language, { minimumFractionDigits: 2 }))}</text>
+            //valueString = <text>{String((Number(Math.abs(f[i]))).toLocaleString(navigator.language, { minimumFractionDigits: 2 }))}</text>
           }
         }
         if (Math.abs(f[i]) != 0){
-          directiveString = "% records compared to last year's dataset. Inspect the "+ i +" field for possible errors" + negativeAddOn + "."
+          directiveString = "% " + less_more  +" records compared to last year's dataset. Inspect the "+ i +" field for possible errors" + negativeAddOn + "."
         }
         tableArray.push(
           <tr style={{ backgroundColor: "#9c27b000"}} mag= {l[i] - f[i]}>
