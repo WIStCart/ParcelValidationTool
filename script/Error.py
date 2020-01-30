@@ -703,7 +703,7 @@ class Error:
 				pass
 			else:
 				#Error.comparisonDict[field] = currentStatDict[field] - previousStatDict[field]
-				Error.comparisonDict[field] = round((100*(currentStatDict[field] - previousStatDict[field])/(Error.recordTotalCount - Error.pinSkipCount)),2)
+				Error.comparisonDict[field] = round((100*(currentStatDict[field] - previousStatDict[field])/(Error.recordTotalCount)),2)
 		return(Error)
 
 
@@ -824,9 +824,9 @@ class Error:
 		return (Error, Parcel)
 
 	def mflLndValueCheck(Error,Parcel,lnd,mfl,errorType):
-		lnd = 0 if (getattr(Parcel,lnd) is None) else int(getattr(Parcel,lnd))
-		mfl = 0 if (getattr(Parcel,mfl) is None) else int(getattr(Parcel,mfl))
-		if lnd == mfl and (lnd <> 0 and mfl <> 0):
+		lnd = 0.0 if (getattr(Parcel,lnd) is None) else float(getattr(Parcel,lnd))
+		mfl = 0.0 if (getattr(Parcel,mfl) is None) else float(getattr(Parcel,mfl))
+		if lnd == mfl and (lnd <> 0.0 and mfl <> 0.0):
 			getattr(Parcel,errorType + "Errors").append("MFLVALUE should not equal LNDVALUE in most cases.  Please correct this issue and refer to the submission documentation for further clarification as needed.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return(Error,Parcel)
