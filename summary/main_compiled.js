@@ -243,9 +243,11 @@ function (_React$Component2) {
           } else {
             if (Math.abs(f[i]) == 0) {
               valueString = React.createElement("text", null, String(Number(Math.abs(f[i])).toLocaleString(navigator.language, {
+              //valueString = React.createElement("text", null, React.createElement("b", null, "-"), " ", String(Number(Math.abs(f[i])).toLocaleString(navigator.language, {
                 minimumFractionDigits: 2
               })));
-            } else {
+            }
+              else {
               valueString = React.createElement("text", null, React.createElement("b", null, "-"), " ", String(Number(Math.abs(f[i])).toLocaleString(navigator.language, {
                 minimumFractionDigits: 2
               })));
