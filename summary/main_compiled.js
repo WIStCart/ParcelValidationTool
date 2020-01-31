@@ -175,7 +175,7 @@ function (_React$Component) {
       }, React.createElement("div", {
         id: "comparison",
         className: "bricks"
-      }, React.createElement("h2", null, "ATTRIBUTE COMPARISON"), React.createElement(FieldsList, {
+      }, React.createElement("h2", null, "ATTRIBUTE COMPARISON"), React.createElement("h4", null, "ATTRIBUTES WITH 30% OR GREATER INCREASE/DECREASE IN RECORD VALUE COMPLETENESS"), React.createElement(FieldsList, {
         fields: this.state.validation.Fields_Diffs,
         legacyFields: this.state.validation.County_Info.Legacy
       }))), React.createElement("div", {
@@ -229,9 +229,10 @@ function (_React$Component2) {
       for (var g in schemaOrder) {
         // Use schemaOrder to implement the order of the Statewide Schema
         i = schemaOrder[g];
-        if (f.hasOwnProperty(schemaOrder[g]) & Math.abs(f[i]) != 0) {
+
+        if (f.hasOwnProperty(schemaOrder[g]) & Math.abs(f[i]) > 30) {
           // some fields in the schemaOrder are not displayed (dont exist in the output .JSON from the tool)     (Math.abs(f[i]) == 0)
-          //i = schemaOrder[g];
+          //i = schemaOrder[g]
           var directiveString = "";
           var valueString = "";
           var negativeAddOn = "/omissions";
@@ -239,7 +240,7 @@ function (_React$Component2) {
 
           if (f[i] > 0) {
             valueString = React.createElement("text", null, "+ ", String(Number(Math.abs(f[i])).toLocaleString(navigator.language, {
-              minimumFractionDigits: 2
+              minimumFractionDigits: 0
             })));
             negativeAddOn = "";
             less_more = "MORE";
@@ -248,7 +249,7 @@ function (_React$Component2) {
               //valueString = <text> <b>-</b> {String((Number(Math.abs(f[i]))).toLocaleString(navigator.language, { minimumFractionDigits: 2 }))}</text>
             } else {
               valueString = React.createElement("text", null, React.createElement("b", null, "- "), String(Number(Math.abs(f[i])).toLocaleString(navigator.language, {
-                minimumFractionDigits: 2
+                minimumFractionDigits: 0
               }))); //valueString = <text>{String((Number(Math.abs(f[i]))).toLocaleString(navigator.language, { minimumFractionDigits: 2 }))}</text>
             }
           }

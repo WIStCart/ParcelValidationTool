@@ -10,6 +10,11 @@ ol{
 h2{
   margin-bottom: 9px;
 }
+h4{
+  text-align: center;
+  margin-bottom: 0px;
+  margin-top: 0px;
+}
 @media (min-width: 1185px){
   body {
     font-size: 12pt;

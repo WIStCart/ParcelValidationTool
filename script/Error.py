@@ -786,9 +786,9 @@ class Error:
 
 	def totalAssdValueCheck(Error,Parcel,cnt,lnd,imp,errorType):
 		try:
-			cnt = 0 if (getattr(Parcel,cnt) is None) else int(getattr(Parcel,cnt))
-			lnd = 0 if (getattr(Parcel,lnd) is None) else int(getattr(Parcel,lnd))
-			imp = 0 if (getattr(Parcel,imp) is None) else int(getattr(Parcel,imp))
+			cnt = 0.0 if (getattr(Parcel,cnt) is None) else float(getattr(Parcel,cnt))
+			lnd = 0.0 if (getattr(Parcel,lnd) is None) else float(getattr(Parcel,lnd))
+			imp = 0.0 if (getattr(Parcel,imp) is None) else float(getattr(Parcel,imp))
 			if lnd + imp <> cnt:
 				getattr(Parcel,errorType + "Errors").append("CNTASSDVALUE is not equal to LNDVALUE + IMPVALUE as expected.  Correct this issue and refer to the submission documentation for futher clarification as needed.")
 				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
@@ -824,12 +824,17 @@ class Error:
 		return (Error, Parcel)
 
 	def mflLndValueCheck(Error,Parcel,lnd,mfl,errorType):
-		lnd = 0.0 if (getattr(Parcel,lnd) is None) else float(getattr(Parcel,lnd))
-		mfl = 0.0 if (getattr(Parcel,mfl) is None) else float(getattr(Parcel,mfl))
-		if lnd == mfl and (lnd <> 0.0 and mfl <> 0.0):
-			getattr(Parcel,errorType + "Errors").append("MFLVALUE should not equal LNDVALUE in most cases.  Please correct this issue and refer to the submission documentation for further clarification as needed.")
+		try:
+			lnd = 0.0 if (getattr(Parcel,lnd) is None) else float(getattr(Parcel,lnd))
+			mfl = 0.0 if (getattr(Parcel,mfl) is None) else float(getattr(Parcel,mfl))
+			if lnd == mfl and (lnd <> 0.0 and mfl <> 0.0):
+				getattr(Parcel,errorType + "Errors").append("MFLVALUE should not equal LNDVALUE in most cases.  Please correct this issue and refer to the submission documentation for further clarification as needed.")
+				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+			return(Error,Parcel)
+		except:
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the MFLVALUE/LNDVALUE field.  Please manually inspect these fields.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-		return(Error,Parcel)
+		return (Error, Parcel)
 
 
 	# checks that parcels with auxclass x1-x4  have taxroll values = <null>
@@ -866,7 +871,7 @@ class Error:
 			propClassTest = getattr(Parcel,propClass)
 			if cnt is None or float(cnt) == 0:
 				if propClassTest in ['1', '2', '3', '4', '5', '5M', '6', '7' ]:
-					getattr(Parcel, errorType + "Errors").append("A non <Null> is expected in CNTASSDVALUE for records with PROPCLASS of (" + str(propClassTest) + "). Verify value.")
+					getattr(Parcel, errorType + "Errors").append("A value greater than zero is expected in CNTASSDVALUE for properties with PROPCLASS of (" + str(propClassTest) + "). Verify value.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				else:
 					pass

@@ -157,6 +157,7 @@ class App extends React.Component {
             <div id="row">
               <div id="comparison" className="bricks">
                   <h2>ATTRIBUTE COMPARISON</h2>
+                  <h3>The following fields have 30% increase or decrease of records</h3>
                   <FieldsList fields={this.state.validation.Fields_Diffs} legacyFields={this.state.validation.County_Info.Legacy} />
               </div>
             </div>
@@ -189,7 +190,7 @@ class FieldsList extends React.Component {
     var tableArray = []
     var i = ""
     for (var g in schemaOrder){ // Use schemaOrder to implement the order of the Statewide Schema
-      if(f.hasOwnProperty(schemaOrder[g]))  { // some fields in the schemaOrder are not displayed (dont exist in the output .JSON from the tool)     (Math.abs(f[i]) == 0)
+      if(f.hasOwnProperty(schemaOrder[g])) & Math.abs(f[i]) >30 { // some fields in the schemaOrder are not displayed (dont exist in the output .JSON from the tool)     (Math.abs(f[i]) == 0)
         i = schemaOrder[g]
         var directiveString = ""
         var valueString = ""
