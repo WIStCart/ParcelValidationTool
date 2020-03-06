@@ -21,7 +21,7 @@ for inputName in inputNameList:
         i += 1
 
 #Run version check
-inputDict['version'] = 'V4.0.0'
+inputDict['version'] = 'V4.0.1'
 try:
 	arcpy.AddMessage('Checking Tool Version...')
 	currVersion = urllib2.urlopen('http://www.sco.wisc.edu/parcels/tools/Validation/validation_version.txt').read()
@@ -152,7 +152,7 @@ if inputDict['isSearchable'] == 'true':
 			totError,currParcel = Error.totalAssdValueCheck(totError,currParcel,'cntassdvalue','lndvalue','impvalue','tax')
 			totError,currParcel = Error.fairMarketCheck(totError,currParcel,'propclass','auxclass','estfmkvalue','tax')
 			totError,currParcel = Error.mfLValueCheck(totError,currParcel,'mflvalue','auxclass','tax')
-			totError,currParcel = Error.auxclassTaxrollCheck (totError,currParcel,'auxclass', 'tax')
+			#totError,currParcel = Error.auxclassTaxrollCheck (totError,currParcel,'auxclass', 'tax')
 			totError,currParcel = Error.matchContrib(totError,currParcel,"coname","parcelfips","parcelsrc",county_nameNo_dict,county_noName_dict,False,"general")
 			totError,currParcel = Error.netVsGross(totError,currParcel,"netprpta","grsprpta","tax")
 			totError,currParcel = Error.schoolDistCheck(totError,currParcel,"parcelid","schooldist","schooldistno",schoolDist_noName_dict,schoolDist_nameNo_dict,"tax",pinSkips,"taxrollyear")
