@@ -33,6 +33,7 @@ class Error:
 		self.validatedGeomCount = 0 #counts parcels whose geometry is validated
 		self.geometryNotValidated = False
 		self.geometryNotChecked = True
+		self.mflLnd = 0
 		self.diffxy = 0
 		self.xyShift = 0
 		self.codedDomainfields = []
@@ -186,12 +187,12 @@ class Error:
 					exit()
 				if coord == False:
 					arcpy.AddMessage("THE FEATURE CLASS SHOULD BE 'NAD_1983_HARN_Wisconsin_TM' INSTEAD OF: " + spatialReference.name + "\n")
-					arcpy.AddMessage("PLEASE FOLLOW THIS DOCUMENTATION: http://www.sco.wisc.edu/images/stories/publications/V2/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf TO PROJECT NATIVE DATA TO THE STATEWIDE PARCEL CRS\n")
+					arcpy.AddMessage("PLEASE FOLLOW THIS DOCUMENTATION: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf TO PROJECT NATIVE DATA TO THE STATEWIDE PARCEL CRS\n")
 					arcpy.AddMessage("PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
 					arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 					exit()
 		except: # using generic error handling because we don't know what errors to expect yet.
-			arcpy.AddMessage("The coordinate reference system of the feature class could not be validated. Please ensure that the feature class is projected to the Statewide Parcel CRS. This documentation may be of use in projecting the dataset: http://www.sco.wisc.edu/images/stories/publications/V2/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf.")
+			arcpy.AddMessage("The coordinate reference system of the feature class could not be validated. Please ensure that the feature class is projected to the Statewide Parcel CRS. This documentation may be of use in projecting the dataset: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf.")
 			exit()
 
 	#Check if text value is a valid number(Error object, Parcel object, field to test, type of error to classify this as, are <Null>s are considered errors?)
@@ -577,13 +578,21 @@ class Error:
 			propClassTest = str(getattr(Parcel,propClass)).replace(" ","")
 			auxClassTest = str(getattr(Parcel,auxClass)).replace(" ","")
 			estFmkValueTest = getattr(Parcel,estFmkValue)
-			if estFmkValueTest is not None:
-				if re.search('4', propClassTest) is not None or re.search('5', propClassTest) is not None:
-					getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in " + estFmkValue.upper() + " for properties with PROPCLASS values of 4, 5 and 5M. Correct or verify.")
+
+			if estFmkValueTest is  None and auxClassTest is None:
+				if re.search('1', propClassTest) is not None or re.search('2', propClassTest) is not None or re.search('3', propClassTest) is not None or re.search('6', propClassTest) is not None or re.search('7', propClassTest) is not None:
+					getattr(Parcel, errorType + "Errors").append("A value greater than zero is expected in ESTFMKVALUE for properties with PROPCLASS of (" + str(propClassTest) + "). Verify value.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-				#elif re.search('W', auxClassTest) is not None or re.search('X', auxClassTest) is not None:
-				#	getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in " + estFmkValue.upper() + " field according to value(s) in " + auxClass.upper() + " field.")
+				else:
+					pass
+			elif estFmkValueTest is not None:
+				#if re.search('4', propClassTest) is not None or re.search('5', propClassTest) is not None:
+				#	getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in ESTFMKVALUE for properties with PROPCLASS values of 4, 5 and 5M. Correct or verify.")
 				#	setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+				if re.search('W', auxClassTest) is not None or re.search('X', auxClassTest) is not None:
+					getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in ESTFMKVALUE for properties with AUXCLASS of (" + str(auxClassTest) + "). Verify value.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				else:
 					pass
 				return(Error,Parcel)
@@ -823,19 +832,52 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
+
 	def mflLndValueCheck(Error,Parcel,lnd,mfl,errorType):
 		try:
 			lnd = 0.0 if (getattr(Parcel,lnd) is None) else float(getattr(Parcel,lnd))
 			mfl = 0.0 if (getattr(Parcel,mfl) is None) else float(getattr(Parcel,mfl))
+
 			if lnd == mfl and (lnd <> 0.0 and mfl <> 0.0):
-				getattr(Parcel,errorType + "Errors").append("MFLVALUE should not equal LNDVALUE in most cases.  Please correct this issue and refer to the submission documentation for further clarification as needed.")
-				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				Error.mflLnd += 1
+				# need to save parcelid
+				if Error.mflLnd > 10:
+					getattr(Parcel,errorType + "Errors").append("MFLVALUE should not equal LNDVALUE in most cases.  Please correct this issue and refer to the submission documentation for further clarification as needed.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 3)
+
 			return(Error,Parcel)
 		except:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the MFLVALUE/LNDVALUE field.  Please manually inspect these fields.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
+	# checks that parcels with auxclass x1-x4  have taxroll values = <null>
+	def auxclassFullyX4Check (Error,Parcel,auxclassField,propclassField,errorType):
+		try:
+			auxclass = getattr(Parcel,auxclassField)
+			propclass = getattr(Parcel,propclassField)
+			taxRollFields = {'IMPVALUE': getattr(Parcel, "impvalue"), 'CNTASSDVALUE': getattr(Parcel, "cntassdvalue"),
+			'LNDVALUE': getattr(Parcel, "lndvalue"), 'MFLVALUE': getattr(Parcel, "mflvalue"),
+			'ESTFMKVALUE': getattr(Parcel, "estfmkvalue"),
+			'NETPRPTA': getattr(Parcel, "netprpta"), 'GRSPRPTA': getattr(Parcel, "grsprpta")}
+
+			probFields = []
+			if auxclass is not None:
+				if auxclass == 'X4' and propclass is None:
+					for key, val in taxRollFields.iteritems():
+						if val is not None:
+							probFields.append(key)
+					if len(probFields) > 0:
+						getattr(Parcel,errorType + "Errors").append("A <Null> value is expected in " + " / ".join(probFields) + "  for properties with AUXCLASS of X4. Please correct.")
+						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				else:  #W values are okay
+					pass
+				return (Error, Parcel)
+
+		except: # using generic error handling because we don't know what errors to expect yet.
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + auxclassField.upper() + " field. Please manually inspect the value of this field.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
 
 	# checks that parcels with auxclass x1-x4  have taxroll values = <null>
 	def auxclassTaxrollCheck (Error,Parcel,auxclassField,errorType):
@@ -853,7 +895,7 @@ class Error:
 						if val is not None:
 							probFields.append(key)
 					if len(probFields) > 0:
-						getattr(Parcel,errorType + "Errors").append("AUXCLASS (" + str(auxclass) + ") found and " + " / ".join(probFields) + " field(s) is/are not <Null>. A <Null> value is expected in the field(s) for tax exempt parcels. Please correct.")
+						getattr(Parcel,errorType + "Errors").append("A <Null> value is expected in " + " / ".join(probFields) + "  for properties with AUXCLASS of (" + str(auxclass) + "). Please correct.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				else:  #W values are okay
 					pass
