@@ -579,22 +579,22 @@ class Error:
 			auxClassTest = str(getattr(Parcel,auxClass)).replace(" ","")
 			estFmkValueTest = getattr(Parcel,estFmkValue)
 
-			if estFmkValueTest is  None and auxClassTest is None:
+			if estFmkValueTest is None and auxClassTest is None:
 				if re.search('1', propClassTest) is not None or re.search('2', propClassTest) is not None or re.search('3', propClassTest) is not None or re.search('6', propClassTest) is not None or re.search('7', propClassTest) is not None:
 					getattr(Parcel, errorType + "Errors").append("A value greater than zero is expected in ESTFMKVALUE for properties with PROPCLASS of (" + str(propClassTest) + "). Verify value.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					setattr(Error, errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				else:
 					pass
-			elif estFmkValueTest is not None:
+			#elif estFmkValueTest is not None:
 				#if re.search('4', propClassTest) is not None or re.search('5', propClassTest) is not None:
 				#	getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in ESTFMKVALUE for properties with PROPCLASS values of 4, 5 and 5M. Correct or verify.")
 				#	setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 
-				if re.search('W', auxClassTest) is not None or re.search('X', auxClassTest) is not None:
-					getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in ESTFMKVALUE for properties with AUXCLASS of (" + str(auxClassTest) + "). Verify value.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-				else:
-					pass
+				#if re.search('W', auxClassTest) is not None or re.search('X', auxClassTest) is not None:
+				#	getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in ESTFMKVALUE for properties with AUXCLASS of (" + str(auxClassTest) + "). Verify value.")
+				#	setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				#else:
+				#	pass
 				return(Error,Parcel)
 
  		except:
