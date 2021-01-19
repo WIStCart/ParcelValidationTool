@@ -3,16 +3,16 @@ const explain = {"County_Info": {
      "CO_NAME": "VERNON",
       "Legacy": {
         "SUFFIX": 46,
-        "STREETTYPE": 8335,
+        "STREETTYPE": 105,
         "PARCELID": 26993,
         "LANDMARKNAME": 0,
-        "SCHOOLDIST": 26175,
+        "SCHOOLDIST": 153,
         "IMPROVED": 23990,
-        "FORESTVALUE": 2659,
+        "MFLVALUE": 200,
         "CNTASSDVALUE": 23074,
         "PARCELFIPS": 26993,
         "UNITTYPE": 0,
-        "ZIP4": 562,
+        "ZIP4": 62,
         "GISACRES": 26993,
         "SITEADRESS": 10358,
         "ESTFMKVALUE": 10643,
@@ -56,7 +56,8 @@ const explain = {"County_Info": {
           "Tax_Errors": "A",
           "Address_Errors": "B",
           "General_Errors": "C",
-          "Geometric_Errors": "D"
+          "Geometric_Errors": "D",
+          "Error_Sum": "E"
          },
          "Records_Missing": {
            "Missing_CONAME": "0",

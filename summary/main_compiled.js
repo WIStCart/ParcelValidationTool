@@ -35,7 +35,7 @@ function getPcnt(oldNumber, newNumber) {
 }
 
 ;
-var schemaOrder = ["STATEID", "PARCELID", "TAXPARCELID", "PARCELDATE", "TAXROLLYEAR", "OWNERNME1", "OWNERNME2", "PSTLADRESS", "SITEADRESS", "ADDNUMPREFIX", "ADDNUM", "ADDNUMSUFFIX", "PREFIX", "STREETNAME", "STREETTYPE", "SUFFIX", "LANDMARKNAME", "UNITTYPE", "UNITID", "PLACENAME", "ZIPCODE", "ZIP4", "STATE", "SCHOOLDIST", "SCHOOLDISTNO", "CNTASSDVALUE", "LNDVALUE", "IMPVALUE", "ESTFMKVALUE", "NETPRPTA", "GRSPRPTA", "PROPCLASS", "AUXCLASS", "ASSDACRES", "DEEDACRES", "GISACRES", "CONAME", "LOADDATE", "PARCELFIPS", "PARCELSRC", "LONGITUDE", "LATITUDE"];
+var schemaOrder = ["STATEID", "PARCELID", "TAXPARCELID", "PARCELDATE", "TAXROLLYEAR", "OWNERNME1", "OWNERNME2", "PSTLADRESS", "SITEADRESS", "ADDNUMPREFIX", "ADDNUM", "ADDNUMSUFFIX", "PREFIX", "STREETNAME", "STREETTYPE", "SUFFIX", "LANDMARKNAME", "UNITTYPE", "UNITID", "PLACENAME", "ZIPCODE", "ZIP4", "STATE", "SCHOOLDIST", "SCHOOLDISTNO", "CNTASSDVALUE", "LNDVALUE", "IMPVALUE", "MFLVALUE", "ESTFMKVALUE", "NETPRPTA", "GRSPRPTA", "PROPCLASS", "AUXCLASS", "ASSDACRES", "DEEDACRES", "GISACRES", "CONAME", "LOADDATE", "PARCELFIPS", "PARCELSRC", "LONGITUDE", "LATITUDE"];
 var fieldStyle = {
   height: 25,
   textAlign: "left",
@@ -175,7 +175,7 @@ function (_React$Component) {
       }, React.createElement("div", {
         id: "comparison",
         className: "bricks"
-      }, React.createElement("h2", null, "ATTRIBUTE COMPARISON"), React.createElement("h4", null, "ATTRIBUTES WITH 30% OR GREATER INCREASE/DECREASE IN RECORD VALUE COMPLETENESS"), React.createElement(FieldsList, {
+      }, React.createElement("h2", null, "ATTRIBUTE COMPARISON"), React.createElement("h4", null, "ATTRIBUTES WITH 15% OR GREATER INCREASE/DECREASE IN RECORD VALUE COMPLETENESS"), React.createElement(FieldsList, {
         fields: this.state.validation.Fields_Diffs,
         legacyFields: this.state.validation.County_Info.Legacy
       }))), React.createElement("div", {
@@ -230,7 +230,7 @@ function (_React$Component2) {
         // Use schemaOrder to implement the order of the Statewide Schema
         i = schemaOrder[g];
 
-        if (f.hasOwnProperty(schemaOrder[g]) & Math.abs(f[i]) > 30) {
+        if (f.hasOwnProperty(schemaOrder[g]) & Math.abs(f[i]) >= 15) {
           // some fields in the schemaOrder are not displayed (dont exist in the output .JSON from the tool)     (Math.abs(f[i]) == 0)
           //i = schemaOrder[g]
           var directiveString = "";
@@ -359,7 +359,22 @@ function (_React$Component3) {
       var p = this.props.inline;
       var e = this.props.inlineexp;
       var listArray = [];
-      var taxOrderAray = ["General_Errors", "Address_Errors", "Tax_Errors", "Geometric_Errors"]; // Determines the order of elements from top to bottom
+
+      var taxOrderAray = ["General_Errors", "Address_Errors", "Tax_Errors", "Geometric_Errors", "Error_Sum"]; // Determines the order of elements from top to bottom
+      var errorSum = "Error_Sum"
+
+      var y = errorSum.split("_").join(" ")
+      //if (Number (p[4]) == 0) {
+      //  var ylv = "None.":
+      //  var lv2y = "";
+      //  var sty = equalLess0;
+      //} else {
+      //  var lvy = Number(p[4]).toLocaleString(navigator.language, {
+      //      minimumFractionDigits: 0
+      //  });
+      //  var lv2y = " sum of possible errors found.  See the attribute table in the output feature class to resolve these.";
+      //  var sty = greater0;
+      //}
 
       for (var l in taxOrderAray) {
         var i = taxOrderAray[l];
@@ -512,7 +527,7 @@ function (_React$Component4) {
       // Add tax roll year errors
 
       var p = this.props.broadLevel.Tax_Roll_Years_Pcnt;
-      var orderArray = [["Expected_Taxroll_Year", "TAXROLLYEAR \"2019\" (Expected year value)"], ["Previous_Taxroll_Year", "TAXROLLYEAR \"2018\" (Previous year value)"], ["Future_Taxroll_Years", "TAXROLLYEAR \"2020 or 2021\" (Future year values)"], ["Other_Taxroll_Years", "TAXROLLYEAR (Other year values)"]]; // Determines the order to which the elements appear from top to bottom
+      var orderArray = [["Expected_Taxroll_Year", "TAXROLLYEAR \"2020\" (Expected year value)"], ["Previous_Taxroll_Year", "TAXROLLYEAR \"2019\" (Previous year value)"], ["Future_Taxroll_Years", "TAXROLLYEAR \"2021 or 2022\" (Future year values)"], ["Other_Taxroll_Years", "TAXROLLYEAR (Other year values)"]]; // Determines the order to which the elements appear from top to bottom
 
       for (var l in orderArray) {
         //console.log(p)
