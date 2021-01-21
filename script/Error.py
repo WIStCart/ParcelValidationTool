@@ -873,11 +873,11 @@ class Error:
 	#totError = Error.checkBadChars (totError )
 	def checkBadChars(Error ):
 		if Error.badcharsCount >= 100:
-			arcpy.AddMessage("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			arcpy.AddMessage("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 			arcpy.AddMessage("THERE ARE AT LEAST 100 INSTANCES OF '<Null>' STRINGS, BLANKS, AND/OR STRING VALUES IN LOWER CASE LETTERS. \n")
 			arcpy.AddMessage("RUN THE \"NULL FIELDS AND SET THE UPPERCASE\" TOOL IN https://www.sco.wisc.edu/parcels/tools \n")
 			arcpy.AddMessage("MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THIS TOOL AGAIN.\n")
-			arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 			exit()
 
 	def totalAssdValueCheck(Error,Parcel,cnt,lnd,imp,errorType):

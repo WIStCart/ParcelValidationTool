@@ -69,7 +69,7 @@ class Summary:
 					'CNTASSDVALUE':  str(totError.comparisonDict["CNTASSDVALUE"]),
 					'LNDVALUE':  str(totError.comparisonDict["LNDVALUE"]),
 					'IMPVALUE':  str(totError.comparisonDict["IMPVALUE"]),
-					#'FORESTVALUE':  str(totError.comparisonDict["FORESTVALUE"]),
+					'MFLVALUE':  str(totError.comparisonDict["MFLVALUE"]),
 					'ESTFMKVALUE':  str(totError.comparisonDict["ESTFMKVALUE"]),
 					'NETPRPTA':  str(totError.comparisonDict["NETPRPTA"]),
 					'GRSPRPTA':  str(totError.comparisonDict["GRSPRPTA"]),
