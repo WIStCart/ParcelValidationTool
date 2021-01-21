@@ -35,7 +35,7 @@ function getPcnt(oldNumber, newNumber) {
 }
 
 ;
-var schemaOrder = ["STATEID", "PARCELID", "TAXPARCELID", "PARCELDATE", "TAXROLLYEAR", "OWNERNME1", "OWNERNME2", "PSTLADRESS", "SITEADRESS", "ADDNUMPREFIX", "ADDNUM", "ADDNUMSUFFIX", "PREFIX", "STREETNAME", "STREETTYPE", "SUFFIX", "LANDMARKNAME", "UNITTYPE", "UNITID", "PLACENAME", "ZIPCODE", "ZIP4", "STATE", "SCHOOLDIST", "SCHOOLDISTNO", "CNTASSDVALUE", "LNDVALUE", "IMPVALUE", "MFLVALUE", "ESTFMKVALUE", "NETPRPTA", "GRSPRPTA", "PROPCLASS", "AUXCLASS", "ASSDACRES", "DEEDACRES", "GISACRES", "CONAME", "LOADDATE", "PARCELFIPS", "PARCELSRC", "LONGITUDE", "LATITUDE"];
+var schemaOrder = ["STATEID", "PARCELID", "TAXPARCELID", "PARCELDATE", "TAXROLLYEAR", "OWNERNME1",  "OWNERNME2", "PSTLADRESS", "SITEADRESS", "ADDNUMPREFIX", "ADDNUM", "ADDNUMSUFFIX", "PREFIX", "STREETNAME", "STREETTYPE", "SUFFIX", "LANDMARKNAME", "UNITTYPE", "UNITID", "PLACENAME", "ZIPCODE", "ZIP4", "STATE", "SCHOOLDIST", "SCHOOLDISTNO", "CNTASSDVALUE", "LNDVALUE", "IMPVALUE", "MFLVALUE", "ESTFMKVALUE", "NETPRPTA", "GRSPRPTA", "PROPCLASS", "AUXCLASS", "ASSDACRES", "DEEDACRES", "GISACRES", "CONAME", "LOADDATE", "PARCELFIPS", "PARCELSRC", "LONGITUDE", "LATITUDE"];
 var fieldStyle = {
   height: 25,
   textAlign: "left",
@@ -98,7 +98,6 @@ function (_React$Component) {
     };
     return _this;
   } // when the component mounts we set the state to contain the values from the output JSON, they are in the console in a callback funtion.
-
 
   _createClass(App, [{
     key: "componentWillMount",
@@ -359,22 +358,8 @@ function (_React$Component3) {
       var p = this.props.inline;
       var e = this.props.inlineexp;
       var listArray = [];
-
-      var taxOrderAray = ["General_Errors", "Address_Errors", "Tax_Errors", "Geometric_Errors", "Error_Sum"]; // Determines the order of elements from top to bottom
-      var errorSum = "Error_Sum"
-
-      var y = errorSum.split("_").join(" ")
-      //if (Number (p[4]) == 0) {
-      //  var ylv = "None.":
-      //  var lv2y = "";
-      //  var sty = equalLess0;
-      //} else {
-      //  var lvy = Number(p[4]).toLocaleString(navigator.language, {
-      //      minimumFractionDigits: 0
-      //  });
-      //  var lv2y = " sum of possible errors found.  See the attribute table in the output feature class to resolve these.";
-      //  var sty = greater0;
-      //}
+      var sum_lv = 0;
+      var taxOrderAray = ["General_Errors", "Address_Errors", "Tax_Errors", "Geometric_Errors"]; //, "Error_Sum"]; // Determines the order of elements from top to bottom
 
       for (var l in taxOrderAray) {
         var i = taxOrderAray[l];
@@ -385,6 +370,7 @@ function (_React$Component3) {
           var lv2 = "";
           var st = equalLess0;
         } else {
+          var sum_lv = sum_lv + Number(p[i])
           var lv = Number(p[i]).toLocaleString(navigator.language, {
             minimumFractionDigits: 0
           });
@@ -406,6 +392,36 @@ function (_React$Component3) {
           }
         }, lv2)));
       }
+
+      var errorSum = "ERROR_SUM"
+      var y = errorSum.split("_").join(" ")
+      if (sum_lv == 0 ) { //Number (p[4]) == 0) {
+        var lvy = "None.";
+        var lv2y = "  GREAT JOB, NO ERRORS!!";
+        var sty = equalLess0;
+      } else {
+        var lvy = sum_lv.toLocaleString(navigator.language, {
+            minimumFractionDigits: 0});
+        //var lvy = Number(p[4]).toLocaleString(navigator.language, {
+        //    minimumFractionDigits: 0});
+        var lv2y = "";
+        var sty = greater0;
+      }
+
+      listArray.push(React.createElement("div", {
+        class: "general-file-errors"
+      }, React.createElement("text", {
+        style: {
+          fontWeight: 'bold'
+        }
+      }, y + ": "), React.createElement("text", {
+        style: sty
+      }, lvy), React.createElement("text", {
+        style: {
+          padding: '0px'
+        }
+      }, lv2y)));
+
 
       return listArray;
     }
