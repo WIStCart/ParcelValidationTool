@@ -22,7 +22,8 @@ class Summary:
 					'General_Errors': str(totError.generalErrorCount),
 					'Geometric_Errors': str(totError.geometricErrorCount),
 					'Address_Errors': str(totError.addressErrorCount),
-					'Tax_Errors': str(totError.taxErrorCount)
+					'Tax_Errors': str(totError.taxErrorCount),
+					'Error_Sum': str(totError.ErrorSum)
 				},
 				'broadLevelErrors':{
 				'Geometric_Misplacement_Flag':[],
@@ -95,6 +96,10 @@ class Summary:
 			Summary.errorSummaryFile.write("	Geometric Errors: " + str(totError.geometricErrorCount) + "\n")
 			Summary.errorSummaryFile.write("	Address Errors: " + str(totError.addressErrorCount) + "\n")
 			Summary.errorSummaryFile.write("	Tax Errors: " + str(totError.taxErrorCount) + "\n")
+			Summary.errorSummaryFile.write("	------------------\n")
+			Summary.errorSummaryFile.write("	ERROR SUM: " + str(totError.ErrorSum ) + "\n")
+			if totError.ErrorSum == 0:
+				Summary.errorSummaryFile.write("\n	GREAT JOB, NO ERRORS!!!!!! \n")
 			Summary.errorSummaryFile.write("\n\n")
 			Summary.errorSummaryFile.write("************************************************************************\n")
 			Summary.errorSummaryFile.write("* Broad-level errors:\n")
@@ -156,7 +161,7 @@ class Summary:
 			Summary.errorSummaryFile.write("   CNTASSDVALUE:  " + str(totError.comparisonDict["CNTASSDVALUE"]) + '\n')
 			Summary.errorSummaryFile.write("       LNDVALUE:  " + str(totError.comparisonDict["LNDVALUE"]) + '\n')
 			Summary.errorSummaryFile.write("       IMPVALUE:  " + str(totError.comparisonDict["IMPVALUE"]) + '\n')
-			#Summary.errorSummaryFile.write("    FORESTVALUE:  " + str(totError.comparisonDict["FORESTVALUE"]) + '\n')
+			Summary.errorSummaryFile.write("       MFLVALUE:  " + str(totError.comparisonDict["MFLVALUE"]) + '\n')
 			Summary.errorSummaryFile.write("    ESTFMKVALUE:  " + str(totError.comparisonDict["ESTFMKVALUE"]) + '\n')
 			Summary.errorSummaryFile.write("       NETPRPTA:  " + str(totError.comparisonDict["NETPRPTA"]) + '\n')
 			Summary.errorSummaryFile.write("       GRSPRPTA:  " + str(totError.comparisonDict["GRSPRPTA"]) + '\n')
@@ -194,6 +199,7 @@ class Summary:
 			config.set('ERROR COUNTS','Geometric',totError.geometricErrorCount)
 			config.set('ERROR COUNTS','Address',totError.addressErrorCount)
 			config.set('ERROR COUNTS','Tax',totError.taxErrorCount)
+			config.set('ERROR COUNTS','Sum',totError.ErrorSum)
 			config.add_section('PERCENT TAXROLL YEAR')
 			config.set('PERCENT TAXROLL YEAR','Previous',round((float(totError.trYearPast / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2))
 			config.set('PERCENT TAXROLL YEAR','Expected',round((float(totError.trYearExpected / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2))

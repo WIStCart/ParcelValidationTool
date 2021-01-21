@@ -50,18 +50,20 @@ if inputDict['isSearchable'] == 'true':
 
 	#Load files for current domain lists
 	#streetNames = [line.strip() for line in open(os.path.join(base, '..\data\V3_StreetName_Simplified.txt'), 'r')] #street name list
-	streetTypes = [line.strip() for line in open(os.path.join(base, '..\data\V5_StreetType_Simplified.txt'), 'r')] #street types domain list
-	unitIdTypes = [line.strip() for line in open(os.path.join(base, '..\data\V5_UnitId_Simplified.txt'),'r')] #unitid domain list
-	unitTypes = [line.strip() for line in open(os.path.join(base, '..\data\V5_UnitType_Simplified.txt'),'r')] #unit type domain list
+	streetTypes = [line.strip() for line in open(os.path.join(base, '..\data\V6_StreetType_Simplified.txt'), 'r')] #street types domain list
+	unitIdTypes = [line.strip() for line in open(os.path.join(base, '..\data\V6_UnitId_Simplified.txt'),'r')] #unitid domain list
+	unitTypes = [line.strip() for line in open(os.path.join(base, '..\data\V6_UnitType_Simplified.txt'),'r')] #unit type domain list
 	lsadDomains = [line.strip() for line in open(os.path.join(base, '..\data\LSAD_Simplified.txt'),'r')] #lsad domain list
-	taxRollYears = [line.strip() for line in open(os.path.join(base, '..\data\V5_TaxRollYears.txt'),'r')] #taxroll years to test (past,expected,future1,future2)
-	suffixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V5_SuffixDomains_Simplified.txt'),'r')] #suffix domain list
-	prefixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V5_PrefixDomains_Simplified.txt'),'r')] #prefix domain list
+	taxRollYears = [line.strip() for line in open(os.path.join(base, '..\data\V6_TaxRollYears.txt'),'r')] #taxroll years to test (past,expected,future1,future2)
+	suffixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V6_SuffixDomains_Simplified.txt'),'r')] #suffix domain list
+	prefixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V6_PrefixDomains_Simplified.txt'),'r')] #prefix domain list
 	pinSkips = [line.strip() for line in open(os.path.join(base, '..\data\V5_PinSkips.txt'),'r')] #list of non-parcelid values found in field to ignore when checking for dups (and use in other functions)
 
 	reader = csv.reader(open(os.path.join(base, '..\data\school_district_codes.csv'),'rU')) #school district code list (csv has been updated for V5/2018 school districts)
 	schoolDist_nameNo_dict = {}
 	schoolDist_noName_dict = {}
+	parcelidList = []  #to store up to 10 parcel id to restore when checking that mflvalue <> landvalue
+
 	for row in reader:
 		k,v = row
 		schoolDist_noName_dict[k] = v
@@ -81,6 +83,7 @@ if inputDict['isSearchable'] == 'true':
 	#lists for collecting parcelids and taxparcelids for checking for dups
 	uniquePinList = []
 	uniqueTaxparList = []
+
 
 	#Copy feature class, add new fields for error reporting
 	arcpy.AddMessage("Writing to Memory")
@@ -108,7 +111,9 @@ if inputDict['isSearchable'] == 'true':
 		for row in cursor:
 			#Construct the Parcel object for the row
 			currParcel = Parcel(row, fieldNames)
-
+			#totError = Error.checkBadChars (totError )
+			if totError.badcharsCount > 100:
+				totError = Error.checkBadChars (totError )    #for wrong <null> values
 			#Execute in-cursor error tests
 			totError,currParcel = Error.checkGeometricQuality(totError,currParcel, pinSkips)
 
@@ -152,19 +157,43 @@ if inputDict['isSearchable'] == 'true':
 			totError,currParcel = Error.totalAssdValueCheck(totError,currParcel,'cntassdvalue','lndvalue','impvalue','tax')
 			totError,currParcel = Error.fairMarketCheck(totError,currParcel,'propclass','auxclass','estfmkvalue','tax')
 			totError,currParcel = Error.mfLValueCheck(totError,currParcel,'mflvalue','auxclass','tax')
+			totError,currParcel = Error.mflLndValueCheck(totError,currParcel,"parcelid",parcelidList,"lndvalue","mflvalue","tax")
+			totError,currParcel = Error.auxclassFullyX4Check (totError,currParcel,'auxclass','propclass','tax')
 			#totError,currParcel = Error.auxclassTaxrollCheck (totError,currParcel,'auxclass', 'tax')
 			totError,currParcel = Error.matchContrib(totError,currParcel,"coname","parcelfips","parcelsrc",county_nameNo_dict,county_noName_dict,False,"general")
 			totError,currParcel = Error.netVsGross(totError,currParcel,"netprpta","grsprpta","tax")
 			totError,currParcel = Error.schoolDistCheck(totError,currParcel,"parcelid","schooldist","schooldistno",schoolDist_noName_dict,schoolDist_nameNo_dict,"tax",pinSkips,"taxrollyear")
-			totError,currParcel = Error.mflLndValueCheck(totError,currParcel,"lndvalue","mflvalue","tax")
+			totError,currParcel = Error.propClassCntCheck(totError,currParcel,"propclass","cntassdvalue","tax")
+
 			totError,currParcel = Error.fieldCompleteness(totError,currParcel,fieldNames,fieldListPass,CompDict)
 			#totError,currParcel = Error.fieldCompletenessComparison(totError,currParcel,fieldNames,fieldListPass,v3CompDict,getattr(LegacyCountyStats, (inputDict['county'].replace(" ","_").replace(".",""))+"LegacyDict"))
-			totError,currParcel = Error.propClassCntCheck(totError,currParcel,"propclass","cntassdvalue","tax")
 			#End of loop, finalize errors with the writeErrors function, then clear parcel
 			currParcel.writeErrors(row,cursor, fieldNames)
 			currParcel = None
 
 	totError = Error.fieldCompletenessComparison(totError,fieldNames,fieldListPass,CompDict,getattr(LegacyCountyStats, (inputDict['county'].replace(" ","_").replace(".",""))+"LegacyDict"))
+
+	#for key in totError.flags_dict:
+	#	arcpy.AddMessage ( str(key) + '->' + str(totError.flags_dict[key] ) )
+
+	if totError.mflLnd > 10:  # populate the error field:TaxrollElementErrors
+		totError.taxErrorCount += 10
+		item = ''
+		with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
+			for row in cursor:
+				for parcelid in parcelidList:
+					if row[3] == parcelid:
+						totError.flags_dict['mflvalueCheck'] += 1
+						if row[48] is not None:
+							item = " |" + " MFLVALUE should not equal LNDVALUE in most cases.  Please correct this issue and refer to the submission documentation for further clarification as needed."
+						else:
+							item = "MFLVALUE should not equal LNDVALUE in most cases.  Please correct this issue and refer to the submission documentation for further clarification as needed."
+						row[48] += item
+				cursor.updateRow(row)
+		del (cursor)
+                        #arcpy.AddMessage( parcelid)
+
+	totError.ErrorSum =  totError.generalErrorCount + totError.geometricErrorCount + totError.addressErrorCount + totError.taxErrorCount
 
 	if totError.geometryNotChecked == False:
 		Error.ctyExtentCentCheck(totError, inputDict['inFC'], ctyCentroidDict)
@@ -204,6 +233,10 @@ if inputDict['isSearchable'] == 'true':
 	arcpy.AddMessage("Geometric Errors: " + str(totError.geometricErrorCount))
 	arcpy.AddMessage("Address Errors: " + str(totError.addressErrorCount))
 	arcpy.AddMessage("Tax Errors: " + str(totError.taxErrorCount))
+	arcpy.AddMessage("-------------------")
+	arcpy.AddMessage("Error Sum: " + str(totError.ErrorSum) + "\n")
+	if totError.ErrorSum == 0:
+		arcpy.AddMessage(" GREAT JOB, NO ERRORS!!!!!!! \n")
 
 
 '''#Export
