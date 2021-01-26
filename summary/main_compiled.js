@@ -35,7 +35,9 @@ function getPcnt(oldNumber, newNumber) {
 }
 
 ;
-var schemaOrder = ["STATEID", "PARCELID", "TAXPARCELID", "PARCELDATE", "TAXROLLYEAR", "OWNERNME1",  "OWNERNME2", "PSTLADRESS", "SITEADRESS", "ADDNUMPREFIX", "ADDNUM", "ADDNUMSUFFIX", "PREFIX", "STREETNAME", "STREETTYPE", "SUFFIX", "LANDMARKNAME", "UNITTYPE", "UNITID", "PLACENAME", "ZIPCODE", "ZIP4", "STATE", "SCHOOLDIST", "SCHOOLDISTNO", "CNTASSDVALUE", "LNDVALUE", "IMPVALUE", "MFLVALUE", "ESTFMKVALUE", "NETPRPTA", "GRSPRPTA", "PROPCLASS", "AUXCLASS", "ASSDACRES", "DEEDACRES", "GISACRES", "CONAME", "LOADDATE", "PARCELFIPS", "PARCELSRC", "LONGITUDE", "LATITUDE"];
+//var schemaOrder = ["STATEID", "PARCELID", "TAXPARCELID", "PARCELDATE", "TAXROLLYEAR", "OWNERNME1",  "OWNERNME2", "PSTLADRESS", "SITEADRESS", "ADDNUMPREFIX", "ADDNUM", "ADDNUMSUFFIX", "PREFIX", "STREETNAME", "STREETTYPE", "SUFFIX", "LANDMARKNAME", "UNITTYPE", "UNITID", "PLACENAME", "ZIPCODE", "ZIP4", "STATE", "SCHOOLDIST", "SCHOOLDISTNO", "CNTASSDVALUE", "LNDVALUE", "IMPVALUE", "MFLVALUE", "ESTFMKVALUE", "NETPRPTA", "GRSPRPTA", "PROPCLASS", "AUXCLASS", "ASSDACRES", "DEEDACRES", "GISACRES", "CONAME", "LOADDATE", "PARCELFIPS", "PARCELSRC", "LONGITUDE", "LATITUDE"];
+var schemaOrder = ["PARCELID", "TAXPARCELID", "TAXROLLYEAR", "OWNERNME1", "OWNERNME2", "PSTLADRESS", "SITEADRESS", "ADDNUMPREFIX", "ADDNUM", "ADDNUMSUFFIX", "PREFIX", "STREETNAME", "STREETTYPE", "SUFFIX", "UNITTYPE", "UNITID", "PLACENAME", "SCHOOLDIST", "SCHOOLDISTNO", "CNTASSDVALUE", "LNDVALUE", "IMPVALUE", "MFLVALUE", "ESTFMKVALUE", "NETPRPTA", "GRSPRPTA", "PROPCLASS", "AUXCLASS", "ASSDACRES", "DEEDACRES", "CONAME", "PARCELFIPS", "PARCELSRC", "LONGITUDE", "LATITUDE"];
+
 var fieldStyle = {
   height: 25,
   textAlign: "left",
@@ -224,9 +226,11 @@ function (_React$Component2) {
       var l = this.props.legacyFields;
       var tableArray = [];
       var i = "";
+      var countZero = 0;
 
       for (var g in schemaOrder) {
         // Use schemaOrder to implement the order of the Statewide Schema
+        //countZero = 0;
         i = schemaOrder[g];
 
         if (f.hasOwnProperty(schemaOrder[g]) & Math.abs(f[i]) >= 15) {
@@ -236,7 +240,7 @@ function (_React$Component2) {
           var valueString = "";
           var negativeAddOn = "/omissions";
           var less_more = "LESS";
-
+          countZero = countZero + 1;
           if (f[i] > 0) {
             valueString = React.createElement("text", null, "+ ", String(Number(Math.abs(f[i])).toLocaleString(navigator.language, {
               minimumFractionDigits: 0
@@ -244,7 +248,8 @@ function (_React$Component2) {
             negativeAddOn = "";
             less_more = "MORE";
           } else {
-            if (Math.abs(f[i]) == 0) {//valueString = <text>{String((Number(Math.abs(f[i]))).toLocaleString(navigator.language, { minimumFractionDigits: 2 }))}</text>
+            if (Math.abs(f[i]) == 0) {
+              //valueString = <text>{String((Number(Math.abs(f[i]))).toLocaleString(navigator.language, { minimumFractionDigits: 2 }))}</text>
               //valueString = <text> <b>-</b> {String((Number(Math.abs(f[i]))).toLocaleString(navigator.language, { minimumFractionDigits: 2 }))}</text>
             } else {
               valueString = React.createElement("text", null, React.createElement("b", null, "- "), String(Number(Math.abs(f[i])).toLocaleString(navigator.language, {
@@ -289,11 +294,30 @@ function (_React$Component2) {
         return mag_b - mag_a;
        })
       */
+      if (countZero == 0) {
+      //if countZero == 0 {  //when fields didn't increase or decrease considerably
+        var dirString = "GREAT JOB!!!!!!   NO ATTRIBUTES WITH MORE THAN 15% INCREASE/DECREASE IN RECORD VALUE!!!!!!";
 
+        tableArray.push(React.createElement("tr", {
+          style: {
+            backgroundColor: "#9c27b000"
+          }
+        },
+         React.createElement("td", {
+          style: fieldStyle
+        },
+      ), React.createElement("td", {
+          style: changeStyle
+        },
+       ), React.createElement("td", {
+          style: directiveStyle
+        }, dirString)));
+      }
 
       return tableArray;
     }
-  }, {
+  },
+  {
     key: "render",
     value: function render() {
       var array = this.list();
@@ -313,7 +337,7 @@ function (_React$Component2) {
         style: {
           padding: '3px'
         }
-      }, "Percentage Difference Compared to Last Year's Dataset - Click attribute name to view schema definition"))];
+      }, "            Percentage Difference Compared to Last Year's Dataset - Click attribute name to view schema definition"))];
       return React.createElement("div", {
         className: "tablecase"
       }, React.createElement("tr", {
