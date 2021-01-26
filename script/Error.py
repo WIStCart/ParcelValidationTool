@@ -1057,7 +1057,7 @@ class Error:
 				if float(grsIn) >= float(netIn):
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("The NETPRPTA value is greater than the GRSPRPTA value.  See Validation_and_Submission_Tool_Guide.pdf for verification.")
+					getattr(Parcel,errorType + "Errors").append("The NETPRPTA value is greater than the GRSPRPTA value.  See Submission_Documentation.pdf for verification.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					Error.netMoreGrsCnt += 1
 					Error.flags_dict['netvsGross'] += 1
