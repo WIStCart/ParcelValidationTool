@@ -296,7 +296,7 @@ function (_React$Component2) {
       */
       if (countZero == 0) {
       //if countZero == 0 {  //when fields didn't increase or decrease considerably
-        var dirString = "GREAT JOB!!!!!!   NO ATTRIBUTES WITH MORE THAN 15% INCREASE/DECREASE IN RECORD VALUE   !!!!!!";
+        var dirString = "!!!!!!  NO ATTRIBUTES WITH MORE THAN 15% INCREASE/DECREASE IN RECORD VALUE  !!!!!!";
 
         tableArray.push(React.createElement("tr", {
           style: {
