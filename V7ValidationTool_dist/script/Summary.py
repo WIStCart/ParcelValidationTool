@@ -189,6 +189,7 @@ class Summary:
 		arcpy.AddMessage("\n")
 		arcpy.AddMessage("Creating .ini file")
 		config = ConfigParser()
+		config = ConfigParser(allow_no_value=True)
 		config.add_section('PARAMETERS')
 		for key in inputDict.keys():
 			config.set('PARAMETERS',key,inputDict[key])
@@ -199,7 +200,10 @@ class Summary:
 			config.set('ERROR COUNTS','Geometric',totError.geometricErrorCount)
 			config.set('ERROR COUNTS','Address',totError.addressErrorCount)
 			config.set('ERROR COUNTS','Tax',totError.taxErrorCount)
-			config.set('ERROR COUNTS','Sum',totError.ErrorSum)
+			config.set('ERROR COUNTS','-------------------')
+			config.set('ERROR COUNTS','Error Sum',totError.ErrorSum)
+			if totError.ErrorSum == 0:
+				config.set('ERROR COUNTS','    GREAT JOB, NO ERRORS!!!!!!!')
 			config.add_section('PERCENT TAXROLL YEAR')
 			config.set('PERCENT TAXROLL YEAR','Previous',round((float(totError.trYearPast / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2))
 			config.set('PERCENT TAXROLL YEAR','Expected',round((float(totError.trYearExpected / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2))
