@@ -206,7 +206,7 @@ class Error:
 			stringToTest = getattr(Parcel,field)
 			if stringToTest is not None:
 				if  stringToTest in nullList or stringToTest.isspace():
-					getattr(Parcel,errorType + "Errors").append("String values of '<Null>' or 'NULL' or blanks occurred in " + field.upper() + ". Please correct.")
+					getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + field.upper() + ". Please correct.")
 					#setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					Error.badcharsCount  +=1   #for wrong <null> values
 				else:
@@ -272,7 +272,7 @@ class Error:
 			if field == 'placename':
 				if stringToTest is not None:
 					if  stringToTest in nullList or stringToTest.isspace() or any(x.islower() for x in stringToTest):
-						getattr(Parcel,errorType + "Errors").append("String values of '<Null>' or 'NULL' or blanks occurred in " + field.upper() + ". Please correct.")
+						getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + field.upper() + ". Please correct.")
 						#setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 						Error.badcharsCount  +=1   #for wrong <null> values
 					elif any(substring in stringToTest for substring in testList):
@@ -296,7 +296,7 @@ class Error:
 			else:
 				if stringToTest is not None:
 					if  stringToTest in nullList or stringToTest.isspace() or any(x.islower() for x in stringToTest):
-						getattr(Parcel,errorType + "Errors").append("String values of '<Null>' or 'NULL' or blanks occurred in " + field.upper() + ". Please correct.")
+						getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + field.upper() + ". Please correct.")
 						#setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 						Error.badcharsCount  +=1   #for wrong <null> values
 
@@ -329,7 +329,7 @@ class Error:
 			pinToTest = getattr(Parcel,pinField)
 			if stringToTest is not None:
 				if  stringToTest in nullList or stringToTest.isspace():
-					getattr(Parcel,errorType + "Errors").append("String values of '<Null>' or 'NULL' or blanks occurred in " + field.upper() + ". Please correct.")
+					getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + field.upper() + ". Please correct.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					Error.badcharsCount  +=1   #for wrong <null> values
 				elif stringToTest == acceptYears[0]:
@@ -397,7 +397,7 @@ class Error:
 			siteAddToTest = getattr(Parcel,siteAddField)
 			if stringToTest is not None:
 				if  stringToTest in nullList or stringToTest.isspace() or any(x.islower() for x in stringToTest) :
-					getattr(Parcel,errorType + "Errors").append("String values of '<Null>' or 'NULL' or blanks occurred in " + field.upper() + ". Please correct.")
+					getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + field.upper() + ". Please correct.")
 					#setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					Error.badcharsCount  +=1   #for wrong <null> values
 
