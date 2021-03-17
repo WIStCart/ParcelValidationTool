@@ -21,7 +21,7 @@ for inputName in inputNameList:
         i += 1
 
 #Run version check
-inputDict['version'] = 'V5.0.0' 
+inputDict['version'] = 'V5.0.0'
 try:
 	arcpy.AddMessage('Checking Tool Version...')
 	currVersion = urllib2.urlopen('http://www.sco.wisc.edu/parcels/tools/Validation/validation_version.txt').read()
