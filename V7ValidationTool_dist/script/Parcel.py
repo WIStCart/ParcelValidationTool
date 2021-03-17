@@ -63,9 +63,9 @@ class Parcel:
 		if len(self.addressErrors) > 0:
 			row[fieldNames.index("AddressElementErrors")] = str(self.addressErrors).strip('[]').replace("'","").replace('"','').replace(",","  | ").replace("#","'").replace(";",",")
 		if len(self.generalErrors) > 0:
-			row[fieldNames.index("GeneralElementErrors")] = str(self.generalErrors).strip('[]').replace("'","").replace('"','').replace(",","  | ").replace("#","'")
+			row[fieldNames.index("GeneralElementErrors")] = str(self.generalErrors).strip('[]').replace("'","").replace('"','').replace(",","  | ").replace("#","'").replace(";",",")
 		if len(self.taxErrors) > 0:
-			row[fieldNames.index("TaxrollElementErrors")] = str(self.taxErrors).strip('[]').replace("'","").replace('"','').replace(",","  | ").replace("#","'")
+			row[fieldNames.index("TaxrollElementErrors")] = str(self.taxErrors).strip('[]').replace("'","").replace('"','').replace(",","  | ").replace("#","'").replace(";",",")
 		if len(self.geometricErrors) > 0:
-			row[fieldNames.index("GeometricElementErrors")] = str(self.geometricErrors).strip('[]').replace("'","").replace('"','').replace(",","  | ").replace("#","'")
+			row[fieldNames.index("GeometricElementErrors")] = str(self.geometricErrors).strip('[]').replace("'","").replace('"','').replace(",","  | ").replace("#","'").replace(";",",")
 		cursor.updateRow(row)
