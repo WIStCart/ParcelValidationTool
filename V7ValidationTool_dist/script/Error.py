@@ -860,6 +860,9 @@ class Error:
 							getattr(Parcel,errorType + "Errors").append("A value provided in the " + PostalAd.upper() + " field may contain an incomplete address. Please verify the value is correct or set to <Null> if complete address is unknown.")
 							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 							Error.flags_dict['postalCheck'] += 1
+
+						elif address in nullList or address.isspace():
+							Error.flags_dict['postalCheck'] += 1
 							Error.badcharsCount  += 1   #for wrong <null> values
 
 						else:
@@ -874,7 +877,7 @@ class Error:
 	def checkBadChars(Error ):
 		if Error.badcharsCount >= 100:
 			arcpy.AddMessage("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
-			arcpy.AddMessage("THERE ARE AT LEAST 100 INSTANCES OF THE STRINGS '<Null>', \'NULL\' AND/OR BLANKS WITHIN THE ATTRIBUTE TABLE. \n")
+			arcpy.AddMessage("THERE ARE AT LEAST 100 INSTANCES OF THE STRINGS '<Null>', \'NULL\', BLANKS AND/OR LOWER CASE CHARACTERS WITHIN THE ATTRIBUTE TABLE. \n")
 			arcpy.AddMessage("RUN THE \"NULL FIELDS AND SET THE UPPERCASE TOOL\" AVAILABLE HERE: https://www.sco.wisc.edu/parcels/tools \n")
 			arcpy.AddMessage("ONCE COMPLETE, RUN VALIDATION TOOL AGAIN.\n")
 			arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
