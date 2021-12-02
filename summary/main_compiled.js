@@ -129,6 +129,7 @@ function (_React$Component) {
       var bLL = this.state.validation;
       var bLLExplained = this.state.explanations;
       var coInfo = this.state.validation.County_Info;
+      var parDate = this.state.validation.Unique_ParcelDate;
       return React.createElement("div", null, React.createElement("div", {
         id: "summary",
         className: "bricks"
@@ -482,6 +483,7 @@ var Geometric_File_Error_Pre = "";
 var Geometric_Misplacement_Flag_Attn = "Geometries appear to be misplaced.";
 var Coded_Domain_Fields_Attn = "Coded domains or subtypes were found.";
 var Geometric_File_Error_Attn = "Click for detail."; //This component renders the list of broad level errors items and sets up a tooltip on them to render on click.
+var UniqueParcelDate = "97% or more records contain uniform PARCELDATE value.";
 
 var BroadLevelErrors =
 /*#__PURE__*/
@@ -563,11 +565,12 @@ function (_React$Component4) {
 
       listArray.push(React.createElement("div", {
         class: "general-file-errors"
-      }, React.createElement("br", null))); /////////////////////////////
+      }, React.createElement("br", null))); 
+      /////////////////////////////
       // Add tax roll year errors
 
       var p = this.props.broadLevel.Tax_Roll_Years_Pcnt;
-      var orderArray = [["Expected_Taxroll_Year", "TAXROLLYEAR \"2020\" (Expected year value)"], ["Previous_Taxroll_Year", "TAXROLLYEAR \"2019\" (Previous year value)"], ["Future_Taxroll_Years", "TAXROLLYEAR \"2021 or 2022\" (Future year values)"], ["Other_Taxroll_Years", "TAXROLLYEAR (Other year values)"]]; // Determines the order to which the elements appear from top to bottom
+      var orderArray = [["Expected_Taxroll_Year", "TAXROLLYEAR \"2021\" (Expected year value)"], ["Previous_Taxroll_Year", "TAXROLLYEAR \"2020\" (Previous year value)"], ["Future_Taxroll_Years", "TAXROLLYEAR \"2022 or 2023\" (Future year values)"], ["Other_Taxroll_Years", "TAXROLLYEAR (Other year values)"]]; // Determines the order to which the elements appear from top to bottom
 
       for (var l in orderArray) {
         //console.log(p)
@@ -587,6 +590,35 @@ function (_React$Component4) {
           }
         }, p[i] + "%")));
       }
+
+      listArray.push(React.createElement("div", {
+        class: "general-file-errors"
+      }, React.createElement("br", null)));
+
+      var p = this.props.broadLevel.Unique_ParcelDate;
+      var z = "PARCELDATE ERRORS"
+      for (var l in p){
+        if ( Number(p[l]) >= 97.0) {
+          var lv = Number(p[l]).toLocaleString(navigator.language, {
+            minimumFractionDigits: 0
+          }) + "% of all records contain uniform PARCELDATE values. Review Documentation";
+          //var lv = " 97% or more records contain uniform PARCELDATE values.";
+        }
+        else {
+          var lv = " None."
+        }  
+      }
+      listArray.push(React.createElement("div", {
+        class: "general-file-errors"
+      }, React.createElement("text", {
+        style: {
+          fontWeight: 'bold'
+        }
+      },z + " :"), React.createElement("text", {
+        style: {
+          padding: '1px'
+        }
+      }, lv)));
 
       return listArray;
     }
