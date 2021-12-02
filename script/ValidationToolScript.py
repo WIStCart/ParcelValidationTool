@@ -62,8 +62,8 @@ if inputDict['isSearchable'] == 'true':
 	reader = csv.reader(open(os.path.join(base, '..\data\school_district_codes.csv'),'rU')) #school district code list (csv has been updated for V5/2018 school districts)
 	schoolDist_nameNo_dict = {}
 	schoolDist_noName_dict = {}
-	parcelidList = []  #to store up to 10 parcel id to restore when checking that mflvalue <> landvalue
-
+	parcelidList_MFL = []  #to store up to 10 parcel id to restore when checking that mflvalue <> landvalue
+	
 	for row in reader:
 		k,v = row
 		schoolDist_noName_dict[k] = v
@@ -84,6 +84,9 @@ if inputDict['isSearchable'] == 'true':
 	uniquePinList = []
 	uniqueTaxparList = []
 
+	# list for collecting unique and repeated parceldates 
+	uniqueDates = []
+	sameDates = []
 
 	#Copy feature class, add new fields for error reporting
 	arcpy.AddMessage("Writing to Memory")
@@ -105,8 +108,10 @@ if inputDict['isSearchable'] == 'true':
 	arcpy.AddField_management(output_fc_temp,"TaxrollElementErrors", "TEXT", "", "", 1000)
 	arcpy.AddField_management(output_fc_temp,"GeometricElementErrors", "TEXT", "", "", 1000)
 
+
 	#Create update cursor then use it to iterate through records in feature class
 	arcpy.AddMessage("Testing the data for various attribute error types.")
+
 	with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 		for row in cursor:
 			#Construct the Parcel object for the row
@@ -143,7 +148,8 @@ if inputDict['isSearchable'] == 'true':
 			totError,currParcel = Error.streetNameCheck(totError,currParcel,"streetname","siteadress","address",True,stNameDict,inputDict['county'])
 			totError,currParcel = Error.zipCheck(totError,currParcel,"zipcode","address",True)
 			totError,currParcel = Error.zip4Check(totError,currParcel,"zip4","address",True)
-			#totError,currParcel = Error.impCheck(totError,currParcel,"improved","impvalue","tax")
+			
+			#totError,currParcel = Error.parcelDateCheck(totError,currParcel,"parceldate", uniqueDates, sameDates,"tax")
 
 			totError,currParcel = Error.totCheck(totError,currParcel,"impvalue","cntassdvalue","lndvalue","tax")
 
@@ -151,17 +157,20 @@ if inputDict['isSearchable'] == 'true':
 			totError,currParcel = Error.checkRedundantID(totError,currParcel,'taxparcelid','parcelid',True,'general')
 			totError,currParcel = Error.postalCheck(totError,currParcel,'pstladress','general',pinSkips,'taxrollyear','parcelid',badPstladdSet, taxRollYears)
 			totError,currParcel = Error.auxPropCheck(totError,currParcel,'propclass','auxclass','taxrollyear','parcelid', pinSkips,'tax', copDomains, auxDomains, taxRollYears)
-			#arcpy.AddMessage('On record:'+ str(currParcel.objectid))
+
 			totError,currParcel = Error.totalAssdValueCheck(totError,currParcel,'cntassdvalue','lndvalue','impvalue','tax')
 			totError,currParcel = Error.fairMarketCheck(totError,currParcel,'propclass','auxclass','estfmkvalue','tax')
 			totError,currParcel = Error.mfLValueCheck(totError,currParcel,'mflvalue','auxclass','tax')
-			totError,currParcel = Error.mflLndValueCheck(totError,currParcel,"parcelid",parcelidList,"lndvalue","mflvalue","tax")
+			totError,currParcel = Error.mflLndValueCheck(totError,currParcel,"parcelid",parcelidList_MFL,"lndvalue","mflvalue","tax")
+			
 			totError,currParcel = Error.auxclassFullyX4Check (totError,currParcel,'auxclass','propclass','tax')
-			#totError,currParcel = Error.auxclassTaxrollCheck (totError,currParcel,'auxclass', 'tax')
 			totError,currParcel = Error.matchContrib(totError,currParcel,"coname","parcelfips","parcelsrc",county_nameNo_dict,county_noName_dict,False,"general")
 			totError,currParcel = Error.netVsGross(totError,currParcel,"netprpta","grsprpta","tax")
 			totError,currParcel = Error.schoolDistCheck(totError,currParcel,"parcelid","schooldist","schooldistno",schoolDist_noName_dict,schoolDist_nameNo_dict,"tax",pinSkips,"taxrollyear")
-			totError,currParcel = Error.propClassCntCheck(totError,currParcel,"propclass","cntassdvalue","tax")
+
+			totError,currParcel = Error.propClassCntandNetCheck(totError,currParcel,"propclass","auxclass","netprpta","tax")
+			totError,currParcel = Error.propClassCntandNetCheck(totError,currParcel,"propclass","auxclass","grsprpta","tax")
+			totError,currParcel = Error.propClassCntandNetCheck(totError,currParcel,"propclass","auxclass","cntassdvalue","tax")
 
 			totError,currParcel = Error.fieldCompleteness(totError,currParcel,fieldNames,fieldListPass,CompDict)
 			#totError,currParcel = Error.fieldCompletenessComparison(totError,currParcel,fieldNames,fieldListPass,v3CompDict,getattr(LegacyCountyStats, (inputDict['county'].replace(" ","_").replace(".",""))+"LegacyDict"))
@@ -172,26 +181,40 @@ if inputDict['isSearchable'] == 'true':
 
 	totError = Error.fieldCompletenessComparison(totError,fieldNames,fieldListPass,CompDict,getattr(LegacyCountyStats, (inputDict['county'].replace(" ","_").replace(".",""))+"LegacyDict"))
 
-	#for key in totError.flags_dict:
-	#	arcpy.AddMessage ( str(key) + '->' + str(totError.flags_dict[key] ) )
+	## creates a statistics table for calculating number of repeated parceldates 
+	number_of_parcels = arcpy.GetCount_management(output_fc_temp)
+	total = int(number_of_parcels.getOutput(0))
+	max_uniform_parceldate =  int( round(  total*0.97,0)) 
+	output_stats_table_temp = os.path.join("in_memory", "WORKING_STATS")
 
+	arcpy.Statistics_analysis(output_fc_temp, output_stats_table_temp, [["parceldate", "COUNT"]], "parceldate")
+	uniform_date = ''
+
+	with arcpy.da.SearchCursor(output_stats_table_temp, ["parceldate", "COUNT_parceldate"]) as cursor:
+		for row in cursor:
+			if row[0] is not None and row[1] >= max_uniform_parceldate :
+				uniform_date  = row[0]
+				totError.generalErrorCount += 1
+				totError.uniqueparcelDatePercent = round(row[1])/round(total) * 100
+				
+	
 	if totError.mflLnd > 10:  # populate the error field:TaxrollElementErrors
 		totError.taxErrorCount += 10
 		item = ''
 		with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 			for row in cursor:
-				for parcelid in parcelidList:
+				for parcelid in parcelidList_MFL:
 					if row[3] == parcelid:
 						totError.flags_dict['mflvalueCheck'] += 1
 						if row[48] is not None:
-							item = " |" + " MFLVALUE should not equal LNDVALUE in most cases.  Please correct this issue and refer to the submission documentation for further clarification as needed."
+							item = "  | " + " MFLVALUE should not equal LNDVALUE in most cases.  Please correct this issue and refer to the submission documentation for further clarification as needed."
 						else:
 							item = "MFLVALUE should not equal LNDVALUE in most cases.  Please correct this issue and refer to the submission documentation for further clarification as needed."
 						row[48] += item
 				cursor.updateRow(row)
 		del (cursor)
-                        #arcpy.AddMessage( parcelid)
 
+	
 	totError.ErrorSum =  totError.generalErrorCount + totError.geometricErrorCount + totError.addressErrorCount + totError.taxErrorCount
 
 	if totError.geometryNotChecked == False:
@@ -220,10 +243,17 @@ if inputDict['isSearchable'] == 'true':
 		outSummaryDir = os.path.join(base, '..\summary') # full (hard coded) path to the Validation Summary directory
 		Summary.writeSummaryTxt(summary,outSummaryDir,inputDict['outName'],totError,outSummaryPage,outSummaryJSON)
 
+
 		#Write feature class from memory back out to hard disk
 		arcpy.FeatureClassToFeatureClass_conversion(output_fc_temp,inputDict['outDir'],inputDict['outName'])
 		arcpy.AddMessage("\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 		arcpy.AddMessage("TEST RUN COMPLETE\n")
+
+		if  totError.uniqueparcelDatePercent >= 97.0: 
+			arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			arcpy.AddMessage("97% OR MORE OF ALL RECORDS CONTAIN THE SAME PARCELDATE VALUE OF " + uniform_date )
+			arcpy.AddMessage("REVIEW SUBMISSION DOCUMENTATION AND SET TO <Null> IF NECESSARY.\n")
+			arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 		arcpy.AddMessage("REVIEW THE VALIDATION SUMMARY PAGE (" + outSummaryPage.replace("\script\..","") + ") FOR A SUMMARY OF THE POTENTIAL ISSUES FOUND.\n")
 		arcpy.AddMessage("REVIEW AND CORRECT IF NECESSARY, THE OUPUT PARCEL FEATURE CLASS.  RECORD-SPECIFIC ERRORS CAN BE FOUND IN THE FOUR COLUMNS ADDED TO THE END OF THE OUTPUT FEATURE CLASS.\n")
 		arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")

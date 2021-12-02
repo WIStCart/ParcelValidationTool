@@ -26,9 +26,9 @@ class Summary:
 					'Error_Sum': str(totError.ErrorSum)
 				},
 				'broadLevelErrors':{
-				'Geometric_Misplacement_Flag':[],
-				'Geometric_File_Error':[],
-                'Coded_Domain_Fields': ', '.join(totError.codedDomainfields)
+					'Geometric_Misplacement_Flag':[],
+					'Geometric_File_Error':[],
+					'Coded_Domain_Fields': ', '.join(totError.codedDomainfields)
 				},
 				'Tax_Roll_Years_Pcnt':{
 					'Previous_Taxroll_Year':  str(round((float(totError.trYearPast / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2)),
@@ -40,6 +40,9 @@ class Summary:
 					'Missing_CONAME': str(totError.coNameMiss),
 					'Missing_PARCELFIPS': str(totError.fipsMiss),
 					'Missing_PARCELSRC': str(totError.srcMiss)
+				},
+				'Unique_ParcelDate':{
+					'Pcnt_Unique_Parceldate': str(round (totError.uniqueparcelDatePercent,2))
 				},
 				'Fields_Diffs':{
 					'PARCELID':  str(totError.comparisonDict["PARCELID"]),
@@ -101,6 +104,12 @@ class Summary:
 			if totError.ErrorSum == 0:
 				Summary.errorSummaryFile.write("\n	GREAT JOB, NO ERRORS!!!!!! \n")
 			Summary.errorSummaryFile.write("\n\n")
+			Summary.errorSummaryFile.write("************************************************************************\n")
+			Summary.errorSummaryFile.write("* Uniform ParcelDate:\n")
+			Summary.errorSummaryFile.write("************************************************************************\n")
+			if totError.uniqueparcelDatePercent >= 97.0:
+				Summary.errorSummaryFile.write( str(round (totError.uniqueparcelDatePercent,2)) + "% of all records contain the same PARCELDATE value\n")
+				Summary.errorSummaryFile.write("Review submission documentation and set <Null> if necessary.\n\n")
 			Summary.errorSummaryFile.write("************************************************************************\n")
 			Summary.errorSummaryFile.write("* Broad-level errors:\n")
 			Summary.errorSummaryFile.write("************************************************************************\n")
