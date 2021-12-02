@@ -134,6 +134,8 @@ class App extends React.Component {
      const bLLExplained = this.state.explanations;
 
      const coInfo = this.state.validation.County_Info;
+
+     const parDate = this.state.validation.Unique_ParcelDate;
       return (
 
          <div>
@@ -308,6 +310,7 @@ var Geometric_File_Error_Pre = ""
 var Geometric_Misplacement_Flag_Attn = "Geometries appear to be misplaced."
 var Coded_Domain_Fields_Attn = "Coded domains or subtypes were found."
 var Geometric_File_Error_Attn = "Click for detail."
+var UniqueParcelDate = "97% or more records contain uniform PARCELDATE value."
 //This component renders the list of broad level errors items and sets up a tooltip on them to render on click.
 class BroadLevelErrors extends React.Component {
   list(){
@@ -367,8 +370,8 @@ class BroadLevelErrors extends React.Component {
     /////////////////////////////
     // Add tax roll year errors
     var p = this.props.broadLevel.Tax_Roll_Years_Pcnt
-    var orderArray = [["Expected_Taxroll_Year","TAXROLLYEAR \"2019\" (Expected year value)"], ["Previous_Taxroll_Year","TAXROLLYEAR \"2018\" (Previous year value)"], ["Future_Taxroll_Years","TAXROLLYEAR \"2020 or 2021\" (Future year values)"], [ "Other_Taxroll_Years", "TAXROLLYEAR (Other year values)"]] // Determines the order to which the elements appear from top to bottom
-    for (var l in orderArray){
+    var orderArray = [["Expected_Taxroll_Year","TAX,"TAXROLLYEAR \"2018\" (Previous year value)"], ["Future_Taxroll_Years","TAXROLLYEAR \"2020 or 2021\" (Future year values)"], [ "Other_Taxroll_Years", "TAXROLLYEAR (Other year values)"]] // Determines the order to which the elements appear from top to bottom
+     for (var l in orderArray){
       //console.log(p)
       var i = orderArray[l][0]
       var x = orderArray[l][1] //.split("_").join(" ")
@@ -380,6 +383,8 @@ class BroadLevelErrors extends React.Component {
             </div>
         );
     }
+
+
     return listArray
   }
   render() {
