@@ -213,6 +213,11 @@ class Summary:
 			config.set('ERROR COUNTS','Error Sum',totError.ErrorSum)
 			if totError.ErrorSum == 0:
 				config.set('ERROR COUNTS','    GREAT JOB, NO ERRORS!!!!!!!')
+			config.add_section('PARCELDATE FLAG')
+			if totError.uniqueparcelDatePercent >= 97.0:
+				config.set('PARCELDATE FLAG', 'Uniform ParcelDate', str(round (totError.uniqueparcelDatePercent,2)) )
+			if totError.uniqueparcelDatePercent < 97.0:
+				config.set('PARCELDATE FLAG','  GREAT JOB, NO UNIFORM PARCELDATE!' )			
 			config.add_section('PERCENT TAXROLL YEAR')
 			config.set('PERCENT TAXROLL YEAR','Previous',round((float(totError.trYearPast / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2))
 			config.set('PERCENT TAXROLL YEAR','Expected',round((float(totError.trYearExpected / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2))

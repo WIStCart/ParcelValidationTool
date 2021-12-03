@@ -51,10 +51,10 @@ if inputDict['isSearchable'] == 'true':
 	#Load files for current domain lists
 	#streetNames = [line.strip() for line in open(os.path.join(base, '..\data\V3_StreetName_Simplified.txt'), 'r')] #street name list
 	streetTypes = [line.strip() for line in open(os.path.join(base, '..\data\V6_StreetType_Simplified.txt'), 'r')] #street types domain list
-	unitIdTypes = [line.strip() for line in open(os.path.join(base, '..\data\V6_UnitId_Simplified.txt'),'r')] #unitid domain list
-	unitTypes = [line.strip() for line in open(os.path.join(base, '..\data\V6_UnitType_Simplified.txt'),'r')] #unit type domain list
+	unitIdTypes = [line.strip() for line in open(os.path.join(base, '..\data\V7_UnitId_Simplified.txt'),'r')] #unitid domain list
+	unitTypes = [line.strip() for line in open(os.path.join(base, '..\data\V7_UnitType_Simplified.txt'),'r')] #unit type domain list
 	lsadDomains = [line.strip() for line in open(os.path.join(base, '..\data\LSAD_Simplified.txt'),'r')] #lsad domain list
-	taxRollYears = [line.strip() for line in open(os.path.join(base, '..\data\V6_TaxRollYears.txt'),'r')] #taxroll years to test (past,expected,future1,future2)
+	taxRollYears = [line.strip() for line in open(os.path.join(base, '..\data\V7_TaxRollYears.txt'),'r')] #taxroll years to test (past,expected,future1,future2)
 	suffixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V6_SuffixDomains_Simplified.txt'),'r')] #suffix domain list
 	prefixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V6_PrefixDomains_Simplified.txt'),'r')] #prefix domain list
 	pinSkips = [line.strip() for line in open(os.path.join(base, '..\data\V6_PinSkips.txt'),'r')] #list of non-parcelid values found in field to ignore when checking for dups (and use in other functions)
@@ -182,20 +182,17 @@ if inputDict['isSearchable'] == 'true':
 	totError = Error.fieldCompletenessComparison(totError,fieldNames,fieldListPass,CompDict,getattr(LegacyCountyStats, (inputDict['county'].replace(" ","_").replace(".",""))+"LegacyDict"))
 
 	## creates a statistics table for calculating number of repeated parceldates 
-	number_of_parcels = arcpy.GetCount_management(output_fc_temp)
-	total = int(number_of_parcels.getOutput(0))
-	max_uniform_parceldate =  int( round(  total*0.97,0)) 
+	total = totError.recordTotalCount
 	output_stats_table_temp = os.path.join("in_memory", "WORKING_STATS")
-
 	arcpy.Statistics_analysis(output_fc_temp, output_stats_table_temp, [["parceldate", "COUNT"]], "parceldate")
 	uniform_date = ''
-
 	with arcpy.da.SearchCursor(output_stats_table_temp, ["parceldate", "COUNT_parceldate"]) as cursor:
 		for row in cursor:
-			if row[0] is not None and row[1] >= max_uniform_parceldate :
+			#arcpy.AddMessage( float(row[1])/float(totError.recordTotalCount) * 100)
+			if row[0] is not None and float(row[1])/float(totError.recordTotalCount) * 100 >= 97.0: #max_uniform_parceldate :
 				uniform_date  = row[0]
 				totError.generalErrorCount += 1
-				totError.uniqueparcelDatePercent = round(row[1])/round(total) * 100
+				totError.uniqueparcelDatePercent = float(row[1])/float(totError.recordTotalCount) * 100
 				
 	
 	if totError.mflLnd > 10:  # populate the error field:TaxrollElementErrors
@@ -251,7 +248,7 @@ if inputDict['isSearchable'] == 'true':
 
 		if  totError.uniqueparcelDatePercent >= 97.0: 
 			arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
-			arcpy.AddMessage("97% OR MORE OF ALL RECORDS CONTAIN THE SAME PARCELDATE VALUE OF " + uniform_date )
+			arcpy.AddMessage( str(round ( totError.uniqueparcelDatePercent,2)) + "% OF ALL RECORDS CONTAIN THE SAME PARCELDATE VALUE OF " + uniform_date )
 			arcpy.AddMessage("REVIEW SUBMISSION DOCUMENTATION AND SET TO <Null> IF NECESSARY.\n")
 			arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 		arcpy.AddMessage("REVIEW THE VALIDATION SUMMARY PAGE (" + outSummaryPage.replace("\script\..","") + ") FOR A SUMMARY OF THE POTENTIAL ISSUES FOUND.\n")

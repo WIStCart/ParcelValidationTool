@@ -596,13 +596,12 @@ function (_React$Component4) {
       }, React.createElement("br", null)));
 
       var p = this.props.broadLevel.Unique_ParcelDate;
-      var z = "PARCELDATE ERRORS"
+      var z = "PARCELDATE FLAG"
       for (var l in p){
         if ( Number(p[l]) >= 97.0) {
           var lv = Number(p[l]).toLocaleString(navigator.language, {
             minimumFractionDigits: 0
-          }) + "% of all records contain uniform PARCELDATE values. Review Documentation";
-          //var lv = " 97% or more records contain uniform PARCELDATE values.";
+          }) + "% of all records contain uniform PARCELDATE values. Review Submission Documentation.";
         }
         else {
           var lv = " None."
