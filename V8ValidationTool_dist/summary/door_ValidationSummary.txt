@@ -1,0 +1,87 @@
+C:\Users\ajwells\Documents\GitHub\More_validation_tool\ParcelValidationTool\script\..\summary\door_ValidationSummary.txt
+Validation Summary Table: 
+This validation summary table contains an overview of any errors found by the Parcel Validation Tool. Please review the contents of this file and make changes to your parcel dataset as necessary.
+
+************************************************************************
+* In-line errors
+************************************************************************
+The following lines summarized the element-specific errors that were found while validating your parcel dataset.  The stats below are meant as a means of reviewing the output.  Please see the GeneralElementErrors, AddressElementErrors, TaxrollElementErrors, and GeometricElementErrors fields to address these errors individually.
+	General Errors: 1
+	Geometric Errors: 0
+	Address Errors: 26
+	Tax Errors: 221
+	------------------
+	ERROR SUM: 248
+
+
+************************************************************************
+* Broad-level errors:
+************************************************************************
+The following lines explain any broad geometric errors that were found while validating your parcel dataset.
+	*No broad-level geometric errors found!
+
+
+Percentage of records with various Taxroll Years
+	Previous Taxroll Year: 0.0%
+	Expected Taxroll Year: 99.21%
+	Future Taxroll Years: 0.79%
+	Other Taxroll Years: 0.0%
+
+
+Records missing CONAME, PARCELFIPS, or PARCELSOURCE
+	Missing CONAME: 0
+	Missing PARCELFIPS: 0
+	Missing PARCELSRC: 0
+
+If any of the above values are greater than 0, please add missing values.  These 3 fields should be populated for all records submitted.
+
+
+BELOW IS A COMPARISON OF COMPLETENESS VALUES FROM YOUR PREVIOUS PARCEL SUBMISSION AND THIS CURRENT SUBMISSION.
+-->If the value shown is a seemingly large negative number, please verify that all data was joined correctly and no data was lost during processing.
+-->Note: This does not necessarily mean your data is incorrect, we just want to highlight large discrepancies that could indicate missing or incorrect data.
+
+          FIELD     DIFFERENCE
+         ------     ----------
+       PARCELID:  0.0
+    TAXPARCELID:  0.0
+     PARCELDATE:  102.0
+    TAXROLLYEAR:  0.0
+      OWNERNME1:  0.0
+      OWNERNME2:  241.0
+     PSTLADRESS:  0.0
+     SITEADRESS:  0.0
+   ADDNUMPREFIX:  -1.0
+         ADDNUM:  0.0
+   ADDNUMSUFFIX:  0.0
+         PREFIX:  -1.0
+     STREETNAME:  0.0
+     STREETTYPE:  0.0
+         SUFFIX:  62.0
+   LANDMARKNAME:  0.0
+       UNITTYPE:  -3.0
+         UNITID:  0.0
+      PLACENAME:  -1.0
+        ZIPCODE:  -16.0
+           ZIP4:  0.0
+     SCHOOLDIST:  -1.0
+   SCHOOLDISTNO:  -1.0
+   CNTASSDVALUE:  4.0
+       LNDVALUE:  4.0
+       IMPVALUE:  4.0
+       MFLVALUE:  -5.0
+    ESTFMKVALUE:  21.0
+       NETPRPTA:  4.0
+       GRSPRPTA:  4.0
+      PROPCLASS:  0.0
+       AUXCLASS:  -4.0
+      ASSDACRES:  -4.0
+      DEEDACRES:  -9.0
+       GISACRES:  0.0
+         CONAME:  0.0
+     PARCELFIPS:  0.0
+      PARCELSRC:  0.0
+
+
+
+* Within: C:\Users\ajwells\Documents\GitHub\More_validation_tool\ParcelValidationTool\script\..\summary\door
+************************************************************************
