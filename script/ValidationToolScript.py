@@ -50,14 +50,14 @@ if inputDict['isSearchable'] == 'true':
 
 	#Load files for current domain lists
 	#streetNames = [line.strip() for line in open(os.path.join(base, '..\data\V3_StreetName_Simplified.txt'), 'r')] #street name list
-	streetTypes = [line.strip() for line in open(os.path.join(base, '..\data\V6_StreetType_Simplified.txt'), 'r')] #street types domain list
+	streetTypes = [line.strip() for line in open(os.path.join(base, '..\data\V7_StreetType_Simplified.txt'), 'r')] #street types domain list
 	unitIdTypes = [line.strip() for line in open(os.path.join(base, '..\data\V7_UnitId_Simplified.txt'),'r')] #unitid domain list
 	unitTypes = [line.strip() for line in open(os.path.join(base, '..\data\V7_UnitType_Simplified.txt'),'r')] #unit type domain list
 	lsadDomains = [line.strip() for line in open(os.path.join(base, '..\data\LSAD_Simplified.txt'),'r')] #lsad domain list
 	taxRollYears = [line.strip() for line in open(os.path.join(base, '..\data\V7_TaxRollYears.txt'),'r')] #taxroll years to test (past,expected,future1,future2)
-	suffixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V6_SuffixDomains_Simplified.txt'),'r')] #suffix domain list
-	prefixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V6_PrefixDomains_Simplified.txt'),'r')] #prefix domain list
-	pinSkips = [line.strip() for line in open(os.path.join(base, '..\data\V6_PinSkips.txt'),'r')] #list of non-parcelid values found in field to ignore when checking for dups (and use in other functions)
+	suffixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V7_SuffixDomains_Simplified.txt'),'r')] #suffix domain list
+	prefixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V7_PrefixDomains_Simplified.txt'),'r')] #prefix domain list
+	pinSkips = [line.strip() for line in open(os.path.join(base, '..\data\V7_PinSkips.txt'),'r')] #list of non-parcelid values found in field to ignore when checking for dups (and use in other functions)
 
 	reader = csv.reader(open(os.path.join(base, '..\data\school_district_codes.csv'),'rU')) #school district code list (csv has been updated for V5/2018 school districts)
 	schoolDist_nameNo_dict = {}
