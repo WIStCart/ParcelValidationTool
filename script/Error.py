@@ -1081,7 +1081,10 @@ class Error:
 			net = getattr(Parcel, netValue)
 			gros = getattr(Parcel, grosValue)
 			if (net is None or float(net) == 0) and (gros is None or float(gros) == 0):
-				if (re.search('1', str(propClassTest)) or re.search('2', str(propClassTest)) or re.search('3',str(propClassTest)) or re.search('4', str(propClassTest)) or re.search('5',str(propClassTest)) or re.search('6',str(propClassTest)) or re.search('7',str(propClassTest))):
+				if auxClassTest is not None and re.search ('AW', str(auxClassTest)):
+					pass    ## Calumet case 
+
+				elif (re.search('1', str(propClassTest)) or re.search('2', str(propClassTest)) or re.search('3',str(propClassTest)) or re.search('4', str(propClassTest)) or re.search('5',str(propClassTest)) or re.search('6',str(propClassTest)) or re.search('7',str(propClassTest))):
 					getattr(Parcel, errorType + "Errors").append("A value greater than zero is expected in NETPRPTA/GRSPRPTA for properties with PROPCLASS of (" + str(propClassTest) + "). Verify value.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					#Error.flags_dict['cntPropClassCheck'] += 1
