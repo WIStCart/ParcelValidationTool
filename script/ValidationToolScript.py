@@ -168,9 +168,8 @@ if inputDict['isSearchable'] == 'true':
 			totError,currParcel = Error.netVsGross(totError,currParcel,"netprpta","grsprpta","tax")
 			totError,currParcel = Error.schoolDistCheck(totError,currParcel,"parcelid","schooldist","schooldistno",schoolDist_noName_dict,schoolDist_nameNo_dict,"tax",pinSkips,"taxrollyear")
 
-			totError,currParcel = Error.propClassCntandNetCheck(totError,currParcel,"propclass","auxclass","netprpta","tax")
-			totError,currParcel = Error.propClassCntandNetCheck(totError,currParcel,"propclass","auxclass","grsprpta","tax")
-			totError,currParcel = Error.propClassCntandNetCheck(totError,currParcel,"propclass","auxclass","cntassdvalue","tax")
+			totError,currParcel = Error.propClassNetGrosCheck(totError,currParcel,"propclass","auxclass","netprpta","grsprpta","tax")
+			totError,currParcel = Error.propClassCntCheck(totError,currParcel,"propclass","auxclass","cntassdvalue","tax")
 
 			totError,currParcel = Error.fieldCompleteness(totError,currParcel,fieldNames,fieldListPass,CompDict)
 			#totError,currParcel = Error.fieldCompletenessComparison(totError,currParcel,fieldNames,fieldListPass,v3CompDict,getattr(LegacyCountyStats, (inputDict['county'].replace(" ","_").replace(".",""))+"LegacyDict"))
@@ -191,7 +190,7 @@ if inputDict['isSearchable'] == 'true':
 			#arcpy.AddMessage( float(row[1])/float(totError.recordTotalCount) * 100)
 			if row[0] is not None and float(row[1])/float(totError.recordTotalCount) * 100 >= 97.0: #max_uniform_parceldate :
 				uniform_date  = row[0]
-				totError.generalErrorCount += 1
+				#totError.generalErrorCount += 1
 				totError.uniqueparcelDatePercent = float(row[1])/float(totError.recordTotalCount) * 100
 				
 	

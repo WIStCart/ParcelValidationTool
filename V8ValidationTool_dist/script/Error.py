@@ -287,7 +287,7 @@ class Error:
 				if stringToTest is not None:
 					if  stringToTest in nullList or stringToTest.isspace() or any(x.islower() for x in stringToTest):
 						getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + field.upper() + ". Please correct.")
-						#setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 						Error.badcharsCount  +=1   #for wrong <null> values
 					elif any(substring in stringToTest for substring in testList):
 						pass
@@ -311,7 +311,7 @@ class Error:
 				if stringToTest is not None:
 					if  stringToTest in nullList or stringToTest.isspace() or any(x.islower() for x in stringToTest):
 						getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + field.upper() + ". Please correct.")
-						#setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 						Error.badcharsCount  +=1   #for wrong <null> values
 
 					elif stringToTest in testList:
@@ -412,10 +412,10 @@ class Error:
 			if stringToTest is not None:
 				if  stringToTest in nullList or stringToTest.isspace() or any(x.islower() for x in stringToTest) :
 					getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + field.upper() + ". Please correct.")
-					#setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					Error.badcharsCount  +=1   #for wrong <null> values
 
-				if stringToTest.strip() in stNameDict[coname]:
+				elif stringToTest.strip() in stNameDict[coname]:
 					pass
 				else:
 					getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " does not appear in list created from data of last year. Please verify this value contains only the STREETNAME and street name is correct.")
@@ -428,9 +428,8 @@ class Error:
 					getattr(Parcel,errorType + "Errors").append(field.upper() + " is <Null> but " + siteAddField.upper() + " is populated. Please ensure elements are in the appropriate field.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					Error.flags_dict['streetnameDom'] += 1
-				#return(Error, Parcel)
 
-				if acceptNull:
+				elif acceptNull:
 					pass
 				else:
 					getattr(Parcel,errorType + "Errors").append("<Null> Found on " + field.upper() + " field and value is expected.")
@@ -541,7 +540,7 @@ class Error:
 
 			return(Error,Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please inspect the value of this field.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with IMPROVED, LANDVALUE or CNTASSVALUE field. Please inspect the value of this field.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return(Error,Parcel)
 
@@ -587,7 +586,12 @@ class Error:
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					Error.flags_dict['auxPropCheck'] += 1
 
-				if copToTest is not None:
+				if copToTest is not None and (copToTest in nullList or copToTest.isspace()):
+						getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + propField.upper() + ". Please correct.")
+						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+						Error.badcharsCount  +=1   #for wrong <null> values
+				
+				elif copToTest is not None:
 					checkVal = copToTest.split(",")
 					for val in checkVal:
 						if val.strip() not in copDomainList:
@@ -602,7 +606,13 @@ class Error:
 
 						else:
 							testListCop.append(val.strip())
-				if auxToTest is not None:
+
+				if auxToTest is not None and (auxToTest in nullList or auxToTest.isspace()):
+						getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + auxField.upper() + ". Please correct.")
+						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+						Error.badcharsCount  +=1   #for wrong <null> values
+
+				elif auxToTest is not None:					
 					checkAuxVal = auxToTest.split(",")
 					for val in checkAuxVal:
 						if val.strip() not in auxDomainList:
@@ -666,8 +676,10 @@ class Error:
 			srcToTest = getattr(Parcel,srcfield)
 			if coNameToTest is not None:
 				if coNameToTest in nullList or coNameToTest.isspace()  or any(x.islower() for x in coNameToTest):
-					getattr(Parcel,errorType + "Errors").append("The value provided in " + coNamefield.upper() + " field does not match expected county name.")
+					getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + coNamefield.upper() + ". Please correct.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					Error.badcharsCount  +=1   #for wrong <null> values
+
 					Error.coNameMiss += 1
 					Error.flags_dict['matchContrib'] += 1
 					Error.badcharsCount  +=1   #for wrong <null> values
@@ -686,7 +698,7 @@ class Error:
 
 			if fipsToTest is not None:
 				if fipsToTest in nullList or fipsToTest.find(' ') >= 0  or any(x.islower() for x in fipsToTest):
-					getattr(Parcel,errorType + "Errors").append("The value provided in " + fipsfield.upper() + " field does not appear to meet required domains.")
+					getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + fipsfield.upper() + ". Please correct.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					Error.fipsMiss += 1
 					Error.flags_dict['matchContrib'] += 1
@@ -706,7 +718,7 @@ class Error:
 
 			if srcToTest is not None:
 				if srcToTest in nullList or srcToTest.isspace()  or any(x.islower() for x in srcToTest):
-					getattr(Parcel,errorType + "Errors").append("The value provided in " + srcfield.upper() + " field does not appear to meet required domains.")
+					getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + srcfield.upper() + ". Please correct.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					Error.srcMiss += 1
 					Error.flags_dict['matchContrib'] += 1
@@ -867,14 +879,18 @@ class Error:
 			if address is None:
 				pass
 			else:
-				if year is not None:
+
+				if address in nullList or address.isspace():
+							
+					getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + PostalAd.upper() + ". Please correct.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					Error.flags_dict['postalCheck'] += 1
+					Error.badcharsCount  += 1   #for wrong <null> values
+
+				elif year is not None:
 					if int(year) <= int(acceptYears[1]):   #or pinToTest in ignorelist:
 						if ('CANULL'  in address or 'NULL BLVD'  in address ):
 							pass
-
-						elif address in nullList or address.isspace():
-							Error.flags_dict['postalCheck'] += 1
-							Error.badcharsCount  += 1   #for wrong <null> values
 
 						elif ('UNAVAILABLE' in address or 'ADDRESS' in address or 'ADDDRESS' in address or 'UNKNOWN' in address or ' 00000' in address or 'NULL' in address or  ('NONE' in address and 'HONONEGAH' not in address) or 'MAIL EXEMPT' in address or 'TAX EX' in address or 'UNASSIGNED' in address or 'N/A' in address) or(address in badPstladdSet) or any(x.islower() for x in address):
 							getattr(Parcel,errorType + "Errors").append("A value provided in the " + PostalAd.upper() + " field may contain an incomplete address. Please verify the value is correct or set to <Null> if complete address is unknown.")
@@ -966,7 +982,7 @@ class Error:
 			
 			return(Error,Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the MFLVALUE/LNDVALUE field.  Please inspect these fields.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the MFLVALUE or LNDVALUE field.  Please inspect these fields.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
@@ -1029,10 +1045,9 @@ class Error:
 		return (Error, Parcel)
 
 	# check that propclass, net and gross with 0.0 or <Null> do not have propclass value
-	def propClassCntandNetCheck (Error,Parcel,propClass,auxClass, taxRollValue,errorType):
+	def propClassCntCheck (Error,Parcel,propClass,auxClass, taxRollValue,errorType):
 		nullList = ["<Null>", "<NULL>", "NULL", ""]
 		try:
-			taxRollFields = {'CNTASSDVALUE': getattr(Parcel, "cntassdvalue"),'NETPRPTA': getattr(Parcel, "netprpta"), 'GRSPRPTA': getattr(Parcel, "grsprpta")}
 			propClassTest = getattr(Parcel,propClass)
 			auxClassTest = getattr(Parcel, auxClass)
 			cnt = getattr(Parcel, taxRollValue)
@@ -1055,6 +1070,34 @@ class Error:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + taxRollValue.upper() + " field.  Please inspect the <Null> value provided in PROPCLASS.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
+
+
+	def propClassNetGrosCheck (Error,Parcel,propClass,auxClass, netValue, grosValue, errorType):
+		nullList = ["<Null>", "<NULL>", "NULL", ""]
+		try:
+			taxRollFields = {'NETPRPTA': getattr(Parcel, "netprpta"), 'GRSPRPTA': getattr(Parcel, "grsprpta")}
+			propClassTest = getattr(Parcel,propClass)
+			auxClassTest = getattr(Parcel, auxClass)
+			net = getattr(Parcel, netValue)
+			gros = getattr(Parcel, grosValue)
+			if (net is None or float(net) == 0) and (gros is None or float(gros) == 0):
+				if (re.search('1', str(propClassTest)) or re.search('2', str(propClassTest)) or re.search('3',str(propClassTest)) or re.search('4', str(propClassTest)) or re.search('5',str(propClassTest)) or re.search('6',str(propClassTest)) or re.search('7',str(propClassTest))):
+					getattr(Parcel, errorType + "Errors").append("A value greater than zero is expected in NETPRPTA/GRSPRPTA for properties with PROPCLASS of (" + str(propClassTest) + "). Verify value.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					#Error.flags_dict['cntPropClassCheck'] += 1
+				else:
+					pass
+			elif (net is not None and float(net) > 0) or (gros is not None and float(gros) > 0)  :
+				if propClassTest is None:
+					getattr(Parcel, errorType + "Errors").append("The value provided in NETPRPTA/GRSPRPTA does not correspond with PROPCLASS value(s) of (" + str(propClassTest) + "). Please verify.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					#Error.flags_dict['cntPropClassCheck'] += 1
+
+		except:
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + taxRollValue.upper() + " field.  Please inspect the <Null> value provided in PROPCLASS.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return (Error, Parcel)
+
 
 
 	#check for instances of net > gross
