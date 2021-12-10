@@ -938,8 +938,8 @@ class Error:
 			auxToTest = getattr(Parcel,auxField)
 
 			if mflValueTest is None or float(mflValueTest) == 0.0:
-			 	if auxToTest is not None and re.search('W', auxToTest) is not None and re.search('AW', auxToTest) is  None and re.search('W4', auxToTest) is  None:
-					getattr(Parcel, errorType + "Errors").append("A <null> or zero value provided in MFLVALUE field does not match the (" + str(auxToTest) + ") AUXCLASS value(s). Refer to submission documentation for verification.")
+			 	if auxToTest is not None and re.search('W', auxToTest) is not None and re.search('AW', auxToTest) is  None and re.search('W4', auxToTest) is  None and re.search('W10', auxToTest) is  None:
+					getattr(Parcel, errorType + "Errors").append("A <Null> or zero value provided in MFLVALUE field does not match the (" + str(auxToTest) + ") AUXCLASS value(s). Refer to submission documentation for verification.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					Error.flags_dict['mflvalueCheck'] += 1
 
