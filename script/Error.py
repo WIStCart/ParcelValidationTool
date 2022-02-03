@@ -202,22 +202,23 @@ class Error:
 			stringToTest = getattr(Parcel,field)
 			if stringToTest is not None:
 				try:
-				  	if stringToTest in nullList or stringToTest.isspace():
-						getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + field.upper() + ". Please correct.")
-						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-						Error.badcharsCount  +=1   #for wrong <null> values
-				except:
+					int(stringToTest)  # or float(stringToTest):
+				except ValueError:
 					try:
-						int(stringToTest)
+						float(stringToTest)
 					except ValueError:
 						try:
-							float(stringToTest)
-						except ValueError:
-							getattr(Parcel,errorType + "Errors").append("Value in " + field.upper() + " does not appear to be a numeric value.")
-							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-							Error.flags_dict['numericCheck'] += 1
-
-				return (Error, Parcel)
+							if stringToTest in nullList or stringToTest.isspace():
+								getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + field.upper() + ". Please correct.")
+								setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+								Error.badcharsCount  += 1
+								return (Error, Parcel)  #for wrong <null> values
+							else:
+								getattr(Parcel,errorType + "Errors").append("Value in " + field.upper() + " does not appear to be a numeric value.")
+								setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+								Error.flags_dict['numericCheck'] += 1
+								return (Error, Parcel)
+						except: pass
 			else:
 				if acceptNull:
 					pass
@@ -260,7 +261,7 @@ class Error:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please inspect the value of this field.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
-		
+
 	def parcelDateCheck(Error,Parcel, parceldateField, uniqueDates, sameDates, errorType):
 		try:
 			parcelDate = getattr(Parcel, parceldateField)
@@ -276,7 +277,7 @@ class Error:
 		return (Error, Parcel)
 
 
-	
+
 
 	#Check to see if a domain string is within a list (good) otherwise report to user it isn't found..
 	def checkDomainString(Error,Parcel,field,errorType,acceptNull,testList):
@@ -434,7 +435,7 @@ class Error:
 				else:
 					getattr(Parcel,errorType + "Errors").append("<Null> Found on " + field.upper() + " field and value is expected.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-				
+
 				return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please inspect the value of this field.")
@@ -590,7 +591,7 @@ class Error:
 						getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + propField.upper() + ". Please correct.")
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 						Error.badcharsCount  +=1   #for wrong <null> values
-				
+
 				elif copToTest is not None:
 					checkVal = copToTest.split(",")
 					for val in checkVal:
@@ -612,7 +613,7 @@ class Error:
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 						Error.badcharsCount  +=1   #for wrong <null> values
 
-				elif auxToTest is not None:					
+				elif auxToTest is not None:
 					checkAuxVal = auxToTest.split(",")
 					for val in checkAuxVal:
 						if val.strip() not in auxDomainList:
@@ -881,7 +882,7 @@ class Error:
 			else:
 
 				if address in nullList or address.isspace():
-							
+
 					getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + PostalAd.upper() + ". Please correct.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					Error.flags_dict['postalCheck'] += 1
@@ -978,8 +979,8 @@ class Error:
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					Error.flags_dict['mflvalueCheck'] += 1
 			else:
-				pass 
-			
+				pass
+
 			return(Error,Parcel)
 		except:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the MFLVALUE or LNDVALUE field.  Please inspect these fields.")
@@ -1053,7 +1054,7 @@ class Error:
 			cnt = getattr(Parcel, taxRollValue)
 			if cnt is None or float(cnt) == 0:
 				if auxClassTest is not None and re.search ('AW', str(auxClassTest)):
-					pass    ## Calumet case 
+					pass    ## Calumet case
 				elif (re.search('1', str(propClassTest)) or re.search('2', str(propClassTest)) or re.search('3',str(propClassTest)) or re.search('4', str(propClassTest)) or re.search('5',str(propClassTest)) or re.search('6',str(propClassTest)) or re.search('7',str(propClassTest))):
 					getattr(Parcel, errorType + "Errors").append("A value greater than zero is expected in " + taxRollValue.upper() + " for properties with PROPCLASS of (" + str(propClassTest) + "). Verify value.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
@@ -1082,7 +1083,7 @@ class Error:
 			gros = getattr(Parcel, grosValue)
 			if (net is None or float(net) == 0) and (gros is None or float(gros) == 0):
 				if auxClassTest is not None and re.search ('AW', str(auxClassTest)):
-					pass    ## Calumet case 
+					pass    ## Calumet case
 
 				elif (re.search('1', str(propClassTest)) or re.search('2', str(propClassTest)) or re.search('3',str(propClassTest)) or re.search('4', str(propClassTest)) or re.search('5',str(propClassTest)) or re.search('6',str(propClassTest)) or re.search('7',str(propClassTest))):
 					getattr(Parcel, errorType + "Errors").append("A value greater than zero is expected in NETPRPTA/GRSPRPTA for properties with PROPCLASS of (" + str(propClassTest) + "). Verify value.")
@@ -1198,4 +1199,3 @@ class Error:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + f.upper() + " field. Please inspect the value of this field.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
-		
