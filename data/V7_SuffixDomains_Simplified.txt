@@ -1,9 +1,0 @@
-E
-EXTENSION
-N
-S
-NE
-NW
-SE
-SW
-W
