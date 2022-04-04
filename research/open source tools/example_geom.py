@@ -12,7 +12,7 @@
 import sys, os
 
 # Check install
-try: from osgeo import ogr, osr, gdal
+try: from osgeo import ogr, gdal
 except: sys.exit('ERROR: cannot find GDAL/OGR modules')
 
 import json
@@ -20,13 +20,13 @@ from urllib.request import urlopen
 
 
 # Enable GDAL/OGR exceptions
-# gdal.UseExceptions()
+gdal.UseExceptions()
 
 # Parameters
 gdb_driver = ogr.GetDriverByName('OpenFileGDB')
 parcels_filename = 'V8ValidationTool_dist/TEST_DATASET_PARCELS_2022/TEST_DATASET_PARCELS_2022.gdb'
 geojson_driver = ogr.GetDriverByName('GeoJSON')
-counties_url = "https://sco-admin.carto.com/api/v2/sql?format=GEOJSON&q=SELECT%20*%20FROM%20%22sco-admin%22.scobase_wi_county_boundaries_24k%20WHERE%20county_nam='Vernon'"
+counties_url = "https://sco-admin.carto.com/api/v2/sql?format=GEOJSON&q=SELECT%20cartodb_id,%20county_nam,%20ST_Transform(the_geom,%203071)%20AS%20the_geom%20FROM%20scobase_wi_county_boundaries_24k%20WHERE%20county_nam=%27Vernon%27"
 
 
 # Open filegeodatabase
@@ -46,31 +46,26 @@ county_feature= county.GetLayer().GetFeature(0)
 # Get Parcels Layer
 parcels_layer = parcels.GetLayer()
 
-
+# Check each parcel
 for parcel in parcels_layer:
-    print(county_feature.GetField("county_cap"))
-    county_geom = county_feature.geometry().Clone()
-    print(parcel.GetField("PARCELID"))
-    parcel_geom = parcel.geometry().Clone()
-    within = parcel_geom.Within(county_geom)
-    print(within)
 
+    # Get geometries
+    county_geom = county_feature.geometry().Clone()
+    parcel_geom = parcel.geometry().Clone()
+
+    # Check if parcel within county geom (both geometries must have the same SRS for this to work)
+    within = parcel_geom.Within(county_geom)
+
+    # Print results
+    print("{county} {parcel} {within}".format(
+        county=county_feature.GetField("county_nam"), 
+        parcel=parcel.GetField("PARCELID"), 
+        within=within)
+    )
+
+    # Clear geom references
     county_geom = None
     parcel_geom = None
-    break
-
-# # create the output layer
-# shp_driver = ogr.GetDriverByName('ESRI Shapefile')
-
-# outSpatialRef = osr.SpatialReference()
-# outSpatialRef.ImportFromEPSG(4326)
-
-# outputShapefile = 'county.shp'
-# if os.path.exists(outputShapefile):
-#     shp_driver.DeleteDataSource(outputShapefile)
-# outDataSet = shp_driver.CreateDataSource(outputShapefile)
-# outLayer = outDataSet.CreateLayer("county", geom_type=ogr.wkbMultiPolygon)
-
 
 
 del parcels
