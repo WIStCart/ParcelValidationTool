@@ -2,11 +2,16 @@
 
 ## Compilers
 
+---
+
 ## GUIs
 
 ### Tkinter
 
+---
+
 ## Open Source Tools
+
 
 ### Set up environment
 
@@ -28,3 +33,9 @@ When you are done, deactivate to exit environment and optionally remove environm
 conda deactivate
 conda remove --name wlia2022_env --all
 ```
+
+### Example Scripts
+
+`example_geom.py`: An example to check if parcel geometry is within a given county.
+
+`example_fields.py`: An example of field validation.
