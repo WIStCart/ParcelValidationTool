@@ -8,8 +8,6 @@ from externalDicts import *
 import os
 
 #Collect tool inputs
-# FROM V1.0.1 (For V3 call) TOOL: inputNameList = ['isSearchable','isFinal','county','inFC','outDir','outName','outSummaryDir',''''exportModel','inExportTable','inExportGeometryFC','inXREFTable','tablePIN','geomPin','xmlPIN','xrefTablePIN','xrefGeomPIN',''''outINIDir','subName','subEmail','condoModel','inCert','isNameRedact','redactPolicy','zoningGenType','zoningGenFC','zoningFarmType','zoningFarmFC','zoningShoreType','zoningShoreFC','zoningFloodType','zoningFloodFC','zoningAirType','zoningAirFC','isCOPDomainV3','copClass1','copClass2','copClass3','copClass4','copClass5','copClass5M','copClass6','copClass7','auxClassW1','auxClassW2','auxClassW3','auxClassW4','auxClassW5','auxClassW6','auxClassW7','auxClassW8','auxClassW9','auxClassX1','auxClassX2','auxClassX3','auxClassX4','PARCELID','TAXPARCELID','PARCELDATE','TAXROLLYEAR','OWNERNME1','OWNERNME2','PSTLADRESS','SITEADRESS','ADDNUMPREFIX','ADDNUM','ADDNUMSUFFIX','PREFIX','STREETNAME','STREETTYPE','SUFFIX','LANDMARKNAME','UNITTYPE','UNITID','PLACENAME','ZIPCODE','ZIP4','STATE','SCHOOLDIST','SCHOOLDISTNO','IMPROVED','CNTASSDVALUE','LNDVALUE','IMPVALUE','FORESTVALU','ESTFMKVALUE','NETPRPTA','GRSPRPTA','PROPCLASS','AUXCLASS','ASSDACRES','DEEDACRES','GISACRES','CONAME','PARCELFIPS','PARCELSRC']
-# FROM V2.0.0 (For V4 call) TOOL: inputNameList = ['isSearchable','isFinal','county','inFC','outDir','outName','outSummaryDir','outINIDir','subName','subEmail','condoModel','inCert','isNameRedact','redactPolicy','zoningGenType','zoningGenFC','zoningShoreType','zoningShoreFC','zoningAirType','zoningAirFC','PLSSType','PLSSFC','RightOfWayType','RightOfWayFC','RoadStreetCenterlineType','RoadStreetCenterlineFC','HydroLineType','HydroLineFC','HydroPolyType','HydroPolyFC','AddressesType','AddressesFC','BuildingBuildingFootprintType','BuildingBuildingFootprintFC','LandUseType','LandUseFC','ParksOpenSpaceType','ParksOpenSpaceFC','TrailsType','TrailsFC','OtherRecreationType','OtherRecreationFC','certifiedBy','PLSSOtherDigitalFile']
 inputNameList = ['isSearchable','isFinal','county','inFC','outDir','outName','outINIDir','subName','subEmail','condoModel','inCert','isNameRedact','redactPolicy','zoningGenType','zoningGenFC','zoningShoreType','zoningShoreFC','zoningAirType','zoningAirFC','PLSSType','PLSSFC','RightOfWayType','RightOfWayFC','RoadStreetCenterlineType','RoadStreetCenterlineFC','HydroLineType','HydroLineFC','HydroPolyType','HydroPolyFC','AddressesType','AddressesFC','BuildingBuildingFootprintType','BuildingBuildingFootprintFC','LandUseType','LandUseFC','ParksOpenSpaceType','ParksOpenSpaceFC','TrailsType','TrailsFC','OtherRecreationType','OtherRecreationFC','certifiedBy','PLSSOtherDigitalFile']
 inputDict = collections.OrderedDict()
 i = 0
@@ -20,7 +18,8 @@ for inputName in inputNameList:
         inputDict[inputName] = arcpy.GetParameterAsText(i)
         i += 1
 
-#Run version check
+#Run version check.  Checks to see if tool version is the newest available against text file sitting on SCO server.
+#If old version, then exception is shown 
 inputDict['version'] = 'V6.0.0'
 try:
 	arcpy.AddMessage('Checking Tool Version...')
@@ -49,27 +48,38 @@ base = os.path.dirname(os.path.abspath(__file__))
 if inputDict['isSearchable'] == 'true':
 
 	#Load files for current domain lists
-	#streetNames = [line.strip() for line in open(os.path.join(base, '..\data\V3_StreetName_Simplified.txt'), 'r')] #street name list
-	streetTypes = [line.strip() for line in open(os.path.join(base, '..\data\V7_StreetType_Simplified.txt'), 'r')] #street types domain list
-	unitIdTypes = [line.strip() for line in open(os.path.join(base, '..\data\V7_UnitId_Simplified.txt'),'r')] #unitid domain list
-	unitTypes = [line.strip() for line in open(os.path.join(base, '..\data\V7_UnitType_Simplified.txt'),'r')] #unit type domain list
-	lsadDomains = [line.strip() for line in open(os.path.join(base, '..\data\LSAD_Simplified.txt'),'r')] #lsad domain list
-	taxRollYears = [line.strip() for line in open(os.path.join(base, '..\data\V7_TaxRollYears.txt'),'r')] #taxroll years to test (past,expected,future1,future2)
-	suffixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V7_SuffixDomains_Simplified.txt'),'r')] #suffix domain list
-	prefixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V7_PrefixDomains_Simplified.txt'),'r')] #prefix domain list
-	pinSkips = [line.strip() for line in open(os.path.join(base, '..\data\V7_PinSkips.txt'),'r')] #list of non-parcelid values found in field to ignore when checking for dups (and use in other functions)
+	##All of this should just be a python lists (w/in the externalDicts.py file), no reason to maintain as individual text files
 
-	reader = csv.reader(open(os.path.join(base, '..\data\school_district_codes.csv'),'rU')) #school district code list (csv has been updated for V5/2018 school districts)
+	#street types domain list
+	streetTypes = [line.strip() for line in open(os.path.join(base, '..\data\V7_StreetType_Simplified.txt'), 'r')]
+	#unit type domain list
+	unitTypes = [line.strip() for line in open(os.path.join(base, '..\data\V7_UnitType_Simplified.txt'),'r')]
+	 #lsad domain list
+	lsadDomains = [line.strip() for line in open(os.path.join(base, '..\data\LSAD_Simplified.txt'),'r')]
+	#taxroll years to test (past,expected,future1,future2)
+	taxRollYears = [line.strip() for line in open(os.path.join(base, '..\data\V7_TaxRollYears.txt'),'r')] 
+	 #suffix domain list
+	suffixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V7_SuffixDomains_Simplified.txt'),'r')]
+	 #prefix domain list
+	prefixDomains = [line.strip() for line in open(os.path.join(base, '..\data\V7_PrefixDomains_Simplified.txt'),'r')]
+	#list of non-parcelid values found in field to ignore when checking for dups (and use in other functions)
+	pinSkips = [line.strip() for line in open(os.path.join(base, '..\data\V7_PinSkips.txt'),'r')]
+	
+	#to store up to 10 parcel id to restore when checking that mflvalue <> landvalue
+	parcelidList_MFL = []
+	
+	#Creates schooldist name/number key value pair dictionaries
+	#(csv has been updated for V8/2021 school districts) 
+	reader = csv.reader(open(os.path.join(base, '..\data\school_district_codes.csv'),'rU')) 
 	schoolDist_nameNo_dict = {}
 	schoolDist_noName_dict = {}
-	parcelidList_MFL = []  #to store up to 10 parcel id to restore when checking that mflvalue <> landvalue
-	
 	for row in reader:
 		k,v = row
 		schoolDist_noName_dict[k] = v
 		schoolDist_nameNo_dict[v] = k
 
-	reader = csv.reader(open(os.path.join(base,'..\data\CoNameFips.csv'),'rU')) #CONAME and FIPS list
+	#Creates CONAME/FIPS key value piar dictinaries
+	reader = csv.reader(open(os.path.join(base,'..\data\CoNameFips.csv'),'rU'))
 	county_nameNo_dict = {}
 	county_noName_dict = {}
 	for row in reader:
