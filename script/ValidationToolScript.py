@@ -128,8 +128,8 @@ if inputDict['isSearchable'] == 'true':
 			currParcel = Parcel(row, fieldNames)
 
 			#Execute in-cursor error tests
+			#EXAMPLE FUNCTION # totError,currParcel = Error.reallyBadChars(totError,currParcel,fieldNames,fieldNamesBadChars,'general')
 			totError,currParcel = Error.checkGeometricQuality(totError,currParcel, pinSkips)
-
 			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"addnum","address", True)
 			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"parcelfips","general", False)
 			totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"zipcode","address", True)
@@ -152,37 +152,26 @@ if inputDict['isSearchable'] == 'true':
 			totError,currParcel = Error.checkDomainString(totError,currParcel,"unitid","address",True,unitIdTypes)
 			totError,currParcel = Error.checkDomainString(totError,currParcel,"placename","general",True,lsadDomains)
 			totError,currParcel = Error.checkDomainString(totError,currParcel,"suffix","address",True, suffixDomains)
-            #totError,currParcel = Error.badChars(totError,currParcel,fieldNames,fieldNamesBadChars,'general')
 			totError,currParcel = Error.trYear(totError,currParcel,"taxrollyear","parcelid","tax",False,pinSkips,taxRollYears)
 			totError,currParcel = Error.taxrollYrCheck(totError,currParcel,"taxrollyear","tax",False,pinSkips,taxRollYears)
 			totError,currParcel = Error.streetNameCheck(totError,currParcel,"streetname","siteadress","address",True,stNameDict,inputDict['county'])
 			totError,currParcel = Error.zipCheck(totError,currParcel,"zipcode","address",True)
 			totError,currParcel = Error.zip4Check(totError,currParcel,"zip4","address",True)
-			
-			#totError,currParcel = Error.parcelDateCheck(totError,currParcel,"parceldate", uniqueDates, sameDates,"tax")
-
 			totError,currParcel = Error.totCheck(totError,currParcel,"impvalue","cntassdvalue","lndvalue","tax")
-
-			#EXAMPLE FUNCTION # totError,currParcel = Error.reallyBadChars(totError,currParcel,fieldNames,fieldNamesBadChars,'general')
 			totError,currParcel = Error.checkRedundantID(totError,currParcel,'taxparcelid','parcelid',True,'general')
 			totError,currParcel = Error.postalCheck(totError,currParcel,'pstladress','general',pinSkips,'taxrollyear','parcelid',badPstladdSet, taxRollYears)
 			totError,currParcel = Error.auxPropCheck(totError,currParcel,'propclass','auxclass','taxrollyear','parcelid', pinSkips,'tax', copDomains, auxDomains, taxRollYears)
-
 			totError,currParcel = Error.totalAssdValueCheck(totError,currParcel,'cntassdvalue','lndvalue','impvalue','tax')
 			totError,currParcel = Error.fairMarketCheck(totError,currParcel,'propclass','auxclass','estfmkvalue','tax')
 			totError,currParcel = Error.mfLValueCheck(totError,currParcel,'mflvalue','auxclass','tax')
 			totError,currParcel = Error.mflLndValueCheck(totError,currParcel,"parcelid",parcelidList_MFL,"lndvalue","mflvalue","tax")
-			
 			totError,currParcel = Error.auxclassFullyX4Check (totError,currParcel,'auxclass','propclass','tax')
 			totError,currParcel = Error.matchContrib(totError,currParcel,"coname","parcelfips","parcelsrc",county_nameNo_dict,county_noName_dict,False,"general")
 			totError,currParcel = Error.netVsGross(totError,currParcel,"netprpta","grsprpta","tax")
 			totError,currParcel = Error.schoolDistCheck(totError,currParcel,"parcelid","schooldist","schooldistno",schoolDist_noName_dict,schoolDist_nameNo_dict,"tax",pinSkips,"taxrollyear")
-
 			totError,currParcel = Error.propClassNetGrosCheck(totError,currParcel,"propclass","auxclass","netprpta","grsprpta","tax")
 			totError,currParcel = Error.propClassCntCheck(totError,currParcel,"propclass","auxclass","cntassdvalue","tax")
-
 			totError,currParcel = Error.fieldCompleteness(totError,currParcel,fieldNames,fieldListPass,CompDict)
-			#totError,currParcel = Error.fieldCompletenessComparison(totError,currParcel,fieldNames,fieldListPass,v3CompDict,getattr(LegacyCountyStats, (inputDict['county'].replace(" ","_").replace(".",""))+"LegacyDict"))
 			Error.checkBadChars (totError )
             #End of loop, finalize errors with the writeErrors function, then clear parcel
 			currParcel.writeErrors(row,cursor, fieldNames)
@@ -272,9 +261,3 @@ if inputDict['isSearchable'] == 'true':
 	arcpy.AddMessage("Error Sum: " + str(totError.ErrorSum) + "\n")
 	if totError.ErrorSum == 0:
 		arcpy.AddMessage(" GREAT JOB, NO ERRORS!!!!!!! \n")
-
-
-'''#Export
-else:
-	totError = Error(inputDict['inExportGeometryFC'],inputDict['county'])
-	summary.writeIniFile(inputDict,totError)'''
