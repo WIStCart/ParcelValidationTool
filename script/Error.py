@@ -1,7 +1,7 @@
 import arcpy
 import math
 from Parcel import Parcel
-import re
+import re, urllib2
 
 class Error:
 
@@ -14,7 +14,6 @@ class Error:
 		self.comparisonDict = {}
 		self.attributeFileErrors = []
 		self.geometricFileErrors = []
-		#self.geometricPlacementErrors = ["Several parcel geometries appear to be spatially misplaced when comparing them against last year's parcel geometries. This issue is indicative of a re-projection error. Please see the following documentation: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf section #2, for advice on how to project native data to the Statewide Parcel CRS."]
 		self.geometricPlacementErrors = []
 		self.pinSkipCount = 0
 		self.trYearPast = 0
@@ -41,7 +40,6 @@ class Error:
 		self.uniqueparcelDatePercent = 0.0
 		self.ErrorSum = 0   #sum of generalErrorCount, geometricErrorCount, addressErrorCount, taxErrorCount
 		self.flags_dict = {'numericCheck': 0, 'duplicatedCheck': 0, 'prefixDom': 0, 'streettypeDom': 0, 'unittype': 0, 'placenameDom': 0, 'suffixDom': 0, 'trYear': 0, 'taxrollYr': 0, 'streetnameDom': 0, 'zipCheck': 0, 'cntCheck': 0, 'redundantId': 0, 'postalCheck':0, 'auxPropCheck': 0, 'fairmarketCheck': 0, 'mflvalueCheck': 0, 'auxclassFullyX4': 0, 'cntPropClassCheck': 0, 'matchContrib': 0, 'netvsGross': 0, 'schoolDist': 0 }
-
 
 	# Test records throughout the dataset to ensure that polygons exist within an actual county envelope ("Waukesha" issue or the "Lake Michigan" issue).
 	def checkGeometricQuality(self,Parcel,ignoreList):
@@ -86,7 +84,6 @@ class Error:
 		self,Parcel = self.testParcelGeometry(Parcel)
 		self.recordIterationCount += 1
 		return (self, Parcel)
-
 
 	# Will test the row against LTSB's feature service to identify if the feature is in the correct location.
 	def testCountyEnvelope(self,Parcel):
@@ -275,9 +272,6 @@ class Error:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the PARCELDATE field. Please inspect the value of this field.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
-
-
-
 
 	#Check to see if a domain string is within a list (good) otherwise report to user it isn't found..
 	def checkDomainString(Error,Parcel,field,errorType,acceptNull,testList):
@@ -489,7 +483,6 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return(Error, Parcel)
 
-
 	#Verify that value in Improved field is correct based on value provided in Impvalue field...
 	#We may want/need to tweak the logic in here depending on how strictly we enforce the value of <Null> allowed in Impvalue field (i.e. Only for non-tax parcels or allow either 0 or <Null>)
 	def impCheck(Error,Parcel,field,impValField,errorType):
@@ -544,7 +537,6 @@ class Error:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with IMPROVED, LANDVALUE or CNTASSVALUE field. Please inspect the value of this field.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return(Error,Parcel)
-
 
 	#checking taxparcelID and parcelID for redundancy
 	def checkRedundantID(Error,Parcel,taxField,parcelField,acceptNull,errorType):
@@ -636,7 +628,7 @@ class Error:
 
 	#checking ESTFMKVALUE field against PROPCLASS field for erroneous not null values when PROPCLASS of 4, 5, 5M or AUXCLASS field
 	# for erroneous not null values when AUXCLASS of x1-x4 or w1-w9 is present with another value
- 	def fairMarketCheck(Error,Parcel,propClass,auxClass,estFmkValue,errorType):
+	def fairMarketCheck(Error,Parcel,propClass,auxClass,estFmkValue,errorType):
 		try:
 			propClassTest = str(getattr(Parcel,propClass)).replace(" ","")
 			auxClassValue = getattr(Parcel, auxClass)
@@ -802,21 +794,19 @@ class Error:
 						CompDict[field] = CompDict[field]+1
 		return(Error,Parcel)
 
-
 	def fieldCompletenessComparison(Error,fieldList,passList,currentStatDict,previousStatDict):
 		for field in fieldList:
 			if field.upper() in passList:
 				pass
 			else:
 				if previousStatDict[field] > 0:
-				 	Error.comparisonDict[field] = round((100*(currentStatDict[field] - previousStatDict[field])/ previousStatDict[field]),2)
+					Error.comparisonDict[field] = round((100*(currentStatDict[field] - previousStatDict[field])/ previousStatDict[field]),2)
 				elif previousStatDict[field] == 0 and currentStatDict[field] == 0  :
-				 	Error.comparisonDict[field] = 0.0
+					Error.comparisonDict[field] = 0.0
 				elif  previousStatDict[field] == 0  :
-				 	Error.comparisonDict[field] = 100.0
+					Error.comparisonDict[field] = 100.0
 				#Error.comparisonDict[field] = round((100*(currentStatDict[field] - previousStatDict[field])/(Error.recordTotalCount)),2)
 		return(Error)
-
 
 	#checkSchemaFunction
 	def checkSchema(Error,inFc,schemaType,fieldPassLst):
@@ -828,7 +818,7 @@ class Error:
 		missingFields = []
 		var = True
 
-		arcpy.AddMessage("Checking for all appropriate fields in " + str(inFc) + "...")
+		arcpy.AddMessage("Checking for all appropriate fields in " + str(inFc) + "...\n")
 
 		for field in fieldList:
 			fieldDictNames[field.name] = [[field.type],[field.length]]
@@ -869,7 +859,6 @@ class Error:
 			arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 			exit()
 
-
 	#check for valid postal address   ('CANULL' not in address or 'NULL BLVD' not in address ) or
 	def postalCheck (Error,Parcel,PostalAd,errorType,ignoreList,taxYear,pinField,badPstladdSet, acceptYears):
 		nullList = ["<Null>", "<NULL>", "NULL", ""]
@@ -907,7 +896,7 @@ class Error:
 		return (Error, Parcel)
 
 	#totError = Error.checkBadChars (totError )
-	def checkBadChars(Error ):
+	def checkBadChars(Error):
 		if Error.badcharsCount >= 100:
 			arcpy.AddMessage("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 			arcpy.AddMessage("THERE ARE AT LEAST 100 INSTANCES OF THE STRINGS '<Null>', \'NULL\', BLANKS AND/OR LOWER CASE CHARACTERS WITHIN THE ATTRIBUTE TABLE. \n")
@@ -1072,7 +1061,6 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
-
 	def propClassNetGrosCheck (Error,Parcel,propClass,auxClass, netValue, grosValue, errorType):
 		nullList = ["<Null>", "<NULL>", "NULL", ""]
 		try:
@@ -1101,8 +1089,6 @@ class Error:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + taxRollValue.upper() + " field.  Please inspect the <Null> value provided in PROPCLASS.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
-
-
 
 	#check for instances of net > gross
 	def netVsGross(Error,Parcel,netField,grsField,errorType):
@@ -1160,7 +1146,6 @@ class Error:
 			arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 			exit()
 
-
 	#checking strings for unacceptable chars including /n, /r, etc...
 	def badChars(Error,Parcel,fieldNamesList,charDict,errorType):
 		try:
@@ -1199,3 +1184,24 @@ class Error:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + f.upper() + " field. Please inspect the value of this field.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
+
+	@staticmethod
+	def versionCheck(inVersion):
+		# try:
+		arcpy.AddMessage('Checking Tool Version...\n')
+		currVersion = urllib2.urlopen('http://www.sco.wisc.edu/parcels/tools/Validation/validation_version.txt').read()
+		if inVersion == currVersion:
+			arcpy.AddMessage('Tool up to date.\n')
+		else:
+			arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+			arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+			arcpy.AddMessage("!!!!!!!!!!Error tool not up to date!!!!!!!!!!")
+			arcpy.AddMessage("Please download the latest version of the tool at")
+			arcpy.AddMessage("http://www.sco.wisc.edu/parcels/tools/")
+			arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+			arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			exit()
+		# except Exception:
+			# arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+			# arcpy.AddMessage("Check the change log at http://www.sco.wisc.edu/parcels/tools/")
+			# arcpy.AddMessage("to make sure the latest version of the tool is installed before submitting")
