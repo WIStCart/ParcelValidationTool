@@ -33,7 +33,6 @@ class Parcel:
 		self.state = row[fieldNames.index("STATE")]
 		self.schooldist = row[fieldNames.index("SCHOOLDIST")]
 		self.schooldistno = row[fieldNames.index("SCHOOLDISTNO")]
-		#self.improved = row[fieldNames.index("IMPROVED")]
 		self.cntassdvalue = row[fieldNames.index("CNTASSDVALUE")]
 		self.lndvalue = row[fieldNames.index("LNDVALUE")]
 		self.impvalue = row[fieldNames.index("IMPVALUE")]
