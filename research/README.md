@@ -31,7 +31,7 @@ conda activate pvt_os_env
 When you are done, deactivate to exit environment and optionally remove environment:
 ```bash
 conda deactivate
-conda remove --name wlia2022_env --all
+conda remove --name pvt_os_env --all
 ```
 
 ### Example Scripts
