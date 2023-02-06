@@ -3,6 +3,7 @@ import ttk
 from Tkinter import *
 from ttk import *
 import tkMessageBox
+from tkinter.scrolledtext import ScrolledText
 from tkFileDialog import askopenfilename
 from tkFileDialog import askdirectory
 import Tix
@@ -14,9 +15,7 @@ import os
 
 import collections
 from  code import ValidationToolScript
-#from code import Parcel
-#from code import Error
-#from code import Summary
+
 
 from threading import *
 
@@ -43,7 +42,7 @@ class App(ttk.Frame):
         
         self.inputNameList = ['isSearchable','isFinal','county','inFC','outDir',
                               'outName','outINIDir','subName','subEmail','condoModel',
-                              'inCert','isNameRedact','redactPolicy','zoningGenType',
+                              'inCert','isNameRedact','redactPolicy', 'certifCompleteness','zoningGenType',
                               'zoningGenFC','zoningShoreType','zoningShoreFC',
                               'zoningAirType','zoningAirFC','PLSSType','PLSSFC',
                               'RightOfWayType','RightOfWayFC','RoadStreetCenterlineType',
@@ -65,7 +64,9 @@ class App(ttk.Frame):
         #Create dictionary kvp for each input name and give it a blank Tkinter string value        
         for i in self.inputNameList:
             self.input_dict[i] = tk.StringVar(value="")
-            
+        #set initial value for redaction checkbox in parcelDataInformationWindow    
+        #self.input_dict['certifCompleteness'] = tk.StringVar(value='Missing')    
+         
         #set initial value for redaction checkbox in parcelDataInformationWindow
         #self.input_dict['isNameRedact'] = tk.StringVar(value='false')
 
@@ -76,6 +77,14 @@ class App(ttk.Frame):
                                                                           'noticeOfMissingDataOmissions',
                                                                           'noticeErrorsSumsUnresolvable',
                                                                           'noticeOther']}
+        #set initial value for text boxes in explain certification Window
+        #self.input_dict['inCert']['noticeOfNewStreetName'] = tk.StringVar(value = 'Enter new Street Names here or type None if no values exist')
+        #self.input_dict['inCert']['noticeOfNewNonParcelFeaturePARCELIDs'] = tk.StringVar(value ='Enter new Non-Parcel Feature Parcel IDs or type None if no values exist')
+        #self.input_dict['inCert']['noticeOfMissingDataOmissions'] = tk.StringVar(value ='Enter omission information here or type None if no omissions exist')
+        #self.input_dict['inCert']['noticeErrorsSumsUnresolvable']= tk.StringVar(value ='Enter justification for unresolvability or type None if no value exist')
+
+
+
 
         self.files_list = []
         self.feature_classes = []
@@ -128,7 +137,7 @@ class App(ttk.Frame):
         """browse to selected a gdb directory (no Feature Class)"""
         gdb_dir = askdirectory()   
         if gdb_dir:
-            if gdb_dir[-4:] == '.gdb':
+            if gdb_dir.lower().endswith('.gdb'):   #[-4:] == '.gdb':
                 gdb.set(gdb_dir)   
                     
     def askdir_basic(self, path_name):
@@ -234,6 +243,7 @@ class App(ttk.Frame):
             self.bind("<FocusIn>", statusDrawer)
             if (self.input_dict['isFinal'].get() == 'testModeSelected'):
                 indicesToCheck = range(6, self.inputNameList.index('inCert')) + range(self.inputNameList.index('inCert') + 1, len(self.inputNameList))
+                
                 if (any([False if (self.input_dict[self.inputNameList[index]].get() == "") else True for index in indicesToCheck]) == False):
                     plssRunWindow.set(False)
                     parcelinfoRunWindow.set(False)
@@ -260,8 +270,9 @@ class App(ttk.Frame):
                 else:
                     windowsNameMaps = [['Parcel Data Information', 'PLSS Layer', 'Explain Certification', 'Zoning Layer', 'Other Layers'],
                                        [parcelinfoRunWindow, plssRunWindow, explainCertifyRunWindow, zoningRunWindow, othersRunWindow]]
+                    
                     inputtedWindows = [window if state.get() else None for window, state in zip(windowsNameMaps[0], windowsNameMaps[1])]
-                    movMsg = "You are about to leave Final mode and have input in subwindow(s) ({}) which would be deleted. Continue?".format(*[inputted for inputted in inputtedWindows if inputted != None])
+                    movMsg = "You are about to leave Final mode and have input in subwindow(s) ({}) which would be deleted. Continue?".format([inputted for inputted in inputtedWindows if inputted != None])
                     moveToTest = tkMessageBox.askokcancel(title = "Proceed to Test Mode", message = movMsg)
                     if moveToTest:
                         self.input_dict['isFinal'].set('testModeSelected')
@@ -441,20 +452,20 @@ class App(ttk.Frame):
                                     'Condo Type N/A because no condos exist in county']
         condoModel_input['state'] = 'readonly' # prevent typing a value
 
-        explainCert_window_label = ttk.Label(parcelDataInformationWindow, text='Explain-Certification (REQUIRED), click Add:')
+        explainCert_window_label = ttk.Label(parcelDataInformationWindow, text='Explain Certification (REQUIRED), click Add:')
         explainCert_window_label.grid(row=8, column=0, padx=5, sticky='w')
 
-#################################################################################################
+
         def open_explanationCertificateWindow():
         
             #grandchild window attributes
             explanationCertificateWindow = Toplevel(parcelDataInformationWindow)
             explanationCertificateWindow.grab_set() #disables parent window while child is open
             explanationCertificateWindow.iconbitmap(wisconsin_icon_path)
-            explanationCertificateWindow.title('Explain Certification Form')
-            explanationCertificateWindow.geometry('600x800')
+            explanationCertificateWindow.title('Explain Certification')
+            explanationCertificateWindow.geometry('615x800')
 
-
+            #explainCertifyRunWindow.set(False) 
             # TODO: enforce required input and also use default text
 
             default_text = {'street': 'Enter new Street Names here or type None if no values exist',
@@ -485,7 +496,7 @@ class App(ttk.Frame):
             explanationCertifyCanvas = tk.Canvas (explanationCertificateWindow )
             explanationCertifyCanvas.pack(side=LEFT, fill = BOTH, expand = True)
 
-            explanationCertifyFrame = tk.Frame (explanationCertifyCanvas, width=500, height=700)
+            explanationCertifyFrame = tk.Frame (explanationCertifyCanvas, width=510, height=700)
             explanationCertifyFrame.pack()
 
             explanationCertifyScrollbar = Scrollbar(explanationCertificateWindow)
@@ -493,39 +504,46 @@ class App(ttk.Frame):
             explanationCertifyCanvas.configure(yscrollcommand = explanationCertifyScrollbar.set)
             explanationCertifyScrollbar.pack (side = RIGHT, fill= BOTH)
      
-            canvas_frame = explanationCertifyCanvas.create_window((0,0), window = explanationCertifyFrame, 
+            explanationCertifyCanvas.create_window((0,0), window = explanationCertifyFrame, 
                     anchor = NW, tags = explanationCertifyFrame)
             explanationCertifyFrame.bind ("<Configure>", lambda event, 
                     explanationCertifyCanvas=explanationCertifyCanvas: onFrameConfigure(explanationCertifyCanvas))        
             
             noticeOfNewStreetName_input_label = ttk.Label(explanationCertifyFrame, text='Notice of New Street Names:')
             noticeOfNewStreetName_input_label.pack () #grid(column=0, row=0, sticky=tk.W)
-            noticeOfNewStreetName_input = Text(explanationCertifyFrame,
+            noticeOfNewStreetName_input = ScrolledText(explanationCertifyFrame, #state = 'normal',
                                                # textvariable = self.input_dict['inCert']['noticeOfNewStreetName'],
-                                               width=70, height=7)
-            noticeOfNewStreetName_input.insert('1.0', self.input_dict['inCert']['noticeOfNewStreetName'].get())  #Displays value stored in dictionary
+                                               width=71, height=7)
+            noticeOfNewStreetName_input.tag_config('default', background="white", foreground= '#808080' )
+            noticeOfNewStreetName_input.insert('1.0', self.input_dict['inCert']['noticeOfNewStreetName'].get()) #, 'default' ) #Displays value stored in dictionary
             noticeOfNewStreetName_input.pack(padx=5, pady=5)
+            noticeOfNewStreetName_input.yview(tk.END)
             noticeOfNewStreetName_input.bind('<FocusOut>', clickedOutExplain(noticeOfNewStreetName_input, 'street'))
             noticeOfNewStreetName_input.bind('<FocusIn>', clickedInExplain(noticeOfNewStreetName_input, 'street'))
+
 
             noticeOfNewNonParcelFeaturePARCELIDs_input_label = ttk.Label(explanationCertifyFrame,
                                                                          text='Notice of New Non-Parcel Feature PARCELIDs:')
             noticeOfNewNonParcelFeaturePARCELIDs_input_label.pack () #grid(column=0, row=0, sticky=tk.W)
-            noticeOfNewNonParcelFeaturePARCELIDs_input = Text(explanationCertifyFrame,
+            noticeOfNewNonParcelFeaturePARCELIDs_input = ScrolledText(explanationCertifyFrame, #state = 'normal',
                                                               # textvariable = self.input_dict['inCert']['noticeOfNewNonParcelFeaturePARCELIDs'],
-                                                              width=70, height=7)
-            noticeOfNewNonParcelFeaturePARCELIDs_input.insert('1.0', self.input_dict['inCert']['noticeOfNewNonParcelFeaturePARCELIDs'].get())  #Displays value stored in dictionary
+                                                              width=71, height=7)
+            noticeOfNewNonParcelFeaturePARCELIDs_input.tag_config('default', background="white", foreground= '#808080' )
+            noticeOfNewNonParcelFeaturePARCELIDs_input.insert('1.0', self.input_dict['inCert']['noticeOfNewNonParcelFeaturePARCELIDs'].get()) #, 'default')  #Displays value stored in dictionary
             noticeOfNewNonParcelFeaturePARCELIDs_input.pack(padx=5, pady=5)
+            noticeOfNewNonParcelFeaturePARCELIDs_input.yview(tk.END)
             noticeOfNewNonParcelFeaturePARCELIDs_input.bind('<FocusOut>', clickedOutExplain(noticeOfNewNonParcelFeaturePARCELIDs_input, 'non parcel'))
             noticeOfNewNonParcelFeaturePARCELIDs_input.bind('<FocusIn>', clickedInExplain(noticeOfNewNonParcelFeaturePARCELIDs_input, 'non parcel'))
 
             noticeOfMissingDataOmissions_input_label = ttk.Label(explanationCertifyFrame, text='Notice of Missing Data/Omissions')
             noticeOfMissingDataOmissions_input_label.pack () #grid(column=0, row=0, sticky=tk.W)
-            noticeOfMissingDataOmissions_input = Text(explanationCertifyFrame,
+            noticeOfMissingDataOmissions_input = ScrolledText(explanationCertifyFrame, state = 'normal',
                                                       # textvariable = self.input_dict['inCert']['noticeOfMissingDataOmissions'],
-                                                      width=70, height=7)
-            noticeOfMissingDataOmissions_input.insert('1.0', self.input_dict['inCert']['noticeOfMissingDataOmissions'].get())  #Displays value stored in dictionary
+                                                      width=71, height=7)
+            noticeOfMissingDataOmissions_input.tag_config('default', background="white", foreground= '#808080' )                                                     
+            noticeOfMissingDataOmissions_input.insert('1.0', self.input_dict['inCert']['noticeOfMissingDataOmissions'].get())#, 'default')  #Displays value stored in dictionary
             noticeOfMissingDataOmissions_input.pack(padx=5, pady=5)
+            noticeOfMissingDataOmissions_input.yview(tk.END)           
             noticeOfMissingDataOmissions_input.bind('<FocusOut>', clickedOutExplain(noticeOfMissingDataOmissions_input, 'omission'))
             noticeOfMissingDataOmissions_input.bind('<FocusIn>', clickedInExplain(noticeOfMissingDataOmissions_input, 'omission'))
 
@@ -533,19 +551,25 @@ class App(ttk.Frame):
         
             noticeErrorsSumsUnresolvable_input_label = ttk.Label(explanationCertifyFrame, text='Error Sums That Are Unresolvable')
             noticeErrorsSumsUnresolvable_input_label.pack () #grid(column=0, row=0, sticky=tk.W)
-            noticeErrorsSumsUnresolvable_input = Text(explanationCertifyFrame,
+            noticeErrorsSumsUnresolvable_input = ScrolledText(explanationCertifyFrame, state = 'normal',
                                                       # textvariable = self.input_dict['inCert']['noticeErrorsSumsUnresolvable'],
-                                                      width=70, height=7)
-            noticeErrorsSumsUnresolvable_input.insert('1.0', self.input_dict['inCert']['noticeErrorsSumsUnresolvable'].get())  #Displays value stored in dictionary
+                                                      width=71, height=7)
+            noticeErrorsSumsUnresolvable_input.tag_config('default', background="white", foreground= '#808080' )     
+            noticeErrorsSumsUnresolvable_input.insert('1.0', self.input_dict['inCert']['noticeErrorsSumsUnresolvable'].get())#, 'default')  #Displays value stored in dictionary
             noticeErrorsSumsUnresolvable_input.pack(padx=5, pady=5)
+            noticeErrorsSumsUnresolvable_input.yview(tk.END)
+            noticeErrorsSumsUnresolvable_input.configure(state='normal')
             noticeErrorsSumsUnresolvable_input.bind('<FocusOut>', clickedOutExplain(noticeErrorsSumsUnresolvable_input, 'error'))
             noticeErrorsSumsUnresolvable_input.bind('<FocusIn>', clickedInExplain(noticeErrorsSumsUnresolvable_input, 'error'))
 
             noticeOther_input_label = ttk.Label(explanationCertifyFrame, text='Other:')
             noticeOther_input_label.pack () #grid(column=0, row=0, sticky=tk.W)
-            noticeOther_input = Text(explanationCertifyFrame,  width=70, height=7)
-            noticeOther_input.insert('1.0', self.input_dict['inCert']['noticeOther'].get())  #Displays value stored in dictionary
+            noticeOther_input = ScrolledText(explanationCertifyFrame,  state = 'normal',  width=71, height=7)
+            noticeOther_input.tag_config('default', background="white", foreground= '#808080' )              
+            noticeOther_input.insert('1.0', self.input_dict['inCert']['noticeOther'].get() )# , 'default')  #Displays value stored in dictionary
             noticeOther_input.pack(padx=5, pady=5)
+            noticeOther_input.configure(state='normal')
+            noticeOther_input.yview(tk.END)    
 
             # TODO: can possibly consider some local caching
             noticeOther_input_label = ttk.Label(explanationCertifyFrame, text='NOTE: ENTRIES HERE ARE NOT SAVED if the validation tool is restarted.')
@@ -608,10 +632,6 @@ class App(ttk.Frame):
             #TODO - consider where/how to write the certification explanation to file or INI will occur
 
 
-
-######################################################
-
-
         explainCert_window_button = ttk.Button(parcelDataInformationWindow, width=25, text = "Add", command = open_explanationCertificateWindow)
         explainCert_window_button.grid(row=9, column=0, padx=5, sticky='w')
 
@@ -625,14 +645,23 @@ class App(ttk.Frame):
         redactPolicy_input_label.grid(row=11, column=0, padx=5, sticky='w')
         redactPolicy_input = ttk.Entry(parcelDataInformationWindow,  width=56)
         redactPolicy_input.insert(0, self.input_dict['redactPolicy'].get())  #Displays value stored in dictionary in the entry box
-        redactPolicy_input.grid(row=12, column=0, padx=5, sticky='w')
+        redactPolicy_input.grid(row=12, column=0, pady=5, padx=5, sticky='w')
 
-        explainedErrorsNumber_input_label = ttk.Label(parcelDataInformationWindow, text='How many errors of the ERROR SUM did you explain in the Explain-Certification Form?:')
-        explainedErrorsNumber_input_label.grid(row=13, column=0, padx=5, sticky='w') #grid(column=0, row=0, sticky=tk.W)
+ 
+        s = ttk.Separator(parcelDataInformationWindow, orient='horizontal')
+        s.grid(row=13, column = 0, columnspan=2, padx= 5, pady=10, sticky='ew') 
+
+        CertText ="I certify this dataset is complete, correct, and all error messages \nhave been explained in the Explain Certification."
+
+        certCompletness_check_holder = tk.StringVar(value=self.input_dict['certifCompleteness'].get())  
+        certCompletness_check = Checkbutton(parcelDataInformationWindow, text=CertText,  variable=certCompletness_check_holder, onvalue='Complete', offvalue='')
+        certCompletness_check.grid(row=15, column=0,  padx=5, pady = 5, sticky='w')
+       
+        explainedErrorsNumber_input_label = ttk.Label(parcelDataInformationWindow, text='How many errors of the ERROR SUM did you explain in Explain Certification?:')
+        explainedErrorsNumber_input_label.grid(row=16, column=0, padx=5, sticky='w') #grid(column=0, row=0, sticky=tk.W)
         explainedErrorsNumber_input = ttk.Entry(parcelDataInformationWindow,  width=7)
         explainedErrorsNumber_input.insert(0, self.input_dict['inCert']['explainedErrorsNumber'].get())  #Displays value stored in dictionary in the entry box
-        explainedErrorsNumber_input.grid(row=14, column=0, padx=5, sticky='w')
-
+        explainedErrorsNumber_input.grid(row=17, column=0, padx=5, sticky='w')
          
         
         def putInput_in_DictionaryPDI():
@@ -642,6 +671,7 @@ class App(ttk.Frame):
             self.input_dict['subName'] = tk.StringVar(value=subName_input.get())
             self.input_dict['condoModel'] = tk.StringVar(value=condoModel_input_holder.get())
             self.input_dict['redactPolicy'] = tk.StringVar(value=redactPolicy_input.get())
+            self.input_dict['certifCompleteness'] = tk.StringVar(value=certCompletness_check_holder.get()) 
             self.input_dict['inCert']['explainedErrorsNumber'] = tk.StringVar(value=explainedErrorsNumber_input.get())
 
             self.input_dict['isNameRedact'] = tk.StringVar(value=isNameRedact_input_holder.get())
@@ -651,7 +681,7 @@ class App(ttk.Frame):
             parcelDataInformationWindow.destroy()
 
         bottomFrame = Frame(parcelDataInformationWindow)
-        bottomFrame.grid(row = 15, column = 0, columnspan = 2)
+        bottomFrame.grid(row = 18, column = 0, columnspan = 2)
 
         ok_button = ttk.Button(bottomFrame, width=8, text = "OK", command=putInput_in_DictionaryPDI)
         ok_button.grid(row = 0, column = 0, padx=5, pady=5)
@@ -665,10 +695,11 @@ class App(ttk.Frame):
                             (subName_input, 'subName', 'Submitter Name'),
                             (condoModel_input, 'condoModel', 'Condo Model'),
                             (explainedErrorsNumber_input, 'explainedErrorNumber', 'Error Sum Explained'),
+                            (certCompletness_check_holder, 'certifCompleteness', 'Certification of Completness'),
                             (explainCertifyRunWindow, 'explainCertifyRunWindow', 'Explain Certify Information')  ]
 
         PDIdefaultInputComparator = {'outINIDir': '', 'subEmail': '', 'subName': '', 'condoModel': '',
-                                    'explainedErrorNumber': '', 
+                                    'explainedErrorNumber': '', 'certifCompleteness': '',
                                     'explainCertifyRunWindow': False}
      
 
@@ -689,7 +720,7 @@ class App(ttk.Frame):
             elif len(unfilledFields) == 0:
                 ok_button['state'] = 'normal'
                 PDIStatus.bind_widget(ok_button, balloonmsg = 'Ready to Save')
-      
+            #print (unfilledFields)
             return unfilledFields
 
 
@@ -1345,25 +1376,23 @@ class App(ttk.Frame):
             self.input_dict['RightOfWayFC'] = tk.StringVar(value = rightsOfWayFCInput.get())
             self.input_dict['RoadStreetCenterlineType'] = tk.StringVar(value = roadStreetCenterComboBox.get())
             self.input_dict['RoadStreetCenterFCInput'] = tk.StringVar(value = roadsStreetCenterFCInput.get())
-            othersRunWindow.set(True) 
-
-            # self.input_dict['HydroLineType'] = tk.StringVar(value = 
-            # self.input_dict['HydroLineFC'] = tk.StringVar(value =
-            # self.input_dict['HydroPolyType'] = tk.StringVar(value =
-            # self.input_dict['HydroPolyFC'] = tk.StringVar(value =
-            # self.input_dict['AddressesType'] = tk.StringVar(value =
-            # self.input_dict['AddressesFC'] = tk.StringVar(value =
-            # self.input_dict['BuildingBuildingFootprintType'] = tk.StringVar(value =
-            # self.input_dict['BuildingBuildingFootprintFC'] = tk.StringVar(value =
-            # self.input_dict['LandUseType'] = tk.StringVar(value =
-            # self.input_dict['LandUseFC'] = tk.StringVar(value =
-            # self.input_dict['ParksOpenSpaceType'] = tk.StringVar(value =
-            # self.input_dict['ParksOpenSpaceFC'] = tk.StringVar(value =
-            # self.input_dict['TrailsType'] = tk.StringVar(value =
-            # self.input_dict['TrailsFC'] = tk.StringVar(value =
-            # self.input_dict['OtherRecreationType'] = tk.StringVar(value =
-            # self.input_dict['OtherRecreationFC'] = tk.StringVar(value =
-            # TODO: complete other inputs
+            self.input_dict['HydroLineType'] = tk.StringVar(value = hydroComboBox.get())
+            self.input_dict['HydroLineFC'] = tk.StringVar(value = hydroFCInput.get())
+            self.input_dict['HydroPolyType'] = tk.StringVar(value = hydroPolyComboBox.get())
+            self.input_dict['HydroPolyFC'] = tk.StringVar(value = hydroPolyFCInput.get())
+            self.input_dict['AddressesType'] = tk.StringVar(value = addressesComboBox.get())
+            self.input_dict['AddressesFC'] = tk.StringVar(value = addressesFCInput.get())
+            self.input_dict['BuildingBuildingFootprintType'] = tk.StringVar(value = bldgComboBox.get())
+            self.input_dict['BuildingBuildingFootprintFC'] = tk.StringVar(value = bldgFCInput.get())
+            self.input_dict['LandUseType'] = tk.StringVar(value = luComboBox.get())
+            self.input_dict['LandUseFC'] = tk.StringVar(value = luFCInput.get())
+            self.input_dict['ParksOpenSpaceType'] = tk.StringVar(value = parksComboBox.get())
+            self.input_dict['ParksOpenSpaceFC'] = tk.StringVar(value = parksFCInput.get())
+            self.input_dict['TrailsType'] = tk.StringVar(value = trailsComboBox.get())
+            self.input_dict['TrailsFC'] = tk.StringVar(value = trailsFCInput.get())
+            self.input_dict['OtherRecreationType'] = tk.StringVar(value = otherRecComboBox.get())
+            self.input_dict['OtherRecreationFC'] = tk.StringVar(value = otherRecFCInput.get())
+            othersRunWindow.set(True)
             
             otherLayerWindow.destroy()
 
@@ -1449,7 +1478,6 @@ class App(ttk.Frame):
 
 
         #Convert Tkinter strings to regular string in dictionary
-        # self.input_string_dict = collections.OrderedDict()
         self.input_string_dict['inCert'] = {element: '' for element in ['explainedErrorsNumber',
                                                                     'noticeOfNewStreetName',
                                                                     'noticeOfNewNonParcelFeaturePARCELIDs',
@@ -1470,7 +1498,7 @@ class App(ttk.Frame):
         # sets required variable to test run the validation tool in Test Mode
         self.input_string_dict['isSearchable'] = 'true'
         #self.input_string_dict['isFinal'] = 'False'
-        self.input_string_dict['version'] = 'V6.0.0'
+        self.input_string_dict['version'] = 'V7.0.0'
 
 
         ValidationToolScript.validation_tool_run_all(self.input_string_dict)

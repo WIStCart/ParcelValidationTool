@@ -1227,3 +1227,31 @@ class Error:
 			# arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 			# arcpy.AddMessage("Check the change log at http://www.sco.wisc.edu/parcels/tools/")
 			# arcpy.AddMessage("to make sure the latest version of the tool is installed before submitting")
+	
+	def siteAdressCheck(Error,Parcel,siteaddressField, errorType):
+		""" Check that SITEADDRESS is populated when address number, streetname, streettype are populated"""
+		try:
+			siteaddressTest = getattr(Parcel,siteaddressField)
+			addressComponents = {'ADDNUM': getattr(Parcel, "addnum"), 'STREETNAME': getattr(Parcel, "streetname"),
+								'STREETTYPE': getattr(Parcel, "streettype")}
+			
+			if siteaddressTest is None:
+				"""check if the three address component fields are populated"""
+				probFields = []
+				for key, val in addressComponents.iteritems():
+					if val is not None:
+						probFields.append(key)
+					if len(probFields) == 3:
+						getattr(Parcel,errorType + "Errors").append("A value is expected in the SITEADRESS field when ADDNUM, STREETNAME and STREETTYPE are populated. Please correct.")
+						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+						#Error.flags_dict['SiteAdress'] += 1
+
+			else: 
+				pass
+			return (Error, Parcel)
+
+		except: # using generic error handling because we don't know what errors to expect yet.
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + siteaddressField.upper() + " field. Please inspect the value of this field.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+		return (Error, Parcel)

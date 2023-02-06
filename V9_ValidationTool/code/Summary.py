@@ -109,7 +109,7 @@ class Summary:
 			Summary.errorSummaryFile.write("************************************************************************\n")
 			Summary.errorSummaryFile.write("* Uniform ParcelDate:\n")
 			Summary.errorSummaryFile.write("************************************************************************\n")
-			if totError.uniqueparcelDatePercent >= 97.0:
+			if totError.uniqueparcelDatePercent >= 25.0:
 				Summary.errorSummaryFile.write( str(round (totError.uniqueparcelDatePercent,2)) + "% of all records contain the same PARCELDATE value\n")
 				Summary.errorSummaryFile.write("Review submission documentation and set <Null> if necessary.\n\n")
 			Summary.errorSummaryFile.write("************************************************************************\n")
@@ -117,7 +117,7 @@ class Summary:
 			Summary.errorSummaryFile.write("************************************************************************\n")
 			Summary.errorSummaryFile.write("The following lines explain any broad geometric errors that were found while validating your parcel dataset."+ "\n")
 			if len(totError.geometricPlacementErrors) != 0:
-				for geometricErrorMessage in totError.geometricPlacementErrors:
+				for geometricErrorMessage in totError.geometricPlacemenftErrors:
 					Summary.errorSummaryFile.write("	Geometric Misplacement Flag: " + str(geometricErrorMessage) + "\n")
 					Validation_JSON["broadLevelErrors"]['Geometric_Misplacement_Flag'].append(str(geometricErrorMessage))
 			if len(totError.geometricFileErrors) != 0:
@@ -217,9 +217,9 @@ class Summary:
 			if totError.ErrorSum == 0:
 				config.set('ERROR COUNTS','    GREAT JOB, NO ERRORS!!!!!!!')
 			config.add_section('PARCELDATE FLAG')
-			if totError.uniqueparcelDatePercent >= 97.0:
+			if totError.uniqueparcelDatePercent >= 25.0:
 				config.set('PARCELDATE FLAG', 'Uniform ParcelDate', str(round (totError.uniqueparcelDatePercent,2)) )
-			if totError.uniqueparcelDatePercent < 97.0:
+			if totError.uniqueparcelDatePercent < 25.0:
 				config.set('PARCELDATE FLAG','  GREAT JOB, NO UNIFORM PARCELDATE!' )			
 			config.add_section('PERCENT TAXROLL YEAR')
 			config.set('PERCENT TAXROLL YEAR','Previous',round((float(totError.trYearPast / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2))
@@ -245,20 +245,26 @@ class Summary:
 			config.set('EXPLAIN CERTIFY','Notice Of Error Sum Unsolvable', '\n' + explain_certify['noticeErrorsSumsUnresolvable'])
 			config.set('EXPLAIN CERTIFY','Other', '\n' + explain_certify['noticeOther'])
 		
+   
+		outPath =  inputDict['outINIDir'] + '/'+ inputDict['county'] + '_Final_Submission'
+		if not os.path.exists(outPath):
+			os.makedirs(outPath)
+
 		try:
 			#Write out .ini file
-			with open(inputDict['outINIDir']+'/'+inputDict['county'] +'.ini','w') as configFile:
+	
+			with open( outPath +'/'+inputDict['county'] +'.ini','w') as configFile:
 				config.write(configFile)
 				#with open(inputDict['inCert'],'r') as certFile:
 				#	for line in certFile:
 						#configFile.write(line)
 			arcpy.AddMessage("\n\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
-			arcpy.AddMessage("  Wrote .ini file to "+inputDict['outINIDir'])
+			arcpy.AddMessage("  Wrote .ini file to "+ outPath)
 			arcpy.AddMessage("\n")
 			arcpy.AddMessage("  ------>  .ini FILE CREATION COMPLETE!   <------\n\n")
 			#arcpy.AddMessage("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
 		except Exception as e:
-			arcpy.AddMessage("  !!!!!!!!!!Error writing .ini file!!!!!!!!!!")
+			arcpy.AddMessage("\n  !!!!!!!!!!Error writing .ini file!!!!!!!!!!")
 			arcpy.AddMessage(str(e))
 
 	def explainCertComplete(self,explain_certify):
@@ -303,7 +309,10 @@ class Summary:
 		other_fc_list = ['zoningGenFC', 'zoningShoreFC','zoningAirFC', 'PLSSFC','RightOfWayFC','RoadStreetCenterlineFC','HydroLineFC','HydroPolyFC','AddressesFC','BuildingBuildingFootprintFC','LandUseFC','ParksOpenSpaceFC','TrailsFC','OtherRecreationFC']
 		year = taxRollYears[2]
 		inFC = inputDict['inFC']
-		outPath = inputDict['outINIDir']  #folder for .ini, fgdbs and other plss files
+
+		county_outPath = inputDict['outINIDir']  #folder for .ini, fgdbs and other plss files
+		outPath =  inputDict['outINIDir'] + '/'+ inputDict['county'] + '_Final_Submission'
+
 		parcel_gdb = inputDict['county'] + '_PARCELS.gdb' 
 		other_gdb =  inputDict['county'] + '_OTHER.gdb'
 		redactPolicy = inputDict['redactPolicy']
@@ -328,7 +337,7 @@ class Summary:
 		
 				plss_file = plssOtherDigitalFile.split('/')
 				plss_file_name = plss_file[len(plss_file)-1]
-				destination = outPath + '/' + plss_file_name 
+				destination = outPath + '/' + inputDict['county'] + '_' + year + '_' + plss_file_name 
 				extension = plss_file_name.split('.')[-1]
 	
 				if extension != 'shp':	
@@ -346,7 +355,7 @@ class Summary:
 						desc = arcpy.Describe(plssOtherDigitalFile)
 						if  hasattr(desc, "dataType") and desc.dataType == "ShapeFile":
 							plss_path = outPath + '/' + other_gdb
-							plss_name = '/PLSS_' + year 
+							plss_name = '/' +  inputDict['county'] + '_PLSS_' + year 
 							#print ( plss_path + plss_name )
 							if arcpy.Exists (plss_path + plss_name):	
 								arcpy.Delete_management(plss_path + plss_name)
@@ -362,42 +371,43 @@ class Summary:
 			### create Parcels gdb	
 			if inputDict['inFC'] != '':
 				parcel_Dir = arcpy.CreateFileGDB_management(outPath, parcel_gdb)
-				arcpy.FeatureClassToFeatureClass_conversion(inFC, parcel_Dir,"PARCELS")
+				arcpy.FeatureClassToFeatureClass_conversion(inFC, parcel_Dir, "PARCELS")
 
 			#Create fgdb for other layers				
 			# append inFeatures list other features provided in the GUI
 			inFeatures = []
+			coName = inputDict['county']
 			for fc in other_fc_list:  
 				if inputDict[fc] != '' and  (arcpy.Exists(inputDict[fc])):
 					#matching  fc with it name:
 					if fc == 'zoningGenFC':
-						fc_name = '/GENERAL_' + year
+						fc_name = '/' + coName + '_GENERAL_' + year
 					elif fc ==  'zoningShoreFC':
-						fc_name = '/SHORELAND_' + year
+						fc_name = '/' + coName + '_SHORELAND_' + year
 					elif fc == 'zoningAirFC':
-						fc_name = '/AIRPORT_' + year
+						fc_name = '/' + coName + '_AIRPORT_' + year
 					elif fc == 'PLSSFC':
-						fc_name =  '/PLSS_' + year
+						fc_name =  '/' + coName + '_PLSS_' + year
 					elif fc == 'RightOfWayFC':
-						fc_name = '/ROW_' + year
+						fc_name = '/' + coName + '_ROW_' + year
 					elif fc ==  'RoadStreetCenterlineFC':
-						fc_name = '/ROADS_' + year
+						fc_name = '/' + coName + '_ROADS_' + year
 					elif fc ==  'HydroLineFC':
-						fc_name = '/HYDRO_' + year + '_LINE'
+						fc_name = '/' + coName + '_HYDRO_' + year + '_LINE'
 					elif fc == 'HydroPolyFC':
-						fc_name = '/HYDRO_' + year + '_POLY'
+						fc_name = '/' + coName + '_HYDRO_' + year + '_POLY'
 					elif fc == 'AddressesFC': 
-						fc_name = '/ADDRESSES_' + year
+						fc_name = '/' + coName + '_ADDRESSES_' + year
 					elif fc == 'BuildingBuildingFootprintFC':
-						fc_name = '/BUILDINGS_' + year
+						fc_name = '/' + coName + '_BUILDINGS_' + year
 					elif fc == 'LandUseFC':
-						fc_name = '/LANDUSE_' + year
+						fc_name = '/' + coName + '_LANDUSE_' + year
 					elif fc == 'ParksOpenSpaceFC':
-						fc_name = '/PARKS_' + year 
+						fc_name = '/' + coName + '_PARKS_' + year 
 					elif fc == 'TrailsFC':
-						fc_name = '/TRAILS_' + year
+						fc_name = '/' + coName + '_TRAILS_' + year
 					elif fc == 'OtherRecreationFC':
-						fc_name = '/RECREATION_' + year	
+						fc_name = '/' + coName + '_RECREATION_' + year	
 					inFeatures.append( [inputDict[fc],  fc_name])  # list with Feat classes with their new neme 
 
 			if inFeatures != []:

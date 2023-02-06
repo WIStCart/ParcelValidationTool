@@ -10,19 +10,16 @@ import os
 
 import collections
 
-
-
 def validation_tool_run_all(inputDict):
 	
 	base = os.path.dirname (os.path.abspath(__file__))
-	
-	
+		
 	#inputNameList = ['isFinal','county','inFC','outDir','outName','outINIDir','subName','subEmail','condoModel','inCert','isNameReact','redactPolicy','zoningGenType','zoningGenFC','zoningShoreType','zoningShoreFC','zoningAirType','zoningAirFC','PLSSType','PLSSFC','RightOfWayType','RightOfWayFC','RoadStreetCenterlineType','RoadStreetCenterlineFC','HydroLineType','HydroLineFC','HydroPolyType','HydroPolyFC','AddressesType','AddressesFC','BuildingBuildingFootprintType','BuildingBuildingFootprintFC','LandUseType','LandUseFC','ParksOpenSpaceType','ParksOpenSpaceFC','TrailsType','TrailsFC','OtherRecreationType','OtherRecreationFC','certifiedBy','PLSSOtherDigitalFile']
 
 	#check that all features are correctly entered
 
 	# Current tool version number & function that checks to ensure running most current version available
-	inputDict['version'] = 'V6.0.0'
+	inputDict['version'] = 'V7.0.1'
 	Error.versionCheck(inputDict['version'])
 
 	#Creates schooldist name/number key value pair dictionaries
@@ -121,6 +118,7 @@ def validation_tool_run_all(inputDict):
 			totError,currParcel = Error.trYear(totError,currParcel,"taxrollyear","parcelid","tax",False,pinSkips,taxRollYears)
 			totError,currParcel = Error.taxrollYrCheck(totError,currParcel,"taxrollyear","tax",False,pinSkips,taxRollYears)
 			totError,currParcel = Error.streetNameCheck(totError,currParcel,"streetname","siteadress","address",True,stNameDict,inputDict['county'])
+			totError,currParcel = Error.siteAdressCheck(totError,currParcel,"siteadress", "address")
 			totError,currParcel = Error.zipCheck(totError,currParcel,"zipcode","address",True)
 			totError,currParcel = Error.zip4Check(totError,currParcel,"zip4","address",True)
 			totError,currParcel = Error.totCheck(totError,currParcel,"impvalue","cntassdvalue","lndvalue","tax")
@@ -154,7 +152,7 @@ def validation_tool_run_all(inputDict):
 	with arcpy.da.SearchCursor(output_stats_table_temp, ["parceldate", "COUNT_parceldate"]) as cursor:
 		for row in cursor:
 			#arcpy.AddMessage( float(row[1])/float(totError.recordTotalCount) * 100)
-			if row[0] is not None and float(row[1])/float(totError.recordTotalCount) * 100 >= 97.0: #max_uniform_parceldate :
+			if row[0] is not None and float(row[1])/float(totError.recordTotalCount) * 100 >= 25.0: #max_uniform_parceldate :
 				uniform_date  = row[0]
 				#totError.generalErrorCount += 1
 				totError.uniqueparcelDatePercent = float(row[1])/float(totError.recordTotalCount) * 100
@@ -165,14 +163,14 @@ def validation_tool_run_all(inputDict):
 		item = ''
 		with arcpy.da.UpdateCursor(output_fc_temp, fieldNames) as cursor:
 			for row in cursor:
-				for parcelid in parcelidList_MFL:
-					if row[3] == parcelid:
-						totError.flags_dict['mflvalueCheck'] += 1
-						if row[48] is not None:
-							item = "  | " + " MFLVALUE should not equal LNDVALUE in most cases.  Please correct this issue and refer to the submission documentation for further clarification as needed."
-						else:
-							item = "MFLVALUE should not equal LNDVALUE in most cases.  Please correct this issue and refer to the submission documentation for further clarification as needed."
+				if row[3] == parcelidList_MFL:
+					totError.flags_dict['mflvalueCheck'] += 1
+					if row[48] is not None:
+						item = "  | " + " MFLVALUE should not equal LNDVALUE in most cases.  Please correct this issue and refer to the submission documentation for further clarification as needed."
 						row[48] += item
+					else:
+						item = "MFLVALUE should not equal LNDVALUE in most cases.  Please correct this issue and refer to the submission documentation for further clarification as needed."
+						row[48] = item
 				cursor.updateRow(row)
 		del (cursor)
 
@@ -225,7 +223,7 @@ def validation_tool_run_all(inputDict):
 		arcpy.AddMessage("\n\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 		arcpy.AddMessage("  TEST RUN COMPLETE\n")
 
-		if  totError.uniqueparcelDatePercent >= 97.0: 
+		if  totError.uniqueparcelDatePercent >= 25.0: 
 			arcpy.AddMessage("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 			arcpy.AddMessage("  " + str(round ( totError.uniqueparcelDatePercent,2)) + "% OF ALL RECORDS CONTAIN THE SAME PARCELDATE VALUE OF " + uniform_date )
 			arcpy.AddMessage("  REVIEW SUBMISSION DOCUMENTATION AND SET TO <Null> IF NECESSARY.\n")
