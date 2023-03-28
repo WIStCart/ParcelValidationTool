@@ -1,16 +1,24 @@
 import tkinter as tk
+from tkinter import tix 
+#import tkinter.tix as Tix
 from tkinter import ttk
 from tkinter import *
 from tkinter.ttk import *
+
 from tkinter.filedialog import *
-import tkinter.tix as Tix
+from tkinter.scrolledtext import ScrolledText
 from tkinter import messagebox
+
 import os
 from os import path
 import collections
-from osgeo import gdal
-from osgeo import ogr
-import ValidationToolScriptFoss
+
+from osgeo import gdal, ogr
+
+#import ValidationToolScriptFoss
+from ValidationToolScriptFoss import validation_tool_run_all
+
+#from threading import *
 
 class App(ttk.Frame):    
     def __init__(self, master=None):
@@ -21,7 +29,7 @@ class App(ttk.Frame):
 
         self.inputNameList = ['isSearchable','isFinal','county','inFC','outDir',
                         'outName','outINIDir','subName','subEmail','condoModel',
-                        'inCert','isNameRedact','redactPolicy','zoningGenType',
+                        'inCert','isNameRedact','redactPolicy', 'certifCompleteness', 'zoningGenType',
                         'zoningGenFC','zoningShoreType','zoningShoreFC',
                         'zoningAirType','zoningAirFC','PLSSType','PLSSFC',
                         'RightOfWayType','RightOfWayFC','RoadStreetCenterlineType',
@@ -68,12 +76,60 @@ class App(ttk.Frame):
         othersRunWindow = tk.BooleanVar()
         
         self.create_widgets()
+    
+       ### App class methods ###
+    # this function is outside of the scope of all windows
+    # @param exitButton: reference to any exit button for any window
+    # @param inputObjectMap: list of 3-tuples corresponding
+    # stored variables address references in dictionary, 
+    # associated widget objects, and aliases
+    # @param inputObjectMap: TODO: consider if inputs need to be organized
+    # in a tree in cases of complex decisions
+    # @return TODO: decide if its a boolean or other type
+    
+    
+    def FC_exists(self, fc):
+        gdal.UseExceptions()
+        datasource = os.path.split (fc)[0]
+        layer = os.path.normpath(fc).split(os.path.sep)[-1]   
+        try:
+            ds = gdal.OpenEx(datasource)
+            if layer is not None:
+                return ds.GetLayerByName(layer) is not None
+            else:
+                return True
+        except RuntimeError as e:
+            return False
 
+    def isExitableState(self, exitableStatus, exitButton):# inputObjectMap):
+        unfilledFields = list()
+        for inputVar in self.inputObjectMap:
+            #print('current input variable: ', inputVar[0].get(), inputVar[1])   
+            if (inputVar[0].get() == defaultInputComparator[inputVar[1]]) or \
+                    (   inputVar[1] == 'inFC' and not self.FC_exists(inputVar[0].get())) or \
+                    (  (inputVar[1] == 'outDir' and os.path.exists(inputVar[0].get()) and inputVar[0].get()[-4:] != '.gdb') or
+                            (inputVar[1] == 'outDir' and not os.path.exists(inputVar[0].get()))):
+                #print('comparison to defaults: ', inputVar[2], defaultInputComparator[inputVar[1]])
+                unfilledFields.append(inputVar[2])
+            else:
+                if inputVar[2] in unfilledFields:
+                    unfilledFields.remove(inputVar[2])
+        
+        if len(unfilledFields) > 0:
+            exitButton['state'] = 'disabled'
+            exitableStatus.bind_widget(exitButton, balloonmsg = 'Missing input: {}'.format(unfilledFields))
+        elif len(unfilledFields) == 0:
+            exitButton['state'] = 'normal'
+            exitableStatus.bind_widget(exitButton, balloonmsg = 'Ready to Execute')        
+        #print('unfill :' , unfilledFields)
+        return unfilledFields
+ 
+ 
     def browse_to_GDB(self, gdb):
         """browse to selected a gdb directory (no Feature Class)"""
         gdb_dir = askdirectory()   
         if gdb_dir:
-            if gdb_dir[-4:] == '.gdb':
+            if gdb_dir.endswith('.gdb'):
                 gdb.set(gdb_dir)   
                     
     def askdir_basic(self, path_name):
@@ -140,7 +196,6 @@ class App(ttk.Frame):
 
             for layerIndex in range(datasource.GetLayerCount()):
                 layer = datasource.GetLayerByIndex(layerIndex)
-                # self.feature_classes.append(os.path.join(path_name, layer.GetName()))
                 self.feature_classes.append(path_name + "/" + layer.GetName())
                 self.files_list.append(layer.GetName())
 
@@ -154,24 +209,22 @@ class App(ttk.Frame):
         def statusDrawer(event):
             colorizer = lambda colorState: "grey" if colorState == False else "green"
             if (self.input_dict['isFinal'].get() == 'finalModeSelected'): # redundant given calling scope below
-                canvasDrawer.create_rectangle(3, 15, 8, 20, fill = colorizer(parcelinfoRunWindow))
-                canvasDrawer.create_rectangle(3, 60, 8, 65, fill = colorizer(plssRunWindow))
-                canvasDrawer.create_rectangle(3, 105, 8, 110, fill = colorizer(zoningRunWindow))
-                canvasDrawer.create_rectangle(3, 150, 8, 155, fill = colorizer(othersRunWindow))
-                canvasDrawer.create_rectangle(3, 195, 8, 200, fill = colorizer(all([parcelinfoRunWindow,
+                canvasDrawer.create_rectangle(3, 15, 12, 24, fill = colorizer(parcelinfoRunWindow))
+                canvasDrawer.create_rectangle(3, 60, 12, 69, fill = colorizer(plssRunWindow))
+                canvasDrawer.create_rectangle(3, 105, 12, 114, fill = colorizer(zoningRunWindow))
+                canvasDrawer.create_rectangle(3, 150, 12, 159, fill = colorizer(othersRunWindow))
+                canvasDrawer.create_rectangle(3, 195, 12, 204, fill = colorizer(all([parcelinfoRunWindow,
                                                                                     plssRunWindow,
                                                                                     zoningRunWindow,
                                                                                     othersRunWindow])))
             else:
                 colorizable = all([True if (self.input_dict[item].get() != "") else False for item in ['county', 'inFC', 'outDir', 'outName']])
-                canvasDrawer.create_rectangle(3, 195, 8, 200, fill = colorizer(colorizable))
+                canvasDrawer.create_rectangle(3, 195, 12, 204, fill = colorizer(colorizable))
                 
         # Radio Buttons for Test or Final mode
-        # TODO: implement this inner function
-        # outside the scope of this outer function.
+        # TODO: implement this inner function outside the scope of this outer function.
         # Also check if user is accidentally changing
-        # these buttons state if they have input from
-        # final mode.
+        # these buttons state if they have input from final mode.
         def startScreenWidgetStateMutator():
             self.bind("<Motion>", statusDrawer)
             self.bind("<FocusIn>", statusDrawer)
@@ -321,7 +374,7 @@ class App(ttk.Frame):
         buttonsFrame = Frame(self)
         buttonsFrame.grid(column = 0, row = 9, sticky = tk.N)
 
-        canvasDrawer = Canvas(buttonsFrame, height = 200, width = 10)
+        canvasDrawer = Canvas(buttonsFrame, height = 210, width = 15)   #200 and 10
         canvasDrawer.grid(column = 1, rowspan = 5, row = 0, padx = 10)
         
         button_main_1 = ttk.Button(buttonsFrame, width=25, text = "Parcel Data Information",
@@ -340,6 +393,18 @@ class App(ttk.Frame):
         button_main_5 = ttk.Button(buttonsFrame, width=15, text = "Run", command = self.big_run_button) 
         button_main_5.grid(column=0, row=4, sticky=tk.N, pady=10)
 
+    
+        runStatus = tix.Balloon(self)
+        
+        startScreenWidgetStateMutator() # hacky way to enforce state on first load
+
+        def exitableStateRunner():
+                return "Missing input: {}".format(self.isExitableState(runStatus, button_main_5)) #, self.inputObjectMap))
+                  
+        runStatus.bind_widget(button_main_5, balloonmsg = exitableStateRunner())
+        button_main_5.bind('<Enter>', lambda event, rs=runStatus,  b=button_main_5: self.isExitableState(rs, b)) 
+
+    
     def open_parcelDataInformationWindow(self):
             
         #child window attributes
@@ -383,15 +448,16 @@ class App(ttk.Frame):
 
         explainCert_window_label = ttk.Label(parcelDataInformationWindow, text='Explain-Certification (REQUIRED), click Add:')
         explainCert_window_label.grid(row=8, column=0, padx=5, sticky='w')
-
+      
         def open_explanationCertificateWindow():
         
             #grandchild window attributes
             explanationCertificateWindow = Toplevel(parcelDataInformationWindow)
             explanationCertificateWindow.grab_set() #disables parent window while child is open
             explanationCertificateWindow.iconbitmap(wisconsin_icon_path)
-            explanationCertificateWindow.title('Explanation Certificate')
-
+            explanationCertificateWindow.title('Explanation Certification')
+            explanationCertificateWindow.geometry('615x800')
+                    
             # TODO: enforce required input and also use default text
 
             default_text = {'street': 'Enter new Street Names here or type None if no values exist',
@@ -416,6 +482,9 @@ class App(ttk.Frame):
                             inputObject.insert('1.0', default_text[inputClass], 'default') 
                 inputObject.bind('<Key>', keyPressed)
 
+            def onFrameConfigure(canvas):
+                canvas.configure(scrollregion=canvas.bbox("all"))
+            
             noticeOfNewStreetName_input_label = ttk.Label(explanationCertificateWindow, text='Notice of New Street Names:')
             noticeOfNewStreetName_input_label.pack () #grid(column=0, row=0, sticky=tk.W)
             noticeOfNewStreetName_input = Text(explanationCertificateWindow,
@@ -431,7 +500,7 @@ class App(ttk.Frame):
             noticeOfNewNonParcelFeaturePARCELIDs_input_label.pack () #grid(column=0, row=0, sticky=tk.W)
             noticeOfNewNonParcelFeaturePARCELIDs_input = Text(explanationCertificateWindow,
                                                                 # textvariable = self.input_dict['inCert']['noticeOfNewNonParcelFeaturePARCELIDs'],
-                                                                width=70, height=7)
+                                                                width=71, height=7)
             noticeOfNewNonParcelFeaturePARCELIDs_input.insert('1.0', self.input_dict['inCert']['noticeOfNewNonParcelFeaturePARCELIDs'].get())  #Displays value stored in dictionary
             noticeOfNewNonParcelFeaturePARCELIDs_input.pack(padx=5, pady=5)
             noticeOfNewNonParcelFeaturePARCELIDs_input.bind('<FocusOut>', clickedOutExplain(noticeOfNewNonParcelFeaturePARCELIDs_input, 'non parcel'))
@@ -441,19 +510,19 @@ class App(ttk.Frame):
             noticeOfMissingDataOmissions_input_label.pack () #grid(column=0, row=0, sticky=tk.W)
             noticeOfMissingDataOmissions_input = Text(explanationCertificateWindow,
                                                         # textvariable = self.input_dict['inCert']['noticeOfMissingDataOmissions'],
-                                                        width=70, height=7)
+                                                        width=71, height=7)
             noticeOfMissingDataOmissions_input.insert('1.0', self.input_dict['inCert']['noticeOfMissingDataOmissions'].get())  #Displays value stored in dictionary
             noticeOfMissingDataOmissions_input.pack(padx=5, pady=5)
             noticeOfMissingDataOmissions_input.bind('<FocusOut>', clickedOutExplain(noticeOfMissingDataOmissions_input, 'omission'))
             noticeOfMissingDataOmissions_input.bind('<FocusIn>', clickedInExplain(noticeOfMissingDataOmissions_input, 'omission'))
-
+      
             # TODO: keep statistics of these
         
             noticeErrorsSumsUnresolvable_input_label = ttk.Label(explanationCertificateWindow, text='Error Sums That Are Unresolvable')
             noticeErrorsSumsUnresolvable_input_label.pack () #grid(column=0, row=0, sticky=tk.W)
             noticeErrorsSumsUnresolvable_input = Text(explanationCertificateWindow,
                                                         # textvariable = self.input_dict['inCert']['noticeErrorsSumsUnresolvable'],
-                                                        width=70, height=7)
+                                                        width=71, height=7)
             noticeErrorsSumsUnresolvable_input.insert('1.0', self.input_dict['inCert']['noticeErrorsSumsUnresolvable'].get())  #Displays value stored in dictionary
             noticeErrorsSumsUnresolvable_input.pack(padx=5, pady=5)
             noticeErrorsSumsUnresolvable_input.bind('<FocusOut>', clickedOutExplain(noticeErrorsSumsUnresolvable_input, 'error'))
@@ -461,12 +530,12 @@ class App(ttk.Frame):
 
             noticeOther_input_label = ttk.Label(explanationCertificateWindow, text='Other:')
             noticeOther_input_label.pack () #grid(column=0, row=0, sticky=tk.W)
-            noticeOther_input = Text(explanationCertificateWindow,  width=70, height=7)
+            noticeOther_input = Text(explanationCertificateWindow,  width=71, height=7)
             noticeOther_input.insert('1.0', self.input_dict['inCert']['noticeOther'].get())  #Displays value stored in dictionary
             noticeOther_input.pack(padx=5, pady=5)
 
             # TODO: can possibly consider some local caching
-            noticeOther_input_label = ttk.Label(explanationCertificateWindow, text='NOTE: ENTRIES HERE ARE NOT SAVED if the validation tool is restarted. Please copy responses from another saved source, Word document, text file, etc.')
+            noticeOther_input_label = ttk.Label(explanationCertificateWindow, text='     NOTE: ENTRIES HERE ARE NOT SAVED if the validation tool is restarted.     ')
             noticeOther_input_label.pack () #grid(column=0, row=0, sticky=tk.W)
 
             def putInput_in_DictionaryEC():
@@ -508,7 +577,7 @@ class App(ttk.Frame):
             def saveableStateRunner():
                 return "Missing input: {}".format(isSaveableState(None))
 
-            saveableStatus = Tix.Balloon(explanationCertificateWindow)
+            saveableStatus = tix.Balloon(explanationCertificateWindow)
             
             ok_button = ttk.Button(bottomFrame, width=8, text="OK", command=putInput_in_DictionaryEC)
             ok_button.grid(row = 0, column = 0, padx=5, pady=5)
@@ -535,13 +604,23 @@ class App(ttk.Frame):
         redactPolicy_input_label.grid(row=11, column=0, padx=5, sticky='w')
         redactPolicy_input = ttk.Entry(parcelDataInformationWindow,  width=56)
         redactPolicy_input.insert(0, self.input_dict['redactPolicy'].get())  #Displays value stored in dictionary in the entry box
-        redactPolicy_input.grid(row=12, column=0, padx=5, sticky='w')
+        redactPolicy_input.grid(row=12, column=0, pady=5, padx=5, sticky='w')
 
+        ## new section
+        s = ttk.Separator(parcelDataInformationWindow, orient='horizontal')
+        s.grid(row=13, column = 0, columnspan=2, padx= 5, pady=10, sticky='ew') 
+
+        CertText ="I certify this dataset is complete, correct, and all error messages \nhave been explained in the Explain Certification."
+
+        certCompletness_check_holder = tk.StringVar(value=self.input_dict['certifCompleteness'].get())  
+        certCompletness_check = Checkbutton(parcelDataInformationWindow, text=CertText,  variable=certCompletness_check_holder, onvalue='Complete', offvalue='')
+        certCompletness_check.grid(row=15, column=0,  padx=5, pady = 5, sticky='w')
+  
         explainedErrorsNumber_input_label = ttk.Label(parcelDataInformationWindow, text='How many errors of the ERROR SUM did you explain in the Certification Explanation?:')
-        explainedErrorsNumber_input_label.grid(row=13, column=0, padx=5, sticky='w') #grid(column=0, row=0, sticky=tk.W)
+        explainedErrorsNumber_input_label.grid(row=16, column=0, padx=5, sticky='w') #grid(column=0, row=0, sticky=tk.W)
         explainedErrorsNumber_input = ttk.Entry(parcelDataInformationWindow,  width=7)
         explainedErrorsNumber_input.insert(0, self.input_dict['inCert']['explainedErrorsNumber'].get())  #Displays value stored in dictionary in the entry box
-        explainedErrorsNumber_input.grid(row=14, column=0, padx=5, sticky='w')
+        explainedErrorsNumber_input.grid(row=17, column=0, padx=5, sticky='w')
 
         def putInput_in_DictionaryPDI():
 
@@ -550,6 +629,7 @@ class App(ttk.Frame):
             self.input_dict['subName'] = tk.StringVar(value=subName_input.get())
             self.input_dict['condoModel'] = tk.StringVar(value=condoModel_input_holder.get())
             self.input_dict['redactPolicy'] = tk.StringVar(value=redactPolicy_input.get())
+            self.input_dict['certifCompleteness'] = tk.StringVar(value=certCompletness_check_holder.get()) 
             self.input_dict['inCert']['explainedErrorsNumber'] = tk.StringVar(value=explainedErrorsNumber_input.get())
 
             self.input_dict['isNameRedact'] = tk.StringVar(value=isNameRedact_input_holder.get())
@@ -559,7 +639,7 @@ class App(ttk.Frame):
             parcelDataInformationWindow.destroy()
 
         bottomFrame = Frame(parcelDataInformationWindow)
-        bottomFrame.grid(row = 15, column = 0, columnspan = 2)
+        bottomFrame.grid(row = 18, column = 0, columnspan = 2)
 
         ok_button = ttk.Button(bottomFrame, width=8, text = "OK", command=putInput_in_DictionaryPDI)
         ok_button.grid(row = 0, column = 0, padx=5, pady=5)
@@ -573,17 +653,18 @@ class App(ttk.Frame):
                             (subName_input, 'subName', 'Submitter Name'),
                             (condoModel_input, 'condoModel', 'Condo Model'),
                             (explainedErrorsNumber_input, 'explainedErrorNumber', 'Error Sum Explained'),
+                            (certCompletness_check_holder, 'certifCompleteness', 'Certification of Completness'),
                             (explainCertifyRunWindow, 'explainCertifyRunWindow', 'Explain Certify Information')  ]
 
         PDIdefaultInputComparator = {'outINIDir': '', 'subEmail': '', 'subName': '', 'condoModel': '',
-                                    'explainedErrorNumber': '', 
+                                    'explainedErrorNumber': '', 'certifCompleteness': '',
                                     'explainCertifyRunWindow': False}
     
         def isPDIReadytoRun(event ):
             unfilledFields = list()
             for inputVar in PDIinputObjectMap:
                 #print('current input variable: ', inputVar[0].get(), inputVar[1])
-                if (inputVar[0].get() == PDIdefaultInputComparator[inputVar[1]]) or (inputVar[1] == 'outINIDir' and  not os.path.isdir(inputVar[0].get()) ): 
+                if (inputVar[0].get() == PDIdefaultInputComparator[inputVar[1]]) or (inputVar[1] == 'outINIDir' and not os.path.isdir(inputVar[0].get()) and inputVar[0].get()[-4:] == '.gdb'): 
                     #print('comparison to defaults: ', inputVar[2], PDIdefaultInputComparator[inputVar[1]])
                     unfilledFields.append(inputVar[2])
                 else:
@@ -596,13 +677,13 @@ class App(ttk.Frame):
             elif len(unfilledFields) == 0:
                 ok_button['state'] = 'normal'
                 PDIStatus.bind_widget(ok_button, balloonmsg = 'Ready to Save')
-        
+            #print (unfilledFields)
             return unfilledFields
 
         def PDIsaveableStateRunner():
             return "Missing input: {}".format(isPDIReadytoRun(None))
 
-        PDIStatus = Tix.Balloon(parcelDataInformationWindow)
+        PDIStatus = tix.Balloon(parcelDataInformationWindow)
         ok_button.bind('<Enter>', isPDIReadytoRun)
         PDIStatus.bind_widget(ok_button, balloonmsg = PDIsaveableStateRunner () )
         
@@ -611,7 +692,6 @@ class App(ttk.Frame):
         #child window attributes
         plssLayerWindow = Toplevel(self)
         plssLayerWindow.grab_set() #disables parent window while child is open
-        # plssLayerWindow.iconbitmap('assets\\V1.ico')
         plssLayerWindow.iconbitmap(wisconsin_icon_path)
         plssLayerWindow.title('PLSS Layer Input')
 
@@ -624,7 +704,7 @@ class App(ttk.Frame):
                 plssFC_input_dirBut['state'] = 'disabled'
                 plssOtherDigitalFile_input['state'] = 'normal'
                 plssOtherDigitalFile_input_dirBut['state'] = 'normal'
-            elif (self.input_dict['PLSSType'].get() == 'Maintained by county as .shp or feature class'):
+            elif (self.input_dict['PLSSType'].get() == 'Maintained by county as feature class'):
                 plssFC_input['state'] = 'normal'
                 plssFC_input_dirBut['state'] = 'normal'
                 plssOtherDigitalFile_input['state'] = 'disabled'
@@ -641,7 +721,7 @@ class App(ttk.Frame):
         # plssType_input_holder = tk.StringVar(value=self.input_dict['PLSSType'].get())
         # plssType_input = ttk.Combobox(plssLayerWindow, width=53, textvariable=plssType_input_holder) 
         plssType_input = ttk.Combobox(plssLayerWindow, width = 53,
-                                      values = ['', 'Maintained by county as .shp or feature class',
+                                      values = ['Maintained by county as feature class',
                                                 'Maintained by county as other digital format',
                                                 'Not in digital format'],
                                       textvariable = self.input_dict['PLSSType'])
@@ -706,9 +786,10 @@ class App(ttk.Frame):
                 unfilledFields.append(typeVar[2])
             else:
                 #print('plsstype: ', typeVar[0].get(), typeVar[2], defaultInputComparator[typeVar[1]])
-                if typeVar[0].get() == 'Maintained by county as .shp or feature class':
+                if typeVar[0].get() == 'Maintained by county as feature class':
                         plssinputObject = plssinputObjectMap[1]     #better finding the object index
-                        if (plssinputObject[0].get() == defaultInputComparator[plssinputObject[1]]):
+                        if (plssinputObject[0].get() == defaultInputComparator[plssinputObject[1]]) or \
+                            (plssinputObject[1] == 'PLSSFC' and not self.FC_exists(plssinputObject[0].get())):
                             #print('comparison to defaults: ', plssinputObject[2], defaultInputComparator[plssinputObject[1]])
                             unfilledFields.append(plssinputObject[2]) 
                         else:
@@ -735,7 +816,7 @@ class App(ttk.Frame):
         def saveableStateRunner():
                 return "Missing input: {}".format(isPLSSReadytoRun(None))
 
-        plssStatus = Tix.Balloon(plssLayerWindow)
+        plssStatus = tix.Balloon(plssLayerWindow)
         ok_button.bind('<Enter>', isPLSSReadytoRun)
         plssStatus.bind_widget(ok_button, balloonmsg = saveableStateRunner () )
 
@@ -858,7 +939,6 @@ class App(ttk.Frame):
         cancel_button = ttk.Button(bottomFrame, width=8,
                                    text = "Cancel", command = zoningLayerWindow.destroy)
         cancel_button.grid(row = 0, column = 1, padx=5, pady=5)
-
     
         ZLinputObjectMap = [(zoningGenType_input, 'zoningGenType', 'Zoning General Type'),
                                 (zoningGenFC_input, 'zoningGenFC', 'Zoning General Feature Class'),  
@@ -879,7 +959,7 @@ class App(ttk.Frame):
                     #print('type: ', typeVar[0].get(), typeVar[2], defaultInputComparator[typeVar[1]])
                     if typeVar[0].get() == 'Administered by county':
                         fcVar = ZLinputObjectMap[i+1]
-                        if (fcVar[0].get() == defaultInputComparator[fcVar[1]]):
+                        if (fcVar[0].get() == defaultInputComparator[fcVar[1]]) or (not self.FC_exists(fcVar[0].get())):
                             unfilledFields.append(fcVar[2]) 
                         else:
                             if fcVar[2] in unfilledFields:
@@ -897,7 +977,7 @@ class App(ttk.Frame):
         def saveableStateRunner():
                 return "Missing input: {}".format(isZLReadytoRun(None))
 
-        ZLStatus = Tix.Balloon(zoningLayerWindow)
+        ZLStatus = tix.Balloon(zoningLayerWindow)
         ok_button.bind('<Enter>', isZLReadytoRun)
         ZLStatus.bind_widget(ok_button, balloonmsg = saveableStateRunner () )
         
@@ -907,7 +987,7 @@ class App(ttk.Frame):
         otherLayerWindow = Toplevel(self)
         otherLayerWindow.grab_set() #disables parent window while child is open
         otherLayerWindow.iconbitmap(wisconsin_icon_path)
-        otherLayerWindow.title('Zoning Layer Input')
+        otherLayerWindow.title('Other Layers Input')
 
         comboBoxOptions = ['Unchanged from last year - not submitted',
                            'Maintained by county',
@@ -1259,8 +1339,8 @@ class App(ttk.Frame):
                     if typeVar[0].get() == 'Maintained by county':
                         fcVar = OLinputObjectMap[i+1]
                         #print (fcVar[0].get() )
-                        if (fcVar[0].get() == defaultInputComparator[fcVar[1]]):
-                             
+                        #if (fcVar[0].get() == defaultInputComparator[fcVar[1]]):
+                        if (fcVar[0].get() == defaultInputComparator[fcVar[1]]) or (not self.FC_exists(fcVar[0].get())):
                             unfilledFields.append(fcVar[2]) 
                         else:
                             if fcVar[2] in unfilledFields:
@@ -1279,14 +1359,13 @@ class App(ttk.Frame):
         def saveableStateRunner():
                 return "Missing input: {}".format(isOLReadytoRun(None))
 
-        OLStatus = Tix.Balloon(otherLayerWindow)
+        OLStatus = tix.Balloon(otherLayerWindow)
         ok_button.bind('<Enter>', isOLReadytoRun)
         OLStatus.bind_widget(ok_button, balloonmsg = saveableStateRunner () )
                               
     def big_run_button(self):
         #Convert Tkinter strings to regular string in dictionary
         self.input_string_dict = collections.OrderedDict()
-
 
         #Convert Tkinter strings to regular string in dictionary
         # self.input_string_dict = collections.OrderedDict()
@@ -1302,20 +1381,15 @@ class App(ttk.Frame):
             else :
                 for j in self.input_dict[i]:
                     self.input_string_dict[i][j] = self.input_dict[i][j].get()
-
-        #debugging code/text:
-
-        #print(self.input_string_dict)
               
         # sets required variable to test run the validation tool in Test Mode
         self.input_string_dict['isSearchable'] = 'true'
-        #self.input_string_dict['isFinal'] = 'False'
-        self.input_string_dict['version'] = 'V6.0.0'
 
-        ValidationToolScriptFoss.validation_tool_run_all(self.input_string_dict)
+        #print (self.input_string_dict)
+        validation_tool_run_all(self.input_string_dict)
 
 if __name__ == '__main__':  
-    gui = Tix.Tk()
+    gui = tix.Tk()
     gui.title('SCO Validation Tool v2.0') #title of main menu
     gui.geometry('420x450')  #dimensions of main menu window (W x H)
     

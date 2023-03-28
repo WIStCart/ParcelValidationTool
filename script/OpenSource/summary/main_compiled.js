@@ -483,7 +483,7 @@ var Geometric_File_Error_Pre = "";
 var Geometric_Misplacement_Flag_Attn = "Geometries appear to be misplaced.";
 var Coded_Domain_Fields_Attn = "Coded domains or subtypes were found.";
 var Geometric_File_Error_Attn = "Click for detail."; //This component renders the list of broad level errors items and sets up a tooltip on them to render on click.
-var UniqueParcelDate = "97% or more records contain uniform PARCELDATE value.";
+var UniqueParcelDate = "25% or more records contain uniform PARCELDATE value.";
 
 var BroadLevelErrors =
 /*#__PURE__*/

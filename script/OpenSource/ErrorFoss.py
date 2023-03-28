@@ -1,12 +1,11 @@
 import math
 from Parcel import Parcel
 import re
-import urllib.request
+import urllib.parse, urllib.request, os, json
 import sys
 from osgeo import gdal, ogr, osr
-import fiona
+#import fiona
 import geopandas as gpd
-import json
 from shapely.geometry import LinearRing
 
 class Error:
@@ -31,10 +30,9 @@ class Error:
 		self.srcMiss = 0
 		self.netMoreGrsCnt = 0
 		self.recordIterationCount = 0
-		datasource = ogr.GetDriverByName('OpenFileGDB').Open(featureClass, 0)
-		# self.recordTotalCount = datasource.GetLayerCount() # Total number of records in the feature class
-		# self.checkEnvelopeInterval = math.trunc(self.recordTotalCount / 100) # Interval value used to apply 10 total checks on records at evenly spaced intervals throughout the dataset.
-		# self.nextEnvelopeInterval = self.checkEnvelopeInterval
+		self.recordTotalCount = featureClass.GetFeatureCount() # Total number of records in the feature class
+		self.checkEnvelopeInterval = math.trunc(self.recordTotalCount / 100) #Interval value used to apply 10 total checks on records at evenly spaced intervals throughout the dataset.
+		self.nextEnvelopeInterval = self.checkEnvelopeInterval
 		self.notConfirmGeomCount = 0 #counts parcels with invalid Geometry
 		self.validatedGeomCount = 0 #counts parcels whose geometry is validated
 		self.geometryNotValidated = False
@@ -46,14 +44,12 @@ class Error:
 		self.badcharsCount = 0
 		self.uniqueparcelDatePercent = 0.0
 		self.ErrorSum = 0   #sum of generalErrorCount, geometricErrorCount, addressErrorCount, taxErrorCount
-		self.flags_dict = {'numericCheck': 0, 'duplicatedCheck': 0, 'prefixDom': 0, 'streettypeDom': 0, 'unittype': 0, 'placenameDom': 0, 'suffixDom': 0, 'trYear': 0, 'taxrollYr': 0, 'streetnameDom': 0, 'zipCheck': 0, 'cntCheck': 0, 'redundantId': 0, 'postalCheck':0, 'auxPropCheck': 0, 'fairmarketCheck': 0, 'mflvalueCheck': 0, 'auxclassFullyX4': 0, 'cntPropClassCheck': 0, 'matchContrib': 0, 'netvsGross': 0, 'schoolDist': 0 }
+		self.flags_dict = {'numericCheck': 0, 'duplicatedCheck': 0, 'prefixDom': 0, 'streettypeDom': 0, 'unitidtype': 0, 'placenameDom': 0, 'suffixDom': 0, 'trYear': 0, 'taxrollYr': 0, 'streetnameDom': 0, 'zipCheck': 0, 'cntCheck': 0, 'redundantId': 0, 'postalCheck':0, 'auxPropCheck': 0, 'fairmarketCheck': 0, 'mflvalueCheck': 0, 'auxclassFullyX4': 0, 'cntPropClassCheck': 0, 'matchContrib': 0, 'netvsGross': 0, 'schoolDist': 0 }
 
 	# Test records throughout the dataset to ensure that polygons exist within an actual county envelope ("Waukesha" issue or the "Lake Michigan" issue).
 	def checkGeometricQuality(self,Parcel,ignoreList):
-		#arcpy.AddMessage(self.nextEnvelopeInterval)
-		#arcpy.AddMessage(self.recordIterationCount)
 		if self.nextEnvelopeInterval == self.recordIterationCount:
-			if str(Parcel.parcelid).upper() in ignoreList:
+			if str(Parcel.parcelid).upper() in ignoreList:   
 				self.nextEnvelopeInterval = self.nextEnvelopeInterval + 1
 			else:
 				countyEnvelope = self.testCountyEnvelope(Parcel)
@@ -61,39 +57,38 @@ class Error:
 					self.nextEnvelopeInterval = 4000000
 					if self.notConfirmGeomCount > 0:
 						self.xyShift = round((self.diffxy/self.notConfirmGeomCount),2)
-					# arcpy.AddMessage("  Parcel geometry validated.")
+					print("    Parcel geometry validated.")
 					self.geometricPlacementErrors = []
 				elif countyEnvelope == "Not Confirmed" and self.notConfirmGeomCount == 50:
 					self.nextEnvelopeInterval = 4000000
 					self.xyShift = round((self.diffxy/self.notConfirmGeomCount),2)
-					#arcpy.AddMessage("couldn't validate")
+					#print("couldn't validate")
 					if  self.xyShift >= 6:
 						self.geometryNotValidated = True
 					elif self.xyShift >= 1.2 and self.xyShift < 6:
-						# arcpy.AddMessage("\n ")
-						# arcpy.AddMessage("  Parcel geometry validated, but several parcel geometries appear to be spatially misplaced by about: " + str(self.xyShift) + " meters. \n" )
+						# print("\n  Parcel geometry validated, but several parcel geometries appear to be spatially misplaced by about: " + str(self.xyShift) + " meters. \n" )
 						self.geometricPlacementErrors = ["Several parcel geometries appear to be spatially misplaced " + str(self.xyShift) + " meters when comparing them against parcel geometries from last year. This issue is indicative of a re-projection error. Please see the following documentation: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf section #2, for advice on how to project native data to the Statewide Parcel CRS."]
 					else:
-						# arcpy.AddMessage("\n  Parcel geometry validated.")
+						print("\n    Parcel geometry validated.")
 						self.geometricPlacementErrors = []
-						#arcpy.AddMessage("Geometry validated -- but several parcels are misplaced: " + str(self.xyShift) + " meters.")
 				self.nextEnvelopeInterval = self.nextEnvelopeInterval + self.checkEnvelopeInterval
-		elif self.nextEnvelopeInterval < 4000000 and self.nextEnvelopeInterval >= (100 * self.checkEnvelopeInterval):
+		elif self.nextEnvelopeInterval < 4000000 and self.nextEnvelopeInterval >= (100 * self.checkEnvelopeInterval):  #all possible checks
 			if self.validatedGeomCount == 0 and self.notConfirmGeomCount == 0: #no parcel geometry was checked -- likely ParcelIds are different from previous years
-				#arcpy.AddMessage("The PARCELID within the dataset may not match the PARCELID submitted the previous year. \n" )
+				#print("The PARCELID within the dataset may not match the PARCELID submitted the previous year. \n" )
 				self.nextEnvelopeInterval = 4000000
+				print("    Parcel geometry not validated yet.")
 				self.geometryNotChecked = False   # flag for county centroid check funcion
 			elif self.notConfirmGeomCount  > 0:
 				self.nextEnvelopeInterval = 4000000
 				self.xyShift = round((self.diffxy/self.notConfirmGeomCount),2)
-				# arcpy.AddMessage("  Several parcel geometries appear to be spatially misplaced by about: " + str(self.xyShift) + " meters." )
+				# print("  Several parcel geometries appear to be spatially misplaced by about: " + str(self.xyShift) + " meters." )
 				self.geometricPlacementErrors = ["Several parcel geometries appear to be spatially misplaced " + str(self.xyShift) + " meters when comparing them against parcel geometries from last year. This issue is indicative of a re-projection error. Please see the following documentation: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf section #2, for advice on how to project native data to the Statewide Parcel CRS."]
 		self,Parcel = self.testParcelGeometry(Parcel)
 		self.recordIterationCount += 1
 		return (self, Parcel)
 
 	# Will test the row against LTSB's feature service to identify if the feature is in the correct location.
-	def testCountyEnvelope(self,parcel):
+	def testCountyEnvelope(self, Parcel):
 		specialchars = ['/', '#', '&']  #this special characters occurs in some ParcelIDs
 		charsdict = {'&': '%26', '#': '%23', '/': '%2F'}
 		parcelid =  str(Parcel.parcelid).upper()
@@ -106,40 +101,47 @@ class Error:
 			where =  str(Parcel.parcelfips) + parcelid
 			query = "?f=json&where=STATEID+%3D+%27{0}%27&geometry=true&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=OBJECTID%2CPARCELID%2CTAXPARCELID%2CCONAME%2CPARCELSRC&outSR=3071&resultOffset=0&resultRecordCount=10000".format(where)
 			fsURL = baseURL + query
-			#arcpy.AddMessage(fsURL)
-			# fs = arcpy.FeatureSet()
-			# fs.load(fsURL)
-			fp = urllib.request.urlopen(fsURL)
+			#fs.load(fsURL)
+			fp = urllib.request.urlopen(fsURL)			
 			mybytes = fp.read()
+			currFC = mybytes.decode('utf_8')
+			currEsriJSON = json.loads(currFC)
+			fp.close()			
+	 		
+			#centroidXY = LinearRing([tuple(coord) for coord in currGeoJSON['features'][0]['geometry']['rings'][0]]).centroid
+			# convert esriJson to geoJson; select the rings, then make a geojson string to create a ogr.geometry 
+			rings  =  currEsriJSON['features'][0]['geometry']['rings']   #there may be more than two rings in the case of multipolys
+			str_geoJSON = """{"type":"Polygon","coordinates":""" + str(rings) + "}"
+			centroidXY = ogr.CreateGeometryFromJson(str_geoJSON).Centroid()
+			v1x, v1y = tuple ([centroidXY.GetX(), centroidXY.GetY()])
+			#v2x, v2y = LinearRing(tuple(coord) for coord in Parcel.geometry).centroid   
+			geom =  Parcel.shapeXY    ## inFC centroid
+			v2x, v2y = tuple ([geom.GetX(), geom.GetY()])
+			v1x = round(v1x,2)
+			v2x = round(v2x,2)
+			v1y = round(v1y,2)
+			v2y = round(v2y,2)
 
-			currFC = mybytes.decode("utf8")
-			fp.close()
-
-			currGeoJSON = json.loads(currFC)
-
-			# with arcpy.da.UpdateCursor(fs,["SHAPE@XY"]) as cursorLTSB:
-				# for rowLTSB in cursorLTSB:
-					# v2x = round(rowLTSB[0][0],2)
-			v1x, v1y = LinearRing([tuple(coord) for coord in currGeoJSON['features'][0]['geometry']['rings'][0]]).centroid
-			v2x, v2y = LinearRing(tuple(coord) for coord in parcel.geometry).centroid
-			# v1x = round(Parcel.shapeXY[0],2)
-			# v2y = round(rowLTSB[0][1],2)
-			# v1y = round(Parcel.shapeXY[1],2)
 			diffx = v2x - v1x
 			diffy = v2y - v1y
-			if (v2x == v1x) and (v2y == v1y):
+			if diffx == 0 and diffy == 0: #(v2x == v1x) and (v2y == v1y):
 				self.validatedGeomCount += 1
+				diffxy = round(math.sqrt (diffx*diffx + diffy*diffy),2)  #distance btw the two centroid points
+				#print ("\nParcel id  " + str (Parcel.parcelid))
+				#print ( "Validated --- distance  " + str(diffxy))
 				if (self.validatedGeomCount % 10 == 0):
-					# arcpy.AddMessage("  Checking parcel geometry ...\n")
-					pass
+					print("    Checking parcel geometry ...\n")
 				return "Valid"
 			else:
-				diffxy = round(math.sqrt (diffx*diffx + diffy*diffy),2)
+				diffxy = round(math.sqrt (diffx*diffx + diffy*diffy),2)  #distance btw the two centroid points
+				#print ("\nParcel id  " + str (Parcel.parcelid))
+				#print ( "no confirmed --- distance  " + str(diffxy))
 				self.diffxy = self.diffxy + diffxy
 				self.notConfirmGeomCount += 1
 				if (self.notConfirmGeomCount % 10 == 0):
-					# arcpy.AddMessage("  Parcel geometry not validated yet, will attempt another record.")
-					pass
+					print("    Parcel geometry not validated yet, will attempt another record.")
+					#print ("P coord  " + str (v2x) + ", " + str(v2y) + " and O coord " + str (v1x) + ", " + str(v1y) )					
+					#print ( "no confirmed --- distance  " + str(diffxy))
 				return "Not Confirmed"
 				# Call it valid If the query returns no features (failure to return features would not be caused by a misalignment)
 			#  return "Valid"
@@ -151,9 +153,9 @@ class Error:
 	def testParcelGeometry(self,Parcel):
 		# Test for null geometries or other oddities
 		try:
-			geom = Parcel.shape
-			xCent = geom.centroid.X
-			yCent = geom.centroid.Y
+			geom = Parcel.shapeXY
+			xCent = geom.GetX()
+			yCent = geom.GetY()
 		except:
 			Parcel.geometricErrors.append("Corrupt Geometry: The geometry of the feature class could not be accessed.")
 			self.geometricErrorCount += 1
@@ -180,44 +182,46 @@ class Error:
 			var = True
 			shape = True
 			coord = True
-			# desc = arcpy.Describe(featureClass)
-			ds=gdal.Open(featureClass)
-			spatialReference = osr.SpatialReference(wkt=ds.GetProjection())
-			print(spatialReference.name)
+			## Get coordinate reference system
+						
+			crs = featureClass.GetSpatialRef().ExportToWkt().split(",")[0].split("[")[1].replace('"','')
 			# spatialReference = desc.spatialReference
 			# Test for the Polygon feature class against the parcel project's, shape type, projection name, and units.
 			# if desc.shapeType != "Polygon":
-				# Error.geometricFileErrors.append("The feature class should be of polygon type instead of: " + desc.shapeType)
-				# var = False
-				# shape = False
-			if spatialReference.name != "NAD_1983_HARN_Wisconsin_TM":
+
+			geomtype = ogr.GeometryTypeToName(featureClass.GetLayerDefn().GetGeomType())
+			if 	(geomtype != 'Multi Polygon') & (geomtype != 'Polygon'):
+			# Error.geometricFileErrors.append("The feature class should be of polygon type instead of: " + desc.shapeType)
+				var = False
+				shape = False
+			if crs != 'NAD83(HARN) / Wisconsin Transverse Mercator' :   ## "NAD_1983_HARN_Wisconsin_TM":
 				#Error.geometricFileErrors.append("The feature class should be 'NAD_1983_HARN_Wisconsin_TM' instead of: " + spatialReference.name + " Please follow this documentation: http://www.sco.wisc.edu/images/stories/publications/V2/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf to project native data to the Statewide Parcel CRS")
 				var = False
 				coord = False
 			#return Error
 			if var == False:
-				# arcpy.AddMessage("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
-				# arcpy.AddMessage("     IMMEDIATE ERROR REQUIRING ATTENTION")
-				# arcpy.AddMessage("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+				# print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+				# print("     IMMEDIATE ERROR REQUIRING ATTENTION")
+				# print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 				if shape == False:
-					# arcpy.AddMessage("  THE FEATURE CLASS SHOULD BE OF POLYGON TYPE INSTEAD OF: " + desc.shapeType.upper() + "\n")
-					# arcpy.AddMessage("  PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
-					# arcpy.AddMessage("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+					# print("  THE FEATURE CLASS SHOULD BE OF POLYGON TYPE INSTEAD OF: " + geomtype.upper() + "\n")
+					# print("  PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
+					# print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
 					sys.tracebacklimit = 0
-					raise NameError("\n     COORDINATE REFERENCE SYSTEM ERROR")
+					raise NameError("\n     POLYGON GEOMETRY SYSTEM ERROR")
 					#exit()
 				if coord == False:
-					# arcpy.AddMessage("  THE FEATURE CLASS SHOULD BE 'NAD_1983_HARN_Wisconsin_TM' INSTEAD OF: " + spatialReference.name + "\n")
-					# arcpy.AddMessage("  PLEASE FOLLOW THIS DOCUMENTATION: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf TO PROJECT NATIVE DATA TO THE STATEWIDE PARCEL CRS\n")
-					# arcpy.AddMessage("  PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
-					# arcpy.AddMessage("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+					# print("  THE FEATURE CLASS SHOULD BE 'NAD_1983_HARN_Wisconsin_TM' INSTEAD OF: " + spatialReference.name + "\n")
+					# print("  PLEASE FOLLOW THIS DOCUMENTATION: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf TO PROJECT NATIVE DATA TO THE STATEWIDE PARCEL CRS\n")
+					# print("  PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
+					# print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
 					sys.tracebacklimit = 0
 					raise NameError("\n     COORDINATE REFERENCE SYSTEM ERROR")
 					#exit()
 		except: # using generic error handling because we don't know what errors to expect yet.
-			# arcpy.AddMessage("  The coordinate reference system of the feature class could not be validated. Please ensure that the feature class is projected to the Statewide Parcel CRS. This documentation may be of use in projecting the dataset: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf.")
+			# print("  The coordinate reference system of the feature class could not be validated. Please ensure that the feature class is projected to the Statewide Parcel CRS. This documentation may be of use in projecting the dataset: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf.")
 			sys.tracebacklimit = 0
-			raise NameError("\n     COORDINATE REFERENCE SYSTEM ERROR")
+			raise NameError("\n     GEOMETRY/COORDINATE REFERENCE SYSTEM ERROR")
 			#exit()
 
 	#Check if text value is a valid number(Error object, Parcel object, field to test, type of error to classify this as, are <Null>s are considered errors?)
@@ -324,12 +328,12 @@ class Error:
 				if (stringToTest is None):
 					pass
 				elif ( str(stringToTest) in testList) :
-					#arcpy.AddMessage("This value is <Null>... or exists in our list..." + str(stringToTest))
+					#print("This value is <Null>... or exists in our list..." + str(stringToTest))
 					pass
 				else:
 					getattr(Parcel,errorType + "Errors").append("The value in " + field.upper() + " is not in standardized domain list. Please standarize/spell out values for affected records.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					Error.flags_dict['unitidtype'] += 1
+					#Error.flags_dict['unitidtype'] += 1
 
 				return (Error,Parcel)
 			else:
@@ -409,7 +413,7 @@ class Error:
 			probFields = []
 			if taxRollYear is not None:
 				if taxRollYear == acceptYears[2] or taxRollYear == acceptYears[3]:
-					for key, val in taxRollFields.iteritems():
+					for key, val in taxRollFields.items():    #iteritems():
 						if val is not None:
 							probFields.append(key)
 					if len(probFields) > 0:
@@ -547,7 +551,6 @@ class Error:
 				pass
 			elif  (impvalue  is None or float(impvalue) == 0):
 				if (cntassvalue is not None and lndvalue is not None) and (float(cntassvalue) == float(lndvalue)):
-					#arcpy.AddMessage(impvalue)
 					pass
 				elif (cntassvalue is not None and lndvalue is not None) and (float(cntassvalue) != float(lndvalue)):
 					getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " is zero or <Null>. 'CNTASSDVALUE' should be equal to 'LNDVALUE' for this record - please verify.")
@@ -604,7 +607,7 @@ class Error:
 				pass
 			else:
 				if copToTest is None and auxToTest is None:
-					#arcpy.AddMessage( str(year) + " and " + str(acceptYears[1]) )
+					#print( str(year) + " and " + str(acceptYears[1]) )
 					getattr(Parcel,errorType + "Errors").append("The " + propField.upper() + " and " + auxField.upper() + " fields are <Null> and a value is expected for any non-new parcels.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					Error.flags_dict['auxPropCheck'] += 1
@@ -673,15 +676,15 @@ class Error:
 				else:
 					pass
 			#elif estFmkValueTest is not None:
-				if re.search('4', propClassTest) is not None or re.search('5', propClassTest) is not None:
-					getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in ESTFMKVALUE for properties with PROPCLASS values of 4, 5 and 5M. Correct or verify.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				#if re.search('4', propClassTest) is not None or re.search('5', propClassTest) is not None:
+				#	getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in ESTFMKVALUE for properties with PROPCLASS values of 4, 5 and 5M. Correct or verify.")
+				#	setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 
-				if re.search('W', auxClassTest) is not None or re.search('X', auxClassTest) is not None:
-					getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in ESTFMKVALUE for properties with AUXCLASS of (" + str(auxClassTest) + "). Verify value.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-				else:
-					pass
+				#if re.search('W', auxClassTest) is not None or re.search('X', auxClassTest) is not None:
+				#	getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in ESTFMKVALUE for properties with AUXCLASS of (" + str(auxClassTest) + "). Verify value.")
+				#	setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+				#else:
+				#	pass
 				return(Error,Parcel)
 		except:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + propClass.upper() + "  or  " + estFmkValue.upper() + " field. Please inspect the values of these fields.")
@@ -704,7 +707,6 @@ class Error:
 					Error.coNameMiss += 1
 					Error.flags_dict['matchContrib'] += 1
 					Error.badcharsCount  +=1   #for wrong <null> values
-
 
 				elif coNameToTest != Error.coName and (str(Error.coName) != 'OUTAGAMIE' and str( Error.coName) != 'WINNEBAGO' ): 
 					getattr(Parcel,errorType + "Errors").append("The value provided in " + coNamefield.upper() + " field does not match expected county name.")
@@ -810,7 +812,7 @@ class Error:
 
 		return (Error, Parcel)
 
-	def fieldCompleteness(Error,Parcel,fieldList,passList,CompDict):
+	def fieldCompleteness(Error,Parcel,fieldList,passList,CompDict):		
 		for field in fieldList:
 			if field.upper() in passList:
 				pass
@@ -838,9 +840,7 @@ class Error:
 		return(Error)
 
 	#checkSchemaFunction
-	def checkSchema(Error,inFc,schemaType,fieldPassLst):
-		# fieldList = arcpy.ListFields(inFc)
-		fieldList = list(inFc.columns)
+	def checkSchema(Error, inFC,schemaType,fieldPassLst):
 		realFieldList = []
 		fieldDictNames = {}
 		incorrectFields = []
@@ -848,22 +848,32 @@ class Error:
 		missingFields = []
 		var = True
 
-		# arcpy.AddMessage("  Checking for all appropriate fields in " + str(inFc) + "...\n")
+		#print("  Checking for all appropriate fields in " + str(inFc.GetName()) + "...\n")
+		print("\n    Checking for all appropriate fields \n")
 
-		for field in fieldList:
-			fieldDictNames[field.name] = [[field.type],[field.length]]
-
-		#if error fields already exits, delete them
-		for field in fieldList:
-			if field.name == 'GeneralElementErrors':
-				# arcpy.DeleteField_management(inFc, ['GeneralElementErrors','AddressElementErrors','TaxrollElementErrors','GeometricElementErrors'])
-				inFc.drop(columns = ['GeneralElementErrors','AddressElementErrors','TaxrollElementErrors','GeometricElementErrors'])
-
+		### Get the description/definition of the layer i.e., feature class
+		defn = inFC.GetLayerDefn()
+		for i in range (defn.GetFieldCount()):
+			j = defn.GetFieldDefn(i).GetType()
+			fieldDictNames[defn.GetFieldDefn(i).GetName()] =[[defn.GetFieldDefn(i).GetFieldTypeName(j)], [defn.GetFieldDefn(i).GetWidth() ]]  #defn.GetFieldDefn(i).GetPrecision()
+		
+		i = 0
+		while i  < defn.GetFieldCount():
+			#if defn.GetFieldDefn(i).GetName() is not None: 
+			if  str(defn.GetFieldDefn(i).GetName()) in ['GeneralElementErrors','AddressElementErrors','TaxrollElementErrors','GeometricElementErrors']:
+					#print (defn.GetFieldDefn(i).GetName())
+					inFC.DeleteField(i)
+			else:
+				i += 1
+		#print ("=====>>>>\n")
+		#print (fieldDictNames)	
+		#print (schemaType)
 		for field in fieldDictNames:
 			if field.upper() not in fieldPassLst:
 				if field not in schemaType.keys():
 					excessFields.append(field)
 					var = False
+				
 				elif fieldDictNames[field][0][0] not in schemaType[field][0] or fieldDictNames[field][1][0] not in schemaType[field][1]:
 					incorrectFields.append(field)
 					var = False
@@ -871,31 +881,30 @@ class Error:
 					missingFields = [i for i in schemaType.keys() if i not in fieldDictNames.keys()]
 					if len(missingFields) > 0:
 						var = False
-
+		
 		if var == False:
-			# arcpy.AddMessage("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
-			# arcpy.AddMessage("     IMMEDIATE ERROR REQUIRING ATTENTION")
-			# arcpy.AddMessage("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
-			# arcpy.AddMessage("  CERTAIN FIELDS DO NOT MEET THE PARCEL SCHEMA REQUIREMENTS.\n")
+			# print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			# print("     IMMEDIATE ERROR REQUIRING ATTENTION")
+			# print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			print("  CERTAIN FIELDS DO NOT MEET THE PARCEL SCHEMA REQUIREMENTS.\n")
 			if len(incorrectFields) > 0:
-				# arcpy.AddMessage("  THE PROBLEMATIC FIELDS INCLUDE: (" + str(incorrectFields).strip("[").strip("]").replace('u','') + ")\n")
-				# arcpy.AddMessage("  ------->> PLEASE CHECK TO MAKE SURE THE NAMES, DATA TYPES, AND LENGTHS MATCH THE SCHEMA REQUIREMENTS.\n")
+				# print("  THE PROBLEMATIC FIELDS INCLUDE: (" + str(incorrectFields).strip("[").strip("]").replace('u','') + ")\n")
+				print("  ------->> PLEASE CHECK TO MAKE SURE THE NAMES, DATA TYPES, AND LENGTHS MATCH THE SCHEMA REQUIREMENTS.\n")
 				pass
 			if len(excessFields) > 0:
-				# arcpy.AddMessage("  THE EXCESS FIELDS INCLUDE: (" + str(excessFields).strip("[").strip("]").replace('u','') + ")\n")
-				# arcpy.AddMessage("  ------->> PLEASE REMOVED FIELDS THAT ARE NOT IN THE PARCEL ATTRIBUTE SCHEMA.\n")
+				# print("  THE EXCESS FIELDS INCLUDE: (" + str(excessFields).strip("[").strip("]").replace('u','') + ")\n")
+				print("  ------->> PLEASE REMOVED FIELDS THAT ARE NOT IN THE PARCEL ATTRIBUTE SCHEMA.\n")
 				pass
 			if len(missingFields) > 0:
-				# arcpy.AddMessage("  THE MISSING FIELDS INCLUDE: (" + str(missingFields).strip("[").strip("]").replace('u','') + ")\n")
-				# arcpy.AddMessage("  ------->> PLEASE ADD FIELDS THAT ARE NOT IN THE PARCEL ATTRIBUTE SCHEMA.\n")
+				# print("  THE MISSING FIELDS INCLUDE: (" + str(missingFields).strip("[").strip("]").replace('u','') + ")\n")
+				print("  ------->> PLEASE ADD FIELDS THAT ARE NOT IN THE PARCEL ATTRIBUTE SCHEMA.\n")
 				pass
-			# arcpy.AddMessage("  PLEASE MAKE NEEDED ALTERATIONS TO THESE FIELDS AND RUN THE TOOL AGAIN.\n")
-			# arcpy.AddMessage("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+			print("  PLEASE MAKE NEEDED ALTERATIONS TO THESE FIELDS AND RUN THE TOOL AGAIN.\n")
+			# print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
 			#exit()
 			sys.tracebacklimit = 0
 			raise NameError("\n     PARCEL SCHEMA ERROR")
-  
-
+				
 	#check for valid postal address   ('CANULL' not in address or 'NULL BLVD' not in address ) or
 	def postalCheck (Error,Parcel,PostalAd,errorType,ignoreList,taxYear,pinField,badPstladdSet, acceptYears):
 		nullList = ["<Null>", "<NULL>", "NULL", ""]
@@ -919,11 +928,10 @@ class Error:
 						if ('CANULL'  in address or 'NULL BLVD'  in address ):
 							pass
 
-						elif ('UNAVAILABLE' in address or 'ADDRESS' in address or 'ADDDRESS' in address or 'UNKNOWN' in address or ' 00000' in address or 'NULL' in address or  ('NONE' in address and 'HONONEGAH' not in address) or 'MAIL EXEMPT' in address or 'TAX EX' in address or 'UNASSIGNED' in address or 'N/A' in address) or(address in badPstladdSet) or any(x.islower() for x in address):
+						elif ('UNAVAILABLE' in address or 'ADDRESS' in address or 'ADDDRESS' in address or 'UNKNOWN' in address or ' 00000' in address or '-0000' in address or 'NULL' in address or  ('NONE' in address and 'HONONEGAH' not in address) or 'MAIL EXEMPT' in address or 'TAX EX' in address or 'UNASSIGNED' in address or 'N/A' in address) or(address in badPstladdSet) or any(x.islower() for x in address):
 							getattr(Parcel,errorType + "Errors").append("A value provided in the " + PostalAd.upper() + " field may contain an incomplete address. Please verify the value is correct or set to <Null> if complete address is unknown.")
 							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 							Error.flags_dict['postalCheck'] += 1
-
 						else:
 							pass
 			return(Error,Parcel)
@@ -935,11 +943,11 @@ class Error:
 	#totError = Error.checkBadChars (totError )
 	def checkBadChars(Error):
 		if Error.badcharsCount >= 100:
-			# arcpy.AddMessage("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
-			# arcpy.AddMessage("  THERE ARE AT LEAST 100 INSTANCES OF THE STRINGS '<Null>', \'NULL\', BLANKS AND/OR LOWER CASE CHARACTERS WITHIN THE ATTRIBUTE TABLE. \n")
-			# arcpy.AddMessage("  RUN THE \"NULL FIELDS AND SET THE UPPERCASE TOOL\" AVAILABLE HERE: https://www.sco.wisc.edu/parcels/tools \n")
-			# arcpy.AddMessage("  ONCE COMPLETE, RUN VALIDATION TOOL AGAIN.\n")
-			# arcpy.AddMessage("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+			print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			print("  THERE ARE AT LEAST 100 INSTANCES OF THE STRINGS '<Null>', \'NULL\', BLANKS AND/OR LOWER CASE CHARACTERS WITHIN THE ATTRIBUTE TABLE. \n")
+			print("  RUN THE \"NULL FIELDS AND SET THE UPPERCASE TOOL\" AVAILABLE HERE: https://www.sco.wisc.edu/parcels/tools \n")
+			print("  ONCE COMPLETE, RUN VALIDATION TOOL AGAIN.\n")
+			print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
 			sys.tracebacklimit = 0
 			raise NameError("\n     INSTANCES OF  '<Null>', \'NULL\', STRINGS IN FEATURE CLASS")
 			#exit()
@@ -1025,8 +1033,8 @@ class Error:
 
 			probFields = []
 			if auxclass is not None:
-				if auxclass == 'X4' and propclass is None:
-					for key, val in taxRollFields.iteritems():
+				if auxclass == 'X4' and propclass is None:					
+					for key, val in taxRollFields.items():    #iteritems():
 						if val is not None:
 							probFields.append(key)
 					if len(probFields) > 0:
@@ -1123,7 +1131,7 @@ class Error:
 					#Error.flags_dict['cntPropClassCheck'] += 1
 
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the TAXROLLVALUE field.  Please inspect the <Null> value provided in PROPCLASS.")
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the NETPRPTA/GRSPRPTA field(s).  Please inspect the <Null> value provided in PROPCLASS.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
@@ -1151,43 +1159,26 @@ class Error:
 
 	# What does this function do?
 	# def checkCodedDomains(Error,featureClass):
-	# 	subtypes = arcpy.da.ListSubtypes(featureClass)
-	# 	for stcode, stdict in list(subtypes.items()):
-	#		for stkey in list(stdict.keys()):
-	#			if stkey == 'FieldValues':
-	#				fields = stdict[stkey]
-	#				for field, fieldvals in list(fields.items()):
-	#					if fieldvals[1] is not None:
-	#						Error.codedDomainfields.append(field)
 	#	return Error
 
 	#backup geom check function for 100 no parcelid matches...
 	def ctyExtentCentCheck(self, infc, centroidDict):
 		coname = self.coName
-		# describeFc = arcpy.Describe(infc)
-		# xMin = describeFc.extent.XMin
-		# xMax = describeFc.extent.XMax
-		# yMin = describeFc.extent.YMin
-		# yMax = describeFc.extent.YMax
-
-		inFCGeom = infc['geometry']
-		xMin = min(inFCGeom, key = lambda point: point[0])
-		xMax = max(inFCGeom, key = lambda point: point[0])
-		yMin = min(inFCGeom, key = lambda point: point[1])
-		yMax = max(inFCGeom, key = lambda point: point[1])
-
+		print ('   in centroid function')
+	
+		xMin, xMax, yMin, yMax = infc.GetExtent()
 		iNxMid = xMin + ((xMax - xMin)/2)
 		iNyMid = yMin + ((yMax - yMin)/2)
 
 		if (centroidDict[coname][0] - 100) <= round(iNxMid,0) <= (centroidDict[coname][0] + 100) and (centroidDict[coname][1] - 100) <= round(iNyMid,0) <= (centroidDict[coname][1] + 100):
-			pass
+			print("  THE GEOMETRY OF THIS FEATURE CLASS WAS VALIDATED.  \n")
 		else:
-			# arcpy.AddMessage("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
-			# arcpy.AddMessage("  THE GEOMETRY OF THIS FEATURE CLASS WAS NOT VALIDATED.  \n")
-			# arcpy.AddMessage("  THIS ISSUE CAN BE INDICATIVE OF A RE-PROJECTION ERROR. \n ")
-			# arcpy.AddMessage("  REMINDER: YOUR DATA SHOULD BE RE-PROJECTED TO NAD_1983_HARN_Wisconsin_TM (Meters) PRIOR TO LOADING DATA INTO THE TEMPLATE FEATURE CLASS.\n")
-			# arcpy.AddMessage("  PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
-			# arcpy.AddMessage("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+			# print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			print("  THE GEOMETRY OF THIS FEATURE CLASS WAS NOT VALIDATED.  \n")
+			# print("  THIS ISSUE CAN BE INDICATIVE OF A RE-PROJECTION ERROR. \n ")
+			# print("  REMINDER: YOUR DATA SHOULD BE RE-PROJECTED TO NAD_1983_HARN_Wisconsin_TM (Meters) PRIOR TO LOADING DATA INTO THE TEMPLATE FEATURE CLASS.\n")
+			# print("  PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
+			# print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
 			sys.tracebacklimit = 0
 			raise NameError("\n     GEOMETRY OF FEATURE CLASS NOT VALIDATED")
 			#exit()
@@ -1212,13 +1203,13 @@ class Error:
 
 	#checking strings for unacceptable chars including /n, /r, etc...
 	def reallyBadChars(Error,Parcel,fieldNamesList,charDict,errorType):
-		# arcpy.AddMessage("  Testing reallyBadChars()")
-		# arcpy.AddMessage("  " + str(getattr(Parcel,"ownernme1"))) # The most explicit way of accessing an attribute on parcel. We use the below example as a way of making the functions more flexible - with this strategy, they can test different character lists against different fields.
-		# arcpy.AddMessage("  " + str(getattr(Parcel,fieldNamesList[7].lower()))) # externalDicts.py/fieldNames is passed as fieldNamesList for this function (ownername1 is in the 8th position)
-		# arcpy.AddMessage("  " + str(Parcel.ownernme1)) # The another explicit way of accessing an attribute on parcel
+		# print("  Testing reallyBadChars()")
+		# print("  " + str(getattr(Parcel,"ownernme1"))) # The most explicit way of accessing an attribute on parcel. We use the below example as a way of making the functions more flexible - with this strategy, they can test different character lists against different fields.
+		# print("  " + str(getattr(Parcel,fieldNamesList[7].lower()))) # externalDicts.py/fieldNames is passed as fieldNamesList for this function (ownername1 is in the 8th position)
+		# print("  " + str(Parcel.ownernme1)) # The another explicit way of accessing an attribute on parcel
 		try:
 			for f in fieldNamesList:
-				#arcpy.AddMessage(str(getattr(Parcel,f.lower()))) # similar to the above, access the attribute value of the fieldname "f"
+				#print(str(getattr(Parcel,f.lower()))) # similar to the above, access the attribute value of the fieldname "f"
 				if f in charDict:
 					testRegex = str(charDict[f]).replace(",",'').replace("'","").replace('"','').replace(" ","")
 					stringToTest = str(getattr(Parcel,f.lower()))
@@ -1236,26 +1227,26 @@ class Error:
 	# TODO: change so that it actually chekcs version or gives option for open source or old closed version
 	def versionCheck(inVersion):
 		# try:
-		# arcpy.AddMessage('  Checking Tool Version...\n')
+		# print('  Checking Tool Version...\n')
 		# self.message_t.insert(END, 'Checking Tool Version...\n' )
 		currVersion = urllib.request.urlopen('http://www.sco.wisc.edu/parcels/tools/Validation/validation_version.txt').read().decode("utf8")
-		print(currVersion, inVersion)
+		# print(  inVersion)
 		if inVersion == currVersion:
-			# arcpy.AddMessage('  Tool up to date.\n')
-			print("")
+			print("\n\n    Tool up to date.\n")
+			print("    "+ str(inVersion) + "\n")
 		else:
-			# arcpy.AddMessage("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-			# arcpy.AddMessage("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-			# arcpy.AddMessage("  !!!!!!!!!!Error tool not up to date!!!!!!!!!!")
-			# arcpy.AddMessage("  Please download the latest version of the tool at")
-			# arcpy.AddMessage("  http://www.sco.wisc.edu/parcels/tools/")
-			# arcpy.AddMessage("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-			# arcpy.AddMessage("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+			# print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+			# print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+			# print("  !!!!!!!!!!Error tool not up to date!!!!!!!!!!")
+			# print("  Please download the latest version of the tool at")
+			# print("  http://www.sco.wisc.edu/parcels/tools/")
+			# print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+			# print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
 			#exit()
 			sys.tracebacklimit = 0
 			raise NameError("\n     TOOL VERSION ERROR")
 
 		# except Exception:
-			# arcpy.AddMessage("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-			# arcpy.AddMessage("Check the change log at http://www.sco.wisc.edu/parcels/tools/")
-			# arcpy.AddMessage("to make sure the latest version of the tool is installed before submitting")
+			# print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+			# print("Check the change log at http://www.sco.wisc.edu/parcels/tools/")
+			# print("to make sure the latest version of the tool is installed before submitting")

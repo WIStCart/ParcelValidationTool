@@ -3,7 +3,8 @@ from Parcel import Parcel
 from LegacyCountyStats import *
 import json
 import webbrowser
-# from .ConfigParser import ConfigParser
+#from .ConfigParser import ConfigParser
+import configparser
 import os
 import sys
 from osgeo import ogr
@@ -13,7 +14,13 @@ class Summary:
 	def __init__(self):
 		pass #placeholder
 
-	def writeSummaryTxt(Summary,outDirTxt,outName,totError,outPage,outJSON):
+		'''
+		print (outSummaryDir)
+		print (outSummaryPage)
+		print (outSummaryJSON)
+		'''
+
+	def writeSummaryTxt(self,outDirTxt,outName,totError,outPage,outJSON):
 		try:
 			Validation_JSON = {
 				'County_Info':{
@@ -71,7 +78,6 @@ class Summary:
 					'ZIP4':  str(totError.comparisonDict["ZIP4"]),
 					'SCHOOLDIST':  str(totError.comparisonDict["SCHOOLDIST"]),
 					'SCHOOLDISTNO':  str(totError.comparisonDict["SCHOOLDISTNO"]),
-					#'IMPROVED':  str(totError.comparisonDict["IMPROVED"]),
 					'CNTASSDVALUE':  str(totError.comparisonDict["CNTASSDVALUE"]),
 					'LNDVALUE':  str(totError.comparisonDict["LNDVALUE"]),
 					'IMPVALUE':  str(totError.comparisonDict["IMPVALUE"]),
@@ -89,120 +95,119 @@ class Summary:
 					'PARCELSRC':  str(totError.comparisonDict["PARCELSRC"])
 					}
 			}
-			Summary.errorSummaryFile = open(outDirTxt + "/" + outName + "_ValidationSummary.txt","w")
+			self.errorSummaryFile = open(outDirTxt + "/" + outName + "_ValidationSummary.txt","w")
 			("Creating Validation Summary here: " + outDirTxt + "/" + outName + "_ValidationSummary.txt")
-			Summary.errorSummaryFile.write(outDirTxt + "\\" + outName + "_ValidationSummary.txt" + "\n")
-			Summary.errorSummaryFile.write("Validation Summary Table: " + "\n")
-			Summary.errorSummaryFile.write("This validation summary table contains an overview of any errors found by the Parcel Validation Tool. Please review the contents of this file and make changes to your parcel dataset as necessary." + "\n\n")
-			Summary.errorSummaryFile.write("************************************************************************\n")
-			Summary.errorSummaryFile.write("* In-line errors\n")
-			Summary.errorSummaryFile.write("************************************************************************\n")
-			Summary.errorSummaryFile.write("The following lines summarized the element-specific errors that were found while validating your parcel dataset.  The stats below are meant as a means of reviewing the output.  Please see the GeneralElementErrors, AddressElementErrors, TaxrollElementErrors, and GeometricElementErrors fields to address these errors individually.\n")
-			Summary.errorSummaryFile.write("	General Errors: " + str(totError.generalErrorCount) + "\n")
-			Summary.errorSummaryFile.write("	Geometric Errors: " + str(totError.geometricErrorCount) + "\n")
-			Summary.errorSummaryFile.write("	Address Errors: " + str(totError.addressErrorCount) + "\n")
-			Summary.errorSummaryFile.write("	Tax Errors: " + str(totError.taxErrorCount) + "\n")
-			Summary.errorSummaryFile.write("	------------------\n")
-			Summary.errorSummaryFile.write("	ERROR SUM: " + str(totError.ErrorSum ) + "\n")
+			self.errorSummaryFile.write(outDirTxt + "\\" + outName + "_ValidationSummary.txt" + "\n")
+			self.errorSummaryFile.write("Validation Summary Table: " + "\n")
+			self.errorSummaryFile.write("This validation summary table contains an overview of any errors found by the Parcel Validation Tool. Please review the contents of this file and make changes to your parcel dataset as necessary." + "\n\n")
+			self.errorSummaryFile.write("************************************************************************\n")
+			self.errorSummaryFile.write("* In-line errors\n")
+			self.errorSummaryFile.write("************************************************************************\n")
+			self.errorSummaryFile.write("The following lines summarized the element-specific errors that were found while validating your parcel dataset.  The stats below are meant as a means of reviewing the output.  Please see the GeneralElementErrors, AddressElementErrors, TaxrollElementErrors, and GeometricElementErrors fields to address these errors individually.\n")
+			self.errorSummaryFile.write("	General Errors: " + str(totError.generalErrorCount) + "\n")
+			self.errorSummaryFile.write("	Geometric Errors: " + str(totError.geometricErrorCount) + "\n")
+			self.errorSummaryFile.write("	Address Errors: " + str(totError.addressErrorCount) + "\n")
+			self.errorSummaryFile.write("	Tax Errors: " + str(totError.taxErrorCount) + "\n")
+			self.errorSummaryFile.write("	------------------\n")
+			self.errorSummaryFile.write("	ERROR SUM: " + str(totError.ErrorSum ) + "\n")
 			if totError.ErrorSum == 0:
-				Summary.errorSummaryFile.write("\n	GREAT JOB, NO ERRORS!!!!!! \n")
-			Summary.errorSummaryFile.write("\n\n")
-			Summary.errorSummaryFile.write("************************************************************************\n")
-			Summary.errorSummaryFile.write("* Uniform ParcelDate:\n")
-			Summary.errorSummaryFile.write("************************************************************************\n")
-			if totError.uniqueparcelDatePercent >= 97.0:
-				Summary.errorSummaryFile.write( str(round (totError.uniqueparcelDatePercent,2)) + "% of all records contain the same PARCELDATE value\n")
-				Summary.errorSummaryFile.write("Review submission documentation and set <Null> if necessary.\n\n")
-			Summary.errorSummaryFile.write("************************************************************************\n")
-			Summary.errorSummaryFile.write("* Broad-level errors:\n")
-			Summary.errorSummaryFile.write("************************************************************************\n")
-			Summary.errorSummaryFile.write("The following lines explain any broad geometric errors that were found while validating your parcel dataset."+ "\n")
+				self.errorSummaryFile.write("\n	GREAT JOB, NO ERRORS!!!!!! \n")
+			self.errorSummaryFile.write("\n\n")
+			self.errorSummaryFile.write("************************************************************************\n")
+			self.errorSummaryFile.write("* Uniform ParcelDate:\n")
+			self.errorSummaryFile.write("************************************************************************\n")
+			if totError.uniqueparcelDatePercent >= 25.0:
+				self.errorSummaryFile.write( str(round (totError.uniqueparcelDatePercent,2)) + "% of all records contain the same PARCELDATE value\n")
+				self.errorSummaryFile.write("Review submission documentation and set <Null> if necessary.\n\n")
+			self.errorSummaryFile.write("************************************************************************\n")
+			self.errorSummaryFile.write("* Broad-level errors:\n")
+			self.errorSummaryFile.write("************************************************************************\n")
+			self.errorSummaryFile.write("The following lines explain any broad geometric errors that were found while validating your parcel dataset."+ "\n")
 			if len(totError.geometricPlacementErrors) != 0:
 				for geometricErrorMessage in totError.geometricPlacementErrors:
-					Summary.errorSummaryFile.write("	Geometric Misplacement Flag: " + str(geometricErrorMessage) + "\n")
+					self.errorSummaryFile.write("	Geometric Misplacement Flag: " + str(geometricErrorMessage) + "\n")
 					Validation_JSON["broadLevelErrors"]['Geometric_Misplacement_Flag'].append(str(geometricErrorMessage))
 			if len(totError.geometricFileErrors) != 0:
 				for geometricErrorMessage in totError.geometricFileErrors:
-					Summary.errorSummaryFile.write("	Geometric File Error: " + str(geometricErrorMessage) + "\n")
+					self.errorSummaryFile.write("	Geometric File Error: " + str(geometricErrorMessage) + "\n")
 					Validation_JSON["broadLevelErrors"]['Geometric_File_Error'].append(str(geometricErrorMessage))
 			if (len(totError.geometricFileErrors) == 0) and (len(totError.geometricPlacementErrors) == 0):
-				Summary.errorSummaryFile.write("	*No broad-level geometric errors found!" + "\n")
+				self.errorSummaryFile.write("	*No broad-level geometric errors found!" + "\n")
 				Validation_JSON["broadLevelErrors"]['Geometric_File_Error'].append("None")
 				Validation_JSON["broadLevelErrors"]['Geometric_Misplacement_Flag'].append("None")
-			Summary.errorSummaryFile.write("\n\n")
-			Summary.errorSummaryFile.write("Percentage of records with various Taxroll Years" + "\n")
-			Summary.errorSummaryFile.write("	Previous Taxroll Year: " + str(round((float(totError.trYearPast / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2)) + "%\n")
-			Summary.errorSummaryFile.write("	Expected Taxroll Year: " + str(round((float(totError.trYearExpected / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2)) + "%\n")
-			Summary.errorSummaryFile.write("	Future Taxroll Years: " + str(round((float(totError.trYearFuture / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2)) + "%\n")
-			Summary.errorSummaryFile.write("	Other Taxroll Years: " + str(round((float(totError.trYearOther / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2)) + "%\n")
-			Summary.errorSummaryFile.write("\n\n")
-			Summary.errorSummaryFile.write("Records missing CONAME, PARCELFIPS, or PARCELSOURCE" + "\n")
-			Summary.errorSummaryFile.write("	Missing CONAME: " + str(totError.coNameMiss) + "\n")
-			Summary.errorSummaryFile.write("	Missing PARCELFIPS: " + str(totError.fipsMiss) + "\n")
-			Summary.errorSummaryFile.write("	Missing PARCELSRC: " + str(totError.srcMiss) + "\n\n")
-			Summary.errorSummaryFile.write("If any of the above values are greater than 0, please add missing values.  These 3 fields should be populated for all records submitted.\n\n\n")
-			Summary.errorSummaryFile.write("BELOW IS A COMPARISON OF COMPLETENESS VALUES FROM YOUR PREVIOUS PARCEL SUBMISSION AND THIS CURRENT SUBMISSION.\n")
-			Summary.errorSummaryFile.write("-->If the value shown is a seemingly large negative number, please verify that all data was joined correctly and no data was lost during processing.\n")
-			Summary.errorSummaryFile.write("-->Note: This does not necessarily mean your data is incorrect, we just want to highlight large discrepancies that could indicate missing or incorrect data.\n\n")
-			Summary.errorSummaryFile.write("          FIELD     DIFFERENCE\n")
-			Summary.errorSummaryFile.write("         ------     ----------\n")
-			Summary.errorSummaryFile.write("       PARCELID:  " + str(totError.comparisonDict["PARCELID"]) + '\n')
-			Summary.errorSummaryFile.write("    TAXPARCELID:  " + str(totError.comparisonDict["TAXPARCELID"]) + '\n')
-			Summary.errorSummaryFile.write("     PARCELDATE:  " + str(totError.comparisonDict["PARCELDATE"]) + '\n')
-			Summary.errorSummaryFile.write("    TAXROLLYEAR:  " + str(totError.comparisonDict["TAXROLLYEAR"]) + '\n')
-			Summary.errorSummaryFile.write("      OWNERNME1:  " + str(totError.comparisonDict["OWNERNME1"]) + '\n')
-			Summary.errorSummaryFile.write("      OWNERNME2:  " + str(totError.comparisonDict["OWNERNME2"]) + '\n')
-			Summary.errorSummaryFile.write("     PSTLADRESS:  " + str(totError.comparisonDict["PSTLADRESS"]) + '\n')
-			Summary.errorSummaryFile.write("     SITEADRESS:  " + str(totError.comparisonDict["SITEADRESS"]) + '\n')
-			Summary.errorSummaryFile.write("   ADDNUMPREFIX:  " + str(totError.comparisonDict["ADDNUMPREFIX"]) + '\n')
-			Summary.errorSummaryFile.write("         ADDNUM:  " + str(totError.comparisonDict["ADDNUM"]) + '\n')
-			Summary.errorSummaryFile.write("   ADDNUMSUFFIX:  " + str(totError.comparisonDict["ADDNUMSUFFIX"]) + '\n')
-			Summary.errorSummaryFile.write("         PREFIX:  " + str(totError.comparisonDict["PREFIX"]) + '\n')
-			Summary.errorSummaryFile.write("     STREETNAME:  " + str(totError.comparisonDict["STREETNAME"]) + '\n')
-			Summary.errorSummaryFile.write("     STREETTYPE:  " + str(totError.comparisonDict["STREETTYPE"]) + '\n')
-			Summary.errorSummaryFile.write("         SUFFIX:  " + str(totError.comparisonDict["SUFFIX"]) + '\n')
-			Summary.errorSummaryFile.write("   LANDMARKNAME:  " + str(totError.comparisonDict["LANDMARKNAME"]) + '\n')
-			Summary.errorSummaryFile.write("       UNITTYPE:  " + str(totError.comparisonDict["UNITTYPE"]) + '\n')
-			Summary.errorSummaryFile.write("         UNITID:  " + str(totError.comparisonDict["UNITID"]) + '\n')
-			Summary.errorSummaryFile.write("      PLACENAME:  " + str(totError.comparisonDict["PLACENAME"]) + '\n')
-			Summary.errorSummaryFile.write("        ZIPCODE:  " + str(totError.comparisonDict["ZIPCODE"]) + '\n')
-			Summary.errorSummaryFile.write("           ZIP4:  " + str(totError.comparisonDict["ZIP4"]) + '\n')
-			Summary.errorSummaryFile.write("     SCHOOLDIST:  " + str(totError.comparisonDict["SCHOOLDIST"]) + '\n')
-			Summary.errorSummaryFile.write("   SCHOOLDISTNO:  " + str(totError.comparisonDict["SCHOOLDISTNO"]) + '\n')
-			#Summary.errorSummaryFile.write("       IMPROVED:  " + str(totError.comparisonDict["IMPROVED"]) + '\n')
-			Summary.errorSummaryFile.write("   CNTASSDVALUE:  " + str(totError.comparisonDict["CNTASSDVALUE"]) + '\n')
-			Summary.errorSummaryFile.write("       LNDVALUE:  " + str(totError.comparisonDict["LNDVALUE"]) + '\n')
-			Summary.errorSummaryFile.write("       IMPVALUE:  " + str(totError.comparisonDict["IMPVALUE"]) + '\n')
-			Summary.errorSummaryFile.write("       MFLVALUE:  " + str(totError.comparisonDict["MFLVALUE"]) + '\n')
-			Summary.errorSummaryFile.write("    ESTFMKVALUE:  " + str(totError.comparisonDict["ESTFMKVALUE"]) + '\n')
-			Summary.errorSummaryFile.write("       NETPRPTA:  " + str(totError.comparisonDict["NETPRPTA"]) + '\n')
-			Summary.errorSummaryFile.write("       GRSPRPTA:  " + str(totError.comparisonDict["GRSPRPTA"]) + '\n')
-			Summary.errorSummaryFile.write("      PROPCLASS:  " + str(totError.comparisonDict["PROPCLASS"]) + '\n')
-			Summary.errorSummaryFile.write("       AUXCLASS:  " + str(totError.comparisonDict["AUXCLASS"]) + '\n')
-			Summary.errorSummaryFile.write("      ASSDACRES:  " + str(totError.comparisonDict["ASSDACRES"]) + '\n')
-			Summary.errorSummaryFile.write("      DEEDACRES:  " + str(totError.comparisonDict["DEEDACRES"]) + '\n')
-			Summary.errorSummaryFile.write("       GISACRES:  " + str(totError.comparisonDict["GISACRES"]) + '\n')
-			Summary.errorSummaryFile.write("         CONAME:  " + str(totError.comparisonDict["CONAME"]) + '\n')
-			Summary.errorSummaryFile.write("     PARCELFIPS:  " + str(totError.comparisonDict["PARCELFIPS"]) + '\n')
-			Summary.errorSummaryFile.write("      PARCELSRC:  " + str(totError.comparisonDict["PARCELSRC"]) + '\n')
-			Summary.errorSummaryFile.write("\n\n\n* Within: " + outDirTxt + "\\" + outName  + "\n")
-			Summary.errorSummaryFile.write("************************************************************************\n")
-			Summary.errorSummaryFile.close()
+			self.errorSummaryFile.write("\n\n")
+			self.errorSummaryFile.write("Percentage of records with various Taxroll Years" + "\n")
+			self.errorSummaryFile.write("	Previous Taxroll Year: " + str(round((float(totError.trYearPast / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2)) + "%\n")
+			self.errorSummaryFile.write("	Expected Taxroll Year: " + str(round((float(totError.trYearExpected / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2)) + "%\n")
+			self.errorSummaryFile.write("	Future Taxroll Years: " + str(round((float(totError.trYearFuture / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2)) + "%\n")
+			self.errorSummaryFile.write("	Other Taxroll Years: " + str(round((float(totError.trYearOther / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2)) + "%\n")
+			self.errorSummaryFile.write("\n\n")
+			self.errorSummaryFile.write("Records missing CONAME, PARCELFIPS, or PARCELSOURCE" + "\n")
+			self.errorSummaryFile.write("	Missing CONAME: " + str(totError.coNameMiss) + "\n")
+			self.errorSummaryFile.write("	Missing PARCELFIPS: " + str(totError.fipsMiss) + "\n")
+			self.errorSummaryFile.write("	Missing PARCELSRC: " + str(totError.srcMiss) + "\n\n")
+			self.errorSummaryFile.write("If any of the above values are greater than 0, please add missing values.  These 3 fields should be populated for all records submitted.\n\n\n")
+			self.errorSummaryFile.write("BELOW IS A COMPARISON OF COMPLETENESS VALUES FROM YOUR PREVIOUS PARCEL SUBMISSION AND THIS CURRENT SUBMISSION.\n")
+			self.errorSummaryFile.write("-->If the value shown is a seemingly large negative number, please verify that all data was joined correctly and no data was lost during processing.\n")
+			self.errorSummaryFile.write("-->Note: This does not necessarily mean your data is incorrect, we just want to highlight large discrepancies that could indicate missing or incorrect data.\n\n")
+			self.errorSummaryFile.write("          FIELD     DIFFERENCE\n")
+			self.errorSummaryFile.write("         ------     ----------\n")
+			self.errorSummaryFile.write("       PARCELID:  " + str(totError.comparisonDict["PARCELID"]) + '\n')
+			self.errorSummaryFile.write("    TAXPARCELID:  " + str(totError.comparisonDict["TAXPARCELID"]) + '\n')
+			self.errorSummaryFile.write("     PARCELDATE:  " + str(totError.comparisonDict["PARCELDATE"]) + '\n')
+			self.errorSummaryFile.write("    TAXROLLYEAR:  " + str(totError.comparisonDict["TAXROLLYEAR"]) + '\n')
+			self.errorSummaryFile.write("      OWNERNME1:  " + str(totError.comparisonDict["OWNERNME1"]) + '\n')
+			self.errorSummaryFile.write("      OWNERNME2:  " + str(totError.comparisonDict["OWNERNME2"]) + '\n')
+			self.errorSummaryFile.write("     PSTLADRESS:  " + str(totError.comparisonDict["PSTLADRESS"]) + '\n')
+			self.errorSummaryFile.write("     SITEADRESS:  " + str(totError.comparisonDict["SITEADRESS"]) + '\n')
+			self.errorSummaryFile.write("   ADDNUMPREFIX:  " + str(totError.comparisonDict["ADDNUMPREFIX"]) + '\n')
+			self.errorSummaryFile.write("         ADDNUM:  " + str(totError.comparisonDict["ADDNUM"]) + '\n')
+			self.errorSummaryFile.write("   ADDNUMSUFFIX:  " + str(totError.comparisonDict["ADDNUMSUFFIX"]) + '\n')
+			self.errorSummaryFile.write("         PREFIX:  " + str(totError.comparisonDict["PREFIX"]) + '\n')
+			self.errorSummaryFile.write("     STREETNAME:  " + str(totError.comparisonDict["STREETNAME"]) + '\n')
+			self.errorSummaryFile.write("     STREETTYPE:  " + str(totError.comparisonDict["STREETTYPE"]) + '\n')
+			self.errorSummaryFile.write("         SUFFIX:  " + str(totError.comparisonDict["SUFFIX"]) + '\n')
+			self.errorSummaryFile.write("   LANDMARKNAME:  " + str(totError.comparisonDict["LANDMARKNAME"]) + '\n')
+			self.errorSummaryFile.write("       UNITTYPE:  " + str(totError.comparisonDict["UNITTYPE"]) + '\n')
+			self.errorSummaryFile.write("         UNITID:  " + str(totError.comparisonDict["UNITID"]) + '\n')
+			self.errorSummaryFile.write("      PLACENAME:  " + str(totError.comparisonDict["PLACENAME"]) + '\n')
+			self.errorSummaryFile.write("        ZIPCODE:  " + str(totError.comparisonDict["ZIPCODE"]) + '\n')
+			self.errorSummaryFile.write("           ZIP4:  " + str(totError.comparisonDict["ZIP4"]) + '\n')
+			self.errorSummaryFile.write("     SCHOOLDIST:  " + str(totError.comparisonDict["SCHOOLDIST"]) + '\n')
+			self.errorSummaryFile.write("   SCHOOLDISTNO:  " + str(totError.comparisonDict["SCHOOLDISTNO"]) + '\n')
+			self.errorSummaryFile.write("   CNTASSDVALUE:  " + str(totError.comparisonDict["CNTASSDVALUE"]) + '\n')
+			self.errorSummaryFile.write("       LNDVALUE:  " + str(totError.comparisonDict["LNDVALUE"]) + '\n')
+			self.errorSummaryFile.write("       IMPVALUE:  " + str(totError.comparisonDict["IMPVALUE"]) + '\n')
+			self.errorSummaryFile.write("       MFLVALUE:  " + str(totError.comparisonDict["MFLVALUE"]) + '\n')
+			self.errorSummaryFile.write("    ESTFMKVALUE:  " + str(totError.comparisonDict["ESTFMKVALUE"]) + '\n')
+			self.errorSummaryFile.write("       NETPRPTA:  " + str(totError.comparisonDict["NETPRPTA"]) + '\n')
+			self.errorSummaryFile.write("       GRSPRPTA:  " + str(totError.comparisonDict["GRSPRPTA"]) + '\n')
+			self.errorSummaryFile.write("      PROPCLASS:  " + str(totError.comparisonDict["PROPCLASS"]) + '\n')
+			self.errorSummaryFile.write("       AUXCLASS:  " + str(totError.comparisonDict["AUXCLASS"]) + '\n')
+			self.errorSummaryFile.write("      ASSDACRES:  " + str(totError.comparisonDict["ASSDACRES"]) + '\n')
+			self.errorSummaryFile.write("      DEEDACRES:  " + str(totError.comparisonDict["DEEDACRES"]) + '\n')
+			self.errorSummaryFile.write("       GISACRES:  " + str(totError.comparisonDict["GISACRES"]) + '\n')
+			self.errorSummaryFile.write("         CONAME:  " + str(totError.comparisonDict["CONAME"]) + '\n')
+			self.errorSummaryFile.write("     PARCELFIPS:  " + str(totError.comparisonDict["PARCELFIPS"]) + '\n')
+			self.errorSummaryFile.write("      PARCELSRC:  " + str(totError.comparisonDict["PARCELSRC"]) + '\n')
+			self.errorSummaryFile.write("\n\n\n* Within: " + outDirTxt + "\\" + outName  + "\n")
+			self.errorSummaryFile.write("************************************************************************\n")
+			self.errorSummaryFile.close()
 			# outJSON - # full (hard coded) path to the output .json file summary.js
 			with open(outJSON, 'w') as outfile:
 				outfile.write("var testValues = ")
 				json.dump(Validation_JSON, outfile)
 		except Exception as e:
-			# arcpy.AddMessage("  !!!!!!!!!!Error writing summary file!!!!!!!!!!")
-			# arcpy.AddMessage(str(e))
+			# print("  !!!!!!!!!!Error writing summary file!!!!!!!!!!")
+			# print(str(e))
 			pass
 		webbrowser.open(outPage, new=2)
 
 	def writeIniFile(self,inputDict,totError):
-		# arcpy.AddMessage("\n")
-		# arcpy.AddMessage("  Creating .ini file")
-		config = ConfigParser()
-		config = ConfigParser(allow_no_value=True)
+		# print("\n")
+		# print("  Creating .ini file")
+		config = configparser.ConfigParser() 
+		config = configparser.ConfigParser(allow_no_value=True)
 		config.add_section('PARAMETERS')
 		for key in inputDict.keys():
 			if key != 'inCert':
@@ -210,24 +215,24 @@ class Summary:
 
 		if inputDict['isSearchable'] == 'true':
 			config.add_section('ERROR COUNTS')
-			config.set('ERROR COUNTS','General',totError.generalErrorCount)
-			config.set('ERROR COUNTS','Geometric',totError.geometricErrorCount)
-			config.set('ERROR COUNTS','Address',totError.addressErrorCount)
-			config.set('ERROR COUNTS','Tax',totError.taxErrorCount)
+			config.set('ERROR COUNTS','General', str(totError.generalErrorCount))
+			config.set('ERROR COUNTS','Geometric',str(totError.geometricErrorCount))
+			config.set('ERROR COUNTS','Address', str(totError.addressErrorCount))
+			config.set('ERROR COUNTS','Tax', str(totError.taxErrorCount))
 			config.set('ERROR COUNTS','-------------------')
-			config.set('ERROR COUNTS','Error Sum',totError.ErrorSum)
+			config.set('ERROR COUNTS','Error Sum', str(totError.ErrorSum))
 			if totError.ErrorSum == 0:
 				config.set('ERROR COUNTS','    GREAT JOB, NO ERRORS!!!!!!!')
 			config.add_section('PARCELDATE FLAG')
-			if totError.uniqueparcelDatePercent >= 97.0:
+			if totError.uniqueparcelDatePercent >= 25.0:
 				config.set('PARCELDATE FLAG', 'Uniform ParcelDate', str(round (totError.uniqueparcelDatePercent,2)) )
-			if totError.uniqueparcelDatePercent < 97.0:
+			if totError.uniqueparcelDatePercent < 25.0:
 				config.set('PARCELDATE FLAG','  GREAT JOB, NO UNIFORM PARCELDATE!' )			
 			config.add_section('PERCENT TAXROLL YEAR')
-			config.set('PERCENT TAXROLL YEAR','Previous',round((float(totError.trYearPast / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2))
-			config.set('PERCENT TAXROLL YEAR','Expected',round((float(totError.trYearExpected / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2))
-			config.set('PERCENT TAXROLL YEAR','Future',round((float(totError.trYearFuture / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2))
-			config.set('PERCENT TAXROLL YEAR','Other',round((float(totError.trYearOther / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2))
+			config.set('PERCENT TAXROLL YEAR','Previous',str(round((float(totError.trYearPast / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2)))
+			config.set('PERCENT TAXROLL YEAR','Expected',str(round((float(totError.trYearExpected / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2)))
+			config.set('PERCENT TAXROLL YEAR','Future', str(round((float(totError.trYearFuture / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2)))
+			config.set('PERCENT TAXROLL YEAR','Other', str(round((float(totError.trYearOther / float((totError.recordTotalCount - totError.pinSkipCount)))*100),2)))
 			config.add_section('MISSING RECORDS')
 			config.set('MISSING RECORDS','CONAME',totError.coNameMiss)
 			config.set('MISSING RECORDS','PARCELFIPS',totError.fipsMiss)
@@ -236,7 +241,7 @@ class Summary:
 			config.add_section('COMPARISON COMPLETENESS')
 			for field in totError.comparisonDict.keys():
 				if field != 'state' or field != 'loaddate':
-					config.set('COMPARISON COMPLETENESS',field,totError.comparisonDict[field])
+					config.set('COMPARISON COMPLETENESS',field,  str(totError.comparisonDict[field]))
 
 			config.add_section('EXPLAIN CERTIFY')
 			explain_certify = inputDict['inCert']
@@ -247,188 +252,232 @@ class Summary:
 			config.set('EXPLAIN CERTIFY','Notice Of Error Sum Unsolvable', '\n' + explain_certify['noticeErrorsSumsUnresolvable'])
 			config.set('EXPLAIN CERTIFY','Other', '\n' + explain_certify['noticeOther'])
 		
+		county_name = inputDict['county'].replace(' ', '_')
+		outPath =  inputDict['outINIDir'] + '/'+ county_name + '_Final_Submission'
+	
+
 		try:
 			#Write out .ini file
-			with open(inputDict['outINIDir']+'/'+inputDict['county'] +'.ini','w') as configFile:
+			with open( outPath +'/'+ county_name +'.ini','w') as configFile:
 				config.write(configFile)
 				#with open(inputDict['inCert'],'r') as certFile:
 				#	for line in certFile:
 						#configFile.write(line)
-			# arcpy.AddMessage("\n\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
-			# arcpy.AddMessage("  Wrote .ini file to "+inputDict['outINIDir'])
-			# arcpy.AddMessage("\n")
-			# arcpy.AddMessage("  ------>  .ini FILE CREATION COMPLETE!   <------\n\n")
-			#arcpy.AddMessage("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+			# print("\n\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			print("    Writing .ini file to " + outPath)
+			print("\n")
+			print("  ------>  .ini FILE CREATION COMPLETE!  GREAT WORK!!   <------\n\n")
+			#print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
 		except Exception as e:
-			# arcpy.AddMessage("  !!!!!!!!!!Error writing .ini file!!!!!!!!!!")
-			# arcpy.AddMessage(str(e))
+			print("  !!!!!!!!!!Error writing .ini file!!!!!!!!!!")
+			print(str(e))
 			pass
 
 	def explainCertComplete(self,explain_certify):
-		#arcpy.AddMessage(explain_certify)
+		#print(explain_certify)
 		if (explain_certify['noticeOfNewStreetName'] == '' or explain_certify['noticeOfNewStreetName'] == "Enter new Street Names here, or None if no Values exist") \
 			    and (explain_certify['noticeOfNewNonParcelFeaturePARCELIDs'] == ''  or explain_certify['noticeOfNewNonParcelFeaturePARCELIDs'] ==  "Enter new Non-Parcel Feature Parcel IDs, or None if no Values exist") \
 				and (explain_certify['noticeOfMissingDataOmissions'] == '' or explain_certify['noticeOfMissingDataOmissions'] == "Enter omission information here, or None if no omissions exist") \
 				and (explain_certify['noticeErrorsSumsUnresolvable'] == '' or explain_certify['noticeErrorsSumsUnresolvable'] == "Enter number of Unresolvable errors, or None if no Values exist"):
 				
-			# arcpy.AddMessage("\n\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
-			# arcpy.AddMessage("     IMMEDIATE ISSUE REQUIRING ATTENTION")
-			# arcpy.AddMessage("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
-			# arcpy.AddMessage("  IT DOESN'T APPEAR THAT YOU FULLY FILLED OUT THE EXPLAIN-CERTIFY INFORMATION REQUIRED FOR SUBMISSION.\n\n")
-			# arcpy.AddMessage("  PLEASE FILL OUT THIS INFORMATION IN IT'S ENTIRETY AND RE-RUN THE TOOL IN FINAL MODE.")
-			# arcpy.AddMessage("\n\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-			# arcpy.AddMessage("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			# print("\n\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			# print("     IMMEDIATE ISSUE REQUIRING ATTENTION")
+			# print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+			# print("  IT DOESN'T APPEAR THAT YOU FULLY FILLED OUT THE EXPLAIN-CERTIFY INFORMATION REQUIRED FOR SUBMISSION.\n\n")
+			# print("  PLEASE FILL OUT THIS INFORMATION IN IT'S ENTIRETY AND RE-RUN THE TOOL IN FINAL MODE.")
+			# print("\n\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+			# print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 			sys.tracebacklimit = 0
 			raise NameError("\n     EXPLAIN-CERTIFY FORM INCOMPLETE")
   			#exit()
 		else:
 			pass 	
 		
-		
 
 	def fieldConstraints(self,totError):
 		if totError.coNameMiss > 0 or totError.fipsMiss > 0 or totError.srcMiss > 0:
-			# arcpy.AddMessage("\n\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
-			# arcpy.AddMessage("     IMMEDIATE ISSUE REQUIRING ATTENTION")
-			# arcpy.AddMessage("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
-			# arcpy.AddMessage("  ONE OF THE FOLLOWING FIELDS: CONAME, PARCELSRC or PARCELFIPS ARE NOT FULLY POPULATED.\n\n")
-			# arcpy.AddMessage("  THESE FIELDS SHOULD BE POPULATED FOR EVERY RECORD IN THE SUMBITTED PARCEL FEATURE CLASS.\n\n")
-			# arcpy.AddMessage("  PLEASE ENSURE THESE FIELDS ARE POPULATED FOR ALL RECORDS AND RE-RUN THE TOOL IN FINAL MODE.")
-			# arcpy.AddMessage("n\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-			# arcpy.AddMessage("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+			# print("\n\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			# print("     IMMEDIATE ISSUE REQUIRING ATTENTION")
+			# print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+			# print("  ONE OF THE FOLLOWING FIELDS: CONAME, PARCELSRC or PARCELFIPS ARE NOT FULLY POPULATED.\n\n")
+			# print("  THESE FIELDS SHOULD BE POPULATED FOR EVERY RECORD IN THE SUMBITTED PARCEL FEATURE CLASS.\n\n")
+			# print("  PLEASE ENSURE THESE FIELDS ARE POPULATED FOR ALL RECORDS AND RE-RUN THE TOOL IN FINAL MODE.")
+			# print("n\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+			# print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
 			sys.tracebacklimit = 0
 			raise NameError("\n     CONAME, PARCELSRC or PARCELFIPS NOT FULLY POPULATED")
 			#exit()
-
 			
 	
 	def createFGDBs (self, inputDict, taxRollYears):
+		import shutil			
+		import os.path
+
 		other_fc_list = ['zoningGenFC', 'zoningShoreFC','zoningAirFC', 'PLSSFC','RightOfWayFC','RoadStreetCenterlineFC','HydroLineFC','HydroPolyFC','AddressesFC','BuildingBuildingFootprintFC','LandUseFC','ParksOpenSpaceFC','TrailsFC','OtherRecreationFC']
 		year = taxRollYears[2]
 		inFC = inputDict['inFC']
-		outPath = inputDict['outINIDir']  #folder for .ini, fgdbs and other plss files
-		parcel_gdb = inputDict['county'] + '_PARCELS.gdb' 
-		other_gdb =  inputDict['county'] + '_OTHER.gdb'
+		county_name = inputDict['county'].replace(' ', '_')
+		#print (county_name)
+		county_outPath = inputDict['outINIDir']  #folder for .ini, fgdbs and other plss files
+		outPath =  inputDict['outINIDir']  + '/'+ county_name + '_Final_Submission'
+		
+		parcel_gdb = county_name + '_PARCELS.gdb'   #eg., VERNON_PARCELS.gdb
+		other_gdb =  county_name + '_OTHER.gdb'		#eg., VERNON_OTHER.gdb	
 		redactPolicy = inputDict['redactPolicy']
 		plssOtherDigitalFile = inputDict['PLSSOtherDigitalFile']
-		
+
+		try:
+			os.makedirs(outPath, exist_ok = True)
+			#print("\n    Output Directory '%s' created successfully" %outPath)
+		except OSError as error:
+			print("\n    Directory can not be created")
+
+
 		#also need to check if the plss files is in other format
 		#and the html or document with the names 
-
 		if os.path.exists(outPath):
-			# arcpy.AddMessage("  Creating PARCEL and OTHER geodatabases\n")
-
-			driver = ogr.GetDriverByName("FileGDB")
-			
+    	
+			print("\n    Creating PARCEL and OTHER geodatabases\n")
+			otherGDBPath  = os.path.join(outPath, other_gdb)
 			parcelGDBPath = os.path.join(outPath, parcel_gdb)
+			
+			### create Parcels gdb	
+			if inputDict['inFC'] != '':			
+				
+				inFC_gdb = os.path.split (inputDict['inFC'])[0]
+				inFC_name = os.path.normpath(inputDict['inFC']).split(os.path.sep)[-1]
+				### open datasource again 
+				datasource = ogr.GetDriverByName('FileGDB').Open(inFC_gdb, 0)
+				###  get layer/feature class from the datasource i.e., geodatabase 
+				inFC_layer = [ly for ly in datasource if ly.GetName() == inFC_name][0]
 
-			if os.path.exists(parcelGDBPath):
-				driver.DeleteDataSource(parcelGDBPath)				
+				fgdb_drv = ogr.GetDriverByName("FileGDB")	
+				if os.path.exists(parcelGDBPath):
+					print( "deleting parcel gdb:  \n\n")
+					fgdb_drv.DeleteDataSource(parcelGDBPath)
+				pds = fgdb_drv.CreateDataSource( parcelGDBPath)
+				#fgdb_drv.Open( parcelGDBPath, 1)  #not sure if this is needed
+				pds.CopyLayer (inFC_layer, 'PARCELS', ['OVERWRITE=YES', 'METHOD=SKIP', 'OGR_ORGANIZE_POLYGONS=SKIP']) 
+				pds = None 
+				inFC_layer = None
+				datasource = None
 
 			# creating PARCELS AND OTHER geodatabases
 			# TODO: ask if this is actually just checking
 			# for existence of data before deleting it; and twice?
-			# Will this actually ever exist? Its a GDB inside a GDB.
-			# if arcpy.Exists(os.path.join(outPath, other_gdb)):
-			# 	arcpy.Delete_management (os.path.join(outPath, other_gdb))
-
-			# if arcpy.Exists( os.path.join(outPath, parcel_gdb)):
-			#	arcpy.Delete_management (os.path.join(outPath, parcel_gdb))
-			
-			def writePlssFile (outPath, plssOtherDigitalFile, other_gdb, year):
+			# Will this actually ever exist? Its a GDB inside a GDB.  there are two gdbs inside a folder
+				
+			def writePlssFile (outPath, plssOtherDigitalFile, ods, year):
 				""" If plss file is different"""
-				import shutil			
-				import os.path
-		
+
 				plss_file = plssOtherDigitalFile.split('/')
 				plss_file_name = plss_file[len(plss_file)-1]
-				destination = outPath + '/' + plss_file_name 
+				destination = outPath + '/' + county_name + '_' + year + '_' + plss_file_name 
 				extension = plss_file_name.split('.')[-1]
-	
-				if extension != 'shp':	
+
+				if extension != 'shp':	#copy a plss file like text, or excel 
 					if not os.path.isfile(destination):
 						shutil.copy(plssOtherDigitalFile, destination)
-						# arcpy.AddMessage("\n\n")
-						# arcpy.AddMessage("  Wrote PLSS file to "+ destination)
-						# arcpy.AddMessage("\n")
-						# arcpy.AddMessage("  ------>  PLSS FILE COPIED SUCCESSFULLY!  <------\n")
-						# arcpy.AddMessage("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+						print("\n\n    Wrote PLSS file to "+ destination)
+						print("\n\n  ------>  PLSS FILE COPIED SUCCESSFULLY!  <------\n")
+						# print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
 					else:
 						pass     #print("\n\n  PLSS file already existed.\n")
 				else:   # for shape files use arcpy
-					# if arcpy.Exists(plssOtherDigitalFile):   #double check that the shapefile exists
+					#    #double check that the shapefile exists
 					if os.path.exists(plssOtherDigitalFile):
-						# desc = arcpy.Describe(plssOtherDigitalFile)
+						
 						if (plssOtherDigitalFile.lower().endswith('.shp')):
-						# if  hasattr(desc, "dataType") and desc.dataType == "ShapeFile":
-							plss_path = outPath + '/' + other_gdb
-							plss_name = '/PLSS_' + year 
-							#print ( plss_path + plss_name )
-							# if arcpy.Exists (plss_path + plss_name):	
-							if os.path.exists(plss_path + plss_name):
-								driver.DeleteDataSource(plss_path + plss_name)
-								# arcpy.Delete_management(plss_path + plss_name)
-							# driver.
-							arcpy.FeatureClassToFeatureClass_conversion(plssOtherDigitalFile, plss_path, plss_name)
-							# arcpy.AddMessage("\n\n")
-							# arcpy.AddMessage("  Wrote PLSS file to "+ plss_path + plss_name)
-							# arcpy.AddMessage("\n")
-							# arcpy.AddMessage("  ------>  PLSS FILE COPIED SUCCESSFULLY!  <------\n")
+							plss_gdb_path = outPath + '/' + other_gdb
+							plss_fc_name = county_name + '_PLSS_' + year
+							#if os.path.exists(plss_path + plss_name):
+							
 
-			### create Parcels gdb	
-			if inputDict['inFC'] != '':
-				parcel_Dir = arcpy.CreateFileGDB_management(outPath, parcel_gdb)
-				arcpy.FeatureClassToFeatureClass_conversion(inFC, parcel_Dir,"PARCELS")
+							shp_drv  =  ogr.GetDriverByName("ESRI Shapefile")  
+							# open user plss shape file
+							ds = shp_drv.Open(plssOtherDigitalFile, 0)
+							plss_lyr = ds.GetLayer()
+							#plss_fc = plss_gdb_path + "/" + plss_fc_name
+							#if os.path.exists(plss_fc):
+							#	shp_drv.DeleteDataSource(plss_fc)
+							ods.CopyLayer (plss_lyr, plss_fc_name,
+									['OVERWRITE=YES', 'METHOD=SKIP', 'OGR_ORGANIZE_POLYGONS=SKIP'] )     
+							#
+							print("\n\n    Wrote PLSS file to "+ plss_gdb_path +"/"+ plss_fc_name)
+							print("\n    ------>  PLSS FILE COPIED SUCCESSFULLY!  <------\n")
+							plss_lyr = None
+							ds = None
+
 
 			#Create fgdb for other layers				
 			# append inFeatures list other features provided in the GUI
 			inFeatures = []
+			coName = county_name
 			for fc in other_fc_list:  
-				# if inputDict[fc] != '' and  (arcpy.Exists(inputDict[fc])):
-				if inputDict[fc] != '' and os.path.exists(inputDict[fc]):
+				if inputDict[fc] != '' :
 					#matching  fc with it name:
 					if fc == 'zoningGenFC':
-						fc_name = '/GENERAL_' + year
+						fc_name = coName + '_GENERAL_' + year
 					elif fc ==  'zoningShoreFC':
-						fc_name = '/SHORELAND_' + year
+						fc_name = coName + '_SHORELAND_' + year
 					elif fc == 'zoningAirFC':
-						fc_name = '/AIRPORT_' + year
+						fc_name = coName + 'A_IRPORT_' + year
 					elif fc == 'PLSSFC':
-						fc_name =  '/PLSS_' + year
+						fc_name = coName + '_PLSS_' + year
 					elif fc == 'RightOfWayFC':
-						fc_name = '/ROW_' + year
+						fc_name = coName + '_ROW_' + year
 					elif fc ==  'RoadStreetCenterlineFC':
-						fc_name = '/ROADS_' + year
+						fc_name = coName + '_ROADS_' + year
 					elif fc ==  'HydroLineFC':
-						fc_name = '/HYDRO_' + year + '_LINE'
+						fc_name = coName + '_HYDRO_' + year + '_LINE'
 					elif fc == 'HydroPolyFC':
-						fc_name = '/HYDRO_' + year + '_POLY'
+						fc_name = coName + '_HYDRO_' + year + '_POLY'
 					elif fc == 'AddressesFC': 
-						fc_name = '/ADDRESSES_' + year
+						fc_name = coName + '_ADDRESSES_' + year
 					elif fc == 'BuildingBuildingFootprintFC':
-						fc_name = '/BUILDINGS_' + year
+						fc_name = coName + '_BUILDINGS_' + year
 					elif fc == 'LandUseFC':
-						fc_name = '/LANDUSE_' + year
+						fc_name = coName + '_LANDUSE_' + year
 					elif fc == 'ParksOpenSpaceFC':
-						fc_name = '/PARKS_' + year 
+						fc_name = coName + '_PARKS_' + year 
 					elif fc == 'TrailsFC':
-						fc_name = '/TRAILS_' + year
+						fc_name = coName +  '_TRAILS_' + year
 					elif fc == 'OtherRecreationFC':
-						fc_name = '/RECREATION_' + year	
+						fc_name = coName + '_RECREATION_' + year	
 					inFeatures.append( [inputDict[fc],  fc_name])  # list with Feat classes with their new neme 
 
+			ofgdb_drv = ogr.GetDriverByName("FileGDB")			
+			if os.path.exists(otherGDBPath):
+				print( "deleting other gdb:  \n\n")
+				ofgdb_drv.DeleteDataSource(otherGDBPath)				
+			ods = ofgdb_drv.CreateDataSource( otherGDBPath)
+		
 			if inFeatures != []:
-				other_Dir = arcpy.CreateFileGDB_management(outPath, other_gdb)
+				#ofgdb_drv.Open( otherGDBPath, 1)  #not sure if this is needed
 				for oLFC in inFeatures:
-					arcpy.FeatureClassToFeatureClass_conversion(oLFC[0], other_Dir, oLFC[1])
+					#print ( "here\n")
+					of_drv  =  ogr.GetDriverByName("FileGDB")  
+					# open other fgdb -- we cannot assume that all the fc are store in the same gdb, so I have to open the/a gdb for each fc
+					o_gdb = os.path.split (oLFC[0])[0]
+					oFC_name = os.path.normpath(oLFC[0]).split(os.path.sep)[-1]
+					of_ds = of_drv.Open( o_gdb , 0)
+					#print  (of_ds)
+					of_lyr = [ly for ly in of_ds if ly.GetName() == oFC_name][0]
+					ods.CopyLayer (of_lyr, oLFC[1], ['OVERWRITE=YES', 'METHOD=SKIP','OGR_ORGANIZE_POLYGONS=SKIP']) 
+					of_lyr = None
+					of_ds = None
+
+				#for oLFC in inFeatures:
+				#
 			if (inputDict['PLSSType'] != '' and inputDict['PLSSType'] == 'Maintained by county as other digital format'):
 				#need to check for shapefile 
-				if inFeatures == []:  #if no other layers existed
-					other_Dir = arcpy.CreateFileGDB_management(outPath, other_gdb)
-				writePlssFile ( outPath, plssOtherDigitalFile, other_gdb, year)
+				writePlssFile ( outPath, plssOtherDigitalFile, ods, year)
 			
-			# arcpy.AddMessage("  ------>  GEODATABASES CREATION COMPLETE!  GREAT WORK!!  <------\n\n\n")
-			# arcpy.AddMessage("  SUBMISSIONS WITHOUT .ini WILL NOT BE ACCEPTED!\n")
-			# arcpy.AddMessage("  ZIP UP THE .ini FILE, THE PARCEL FILE GEODATABASE, THE OTHER_LAYERS FILE GEODATABASE, AND SUBMIT TO THE LTSB Geodata Collector,\n") 
-			# arcpy.AddMessage("  at  https://geodatacollector.legis.wisconsin.gov/")
-			# arcpy.AddMessage("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+			ods = None
+			print("    ------>  GEODATABASES CREATION COMPLETE!   <------\n\n")
+			print("    SUBMISSIONS WITHOUT .ini WILL NOT BE ACCEPTED!\n")
+			print("    ZIP UP THE .ini FILE, THE PARCEL FILE GEODATABASE, THE OTHER_LAYERS FILE GEODATABASE, AND SUBMIT TO THE LTSB Geodata Collector,\n") 
+			# print("  at  https://geodatacollector.legis.wisconsin.gov/")
+			# print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+		else:
+			print (' cannot create gdbs')	
