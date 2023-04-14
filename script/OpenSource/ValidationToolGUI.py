@@ -6,16 +6,17 @@ from tkinter import *
 from tkinter.ttk import *
 
 from tkinter.filedialog import *
-from tkinter.scrolledtext import ScrolledText
+from tkinter import scrolledtext
+#from tkinter.scrolledtext import ScrolledText
 from tkinter import messagebox
 
-import os
+import os, sys
 from os import path
 import collections
 
-from osgeo import gdal, ogr
+from osgeo import ogr, gdal
 
-#import ValidationToolScriptFoss
+import ValidationToolScriptFoss
 from ValidationToolScriptFoss import validation_tool_run_all
 
 #from threading import *
@@ -87,19 +88,7 @@ class App(ttk.Frame):
     # in a tree in cases of complex decisions
     # @return TODO: decide if its a boolean or other type
     
-    
-    def FC_exists(self, fc):
-        gdal.UseExceptions()
-        datasource = os.path.split (fc)[0]
-        layer = os.path.normpath(fc).split(os.path.sep)[-1]   
-        try:
-            ds = gdal.OpenEx(datasource)
-            if layer is not None:
-                return ds.GetLayerByName(layer) is not None
-            else:
-                return True
-        except RuntimeError as e:
-            return False
+
 
     def isExitableState(self, exitableStatus, exitButton):# inputObjectMap):
         unfilledFields = list()
@@ -125,6 +114,37 @@ class App(ttk.Frame):
         return unfilledFields
  
  
+    '''
+    def FC_exists(self, fc):
+        ogr.UseExceptions()
+        datasource = os.path.split (fc)[0]
+        layer = os.path.normpath(fc).split(os.path.sep)[-1]   
+        try:
+            driver = ogr.GetDriverByName('OpenFileGDB')
+            ds = driver.Open(datasource,0 )
+            if layer is not None:
+                return ds.GetLayerByName(layer) is not None
+            else:
+                return True
+        except RuntimeError as e:
+            return False
+
+    '''
+
+
+    def FC_exists(self, fc):
+        gdal.UseExceptions()
+        datasource = os.path.split (fc)[0]
+        layer = os.path.normpath(fc).split(os.path.sep)[-1]   
+        try:
+            ds = gdal.OpenEx(datasource)
+            if layer is not None:
+                return ds.GetLayerByName(layer) is not None
+            else:
+                return True
+        except RuntimeError as e:
+            return False
+
     def browse_to_GDB(self, gdb):
         """browse to selected a gdb directory (no Feature Class)"""
         gdb_dir = askdirectory()   
@@ -160,6 +180,7 @@ class App(ttk.Frame):
     def open_win(self, full_path, childWin):
         """ open a window with a list of the feature classes list in the gdb"""
         new= Toplevel(childWin)
+        new.iconbitmap(wisconsin_icon_path)
         new.title("Feature Classes")
   
         scrollbar = Scrollbar(new)
@@ -192,7 +213,8 @@ class App(ttk.Frame):
             path_name = askdirectory()
 
         if path_name:
-            datasource = ogr.GetDriverByName('OpenFileGDB').Open(path_name, 0)
+            dr = ogr.GetDriverByName('OpenFileGDB')
+            datasource = dr.Open(path_name, 0)
 
             for layerIndex in range(datasource.GetLayerCount()):
                 layer = datasource.GetLayerByIndex(layerIndex)
@@ -200,6 +222,7 @@ class App(ttk.Frame):
                 self.files_list.append(layer.GetName())
 
             self.open_win(full_path, childWin = childWin2)
+            datasource = None
 
     def create_widgets(self):
         """create the widgets in the app gui """
@@ -485,58 +508,92 @@ class App(ttk.Frame):
             def onFrameConfigure(canvas):
                 canvas.configure(scrollregion=canvas.bbox("all"))
             
-            noticeOfNewStreetName_input_label = ttk.Label(explanationCertificateWindow, text='Notice of New Street Names:')
+            
+            explanationCertifyCanvas = tk.Canvas (explanationCertificateWindow )
+            explanationCertifyCanvas.pack(side=LEFT, fill = BOTH, expand = True)
+
+            explanationCertifyFrame = tk.Frame (explanationCertifyCanvas, width=510, height=700)
+            explanationCertifyFrame.pack()
+
+            explanationCertifyScrollbar = Scrollbar(explanationCertificateWindow)
+            explanationCertifyScrollbar.config ( command=explanationCertifyCanvas.yview)
+            explanationCertifyCanvas.configure(yscrollcommand = explanationCertifyScrollbar.set)
+            explanationCertifyScrollbar.pack (side = RIGHT, fill= BOTH)
+     
+            explanationCertifyCanvas.create_window((0,0), window = explanationCertifyFrame, 
+                    anchor = NW, tags = explanationCertifyFrame)
+            explanationCertifyFrame.bind ("<Configure>", lambda event, 
+                    explanationCertifyCanvas=explanationCertifyCanvas: onFrameConfigure(explanationCertifyCanvas))        
+
+
+            
+            
+            noticeOfNewStreetName_input_label = ttk.Label(explanationCertifyFrame, text='Notice of New Street Names:')
             noticeOfNewStreetName_input_label.pack () #grid(column=0, row=0, sticky=tk.W)
-            noticeOfNewStreetName_input = Text(explanationCertificateWindow,
-                                                # textvariable = self.input_dict['inCert']['noticeOfNewStreetName'],
-                                                width=70, height=7)
-            noticeOfNewStreetName_input.insert('1.0', self.input_dict['inCert']['noticeOfNewStreetName'].get())  #Displays value stored in dictionary
+            noticeOfNewStreetName_input = scrolledtext.ScrolledText(explanationCertifyFrame, #state = 'normal',
+                                               # textvariable = self.input_dict['inCert']['noticeOfNewStreetName'],
+                                               width=71, height=7)
+            noticeOfNewStreetName_input.tag_config('default', background="white", foreground= '#808080' )
+            noticeOfNewStreetName_input.insert('1.0', self.input_dict['inCert']['noticeOfNewStreetName'].get()) #Displays value stored in dictionary
             noticeOfNewStreetName_input.pack(padx=5, pady=5)
+            noticeOfNewStreetName_input.yview(tk.END)
             noticeOfNewStreetName_input.bind('<FocusOut>', clickedOutExplain(noticeOfNewStreetName_input, 'street'))
             noticeOfNewStreetName_input.bind('<FocusIn>', clickedInExplain(noticeOfNewStreetName_input, 'street'))
+            
 
-            noticeOfNewNonParcelFeaturePARCELIDs_input_label = ttk.Label(explanationCertificateWindow,
-                                                                            text='Notice of New Non-Parcel Feature PARCELIDs:')
+            noticeOfNewNonParcelFeaturePARCELIDs_input_label = ttk.Label(explanationCertifyFrame,
+                                                                         text='Notice of New Non-Parcel Feature PARCELIDs:')
             noticeOfNewNonParcelFeaturePARCELIDs_input_label.pack () #grid(column=0, row=0, sticky=tk.W)
-            noticeOfNewNonParcelFeaturePARCELIDs_input = Text(explanationCertificateWindow,
-                                                                # textvariable = self.input_dict['inCert']['noticeOfNewNonParcelFeaturePARCELIDs'],
-                                                                width=71, height=7)
-            noticeOfNewNonParcelFeaturePARCELIDs_input.insert('1.0', self.input_dict['inCert']['noticeOfNewNonParcelFeaturePARCELIDs'].get())  #Displays value stored in dictionary
+            noticeOfNewNonParcelFeaturePARCELIDs_input = scrolledtext.ScrolledText(explanationCertifyFrame, #state = 'normal',
+                                                              # textvariable = self.input_dict['inCert']['noticeOfNewNonParcelFeaturePARCELIDs'],
+                                                              width=71, height=7)
+            noticeOfNewNonParcelFeaturePARCELIDs_input.tag_config('default', background="white", foreground= '#808080' )
+            noticeOfNewNonParcelFeaturePARCELIDs_input.insert('1.0', self.input_dict['inCert']['noticeOfNewNonParcelFeaturePARCELIDs'].get()) #, 'default')  #Displays value stored in dictionary
             noticeOfNewNonParcelFeaturePARCELIDs_input.pack(padx=5, pady=5)
+            noticeOfNewNonParcelFeaturePARCELIDs_input.yview(tk.END)
             noticeOfNewNonParcelFeaturePARCELIDs_input.bind('<FocusOut>', clickedOutExplain(noticeOfNewNonParcelFeaturePARCELIDs_input, 'non parcel'))
             noticeOfNewNonParcelFeaturePARCELIDs_input.bind('<FocusIn>', clickedInExplain(noticeOfNewNonParcelFeaturePARCELIDs_input, 'non parcel'))
 
-            noticeOfMissingDataOmissions_input_label = ttk.Label(explanationCertificateWindow, text='Notice of Missing Data/Omissions')
+            noticeOfMissingDataOmissions_input_label = ttk.Label(explanationCertifyFrame, text='Notice of Missing Data/Omissions')
             noticeOfMissingDataOmissions_input_label.pack () #grid(column=0, row=0, sticky=tk.W)
-            noticeOfMissingDataOmissions_input = Text(explanationCertificateWindow,
-                                                        # textvariable = self.input_dict['inCert']['noticeOfMissingDataOmissions'],
-                                                        width=71, height=7)
-            noticeOfMissingDataOmissions_input.insert('1.0', self.input_dict['inCert']['noticeOfMissingDataOmissions'].get())  #Displays value stored in dictionary
+            noticeOfMissingDataOmissions_input = scrolledtext.ScrolledText(explanationCertifyFrame, state = 'normal',
+                                                      # textvariable = self.input_dict['inCert']['noticeOfMissingDataOmissions'],
+                                                      width=71, height=7)
+            noticeOfMissingDataOmissions_input.tag_config('default', background="white", foreground= '#808080' )                                                     
+            noticeOfMissingDataOmissions_input.insert('1.0', self.input_dict['inCert']['noticeOfMissingDataOmissions'].get())#, 'default')  #Displays value stored in dictionary
             noticeOfMissingDataOmissions_input.pack(padx=5, pady=5)
+            noticeOfMissingDataOmissions_input.yview(tk.END)           
             noticeOfMissingDataOmissions_input.bind('<FocusOut>', clickedOutExplain(noticeOfMissingDataOmissions_input, 'omission'))
             noticeOfMissingDataOmissions_input.bind('<FocusIn>', clickedInExplain(noticeOfMissingDataOmissions_input, 'omission'))
-      
+
             # TODO: keep statistics of these
         
-            noticeErrorsSumsUnresolvable_input_label = ttk.Label(explanationCertificateWindow, text='Error Sums That Are Unresolvable')
+            noticeErrorsSumsUnresolvable_input_label = ttk.Label(explanationCertifyFrame, text='Error Sums That Are Unresolvable')
             noticeErrorsSumsUnresolvable_input_label.pack () #grid(column=0, row=0, sticky=tk.W)
-            noticeErrorsSumsUnresolvable_input = Text(explanationCertificateWindow,
-                                                        # textvariable = self.input_dict['inCert']['noticeErrorsSumsUnresolvable'],
-                                                        width=71, height=7)
-            noticeErrorsSumsUnresolvable_input.insert('1.0', self.input_dict['inCert']['noticeErrorsSumsUnresolvable'].get())  #Displays value stored in dictionary
+            noticeErrorsSumsUnresolvable_input = scrolledtext.ScrolledText(explanationCertifyFrame, state = 'normal',
+                                                      # textvariable = self.input_dict['inCert']['noticeErrorsSumsUnresolvable'],
+                                                      width=71, height=7)
+            noticeErrorsSumsUnresolvable_input.tag_config('default', background="white", foreground= '#808080' )     
+            noticeErrorsSumsUnresolvable_input.insert('1.0', self.input_dict['inCert']['noticeErrorsSumsUnresolvable'].get())#, 'default')  #Displays value stored in dictionary
             noticeErrorsSumsUnresolvable_input.pack(padx=5, pady=5)
+            noticeErrorsSumsUnresolvable_input.yview(tk.END)
+            noticeErrorsSumsUnresolvable_input.configure(state='normal')
             noticeErrorsSumsUnresolvable_input.bind('<FocusOut>', clickedOutExplain(noticeErrorsSumsUnresolvable_input, 'error'))
             noticeErrorsSumsUnresolvable_input.bind('<FocusIn>', clickedInExplain(noticeErrorsSumsUnresolvable_input, 'error'))
 
-            noticeOther_input_label = ttk.Label(explanationCertificateWindow, text='Other:')
+            noticeOther_input_label = ttk.Label(explanationCertifyFrame, text='Other:')
             noticeOther_input_label.pack () #grid(column=0, row=0, sticky=tk.W)
-            noticeOther_input = Text(explanationCertificateWindow,  width=71, height=7)
-            noticeOther_input.insert('1.0', self.input_dict['inCert']['noticeOther'].get())  #Displays value stored in dictionary
+            noticeOther_input = scrolledtext.ScrolledText(explanationCertifyFrame,  state = 'normal',  width=71, height=7)
+            noticeOther_input.tag_config('default', background="white", foreground= '#808080' )              
+            noticeOther_input.insert('1.0', self.input_dict['inCert']['noticeOther'].get() )# , 'default')  #Displays value stored in dictionary
             noticeOther_input.pack(padx=5, pady=5)
+            noticeOther_input.configure(state='normal')
+            noticeOther_input.yview(tk.END)    
 
             # TODO: can possibly consider some local caching
-            noticeOther_input_label = ttk.Label(explanationCertificateWindow, text='     NOTE: ENTRIES HERE ARE NOT SAVED if the validation tool is restarted.     ')
+            noticeOther_input_label = ttk.Label(explanationCertifyFrame, text='NOTE: ENTRIES HERE ARE NOT SAVED if the validation tool is restarted.')
             noticeOther_input_label.pack () #grid(column=0, row=0, sticky=tk.W)
+
 
             def putInput_in_DictionaryEC():
                 self.input_dict['inCert']['noticeOfNewStreetName'] = tk.StringVar(value=noticeOfNewStreetName_input.get('1.0', 'end'))
@@ -549,7 +606,7 @@ class App(ttk.Frame):
                 #close window
                 explanationCertificateWindow.destroy()
 
-            bottomFrame = Frame(explanationCertificateWindow)
+            bottomFrame = Frame(explanationCertifyFrame)
             bottomFrame.pack(side = BOTTOM)
 
             def isSaveableState(_):
@@ -664,7 +721,9 @@ class App(ttk.Frame):
             unfilledFields = list()
             for inputVar in PDIinputObjectMap:
                 #print('current input variable: ', inputVar[0].get(), inputVar[1])
-                if (inputVar[0].get() == PDIdefaultInputComparator[inputVar[1]]) or (inputVar[1] == 'outINIDir' and not os.path.isdir(inputVar[0].get()) and inputVar[0].get()[-4:] == '.gdb'): 
+                if (inputVar[0].get() == PDIdefaultInputComparator[inputVar[1]]) or \
+                    (inputVar[1] == 'outINIDir' and os.path.isdir( inputVar[0].get()) and inputVar[0].get()[-4:] == '.gdb') or \
+                    (inputVar[1] == 'outINIDir' and not os.path.isdir(inputVar[0].get())): 
                     #print('comparison to defaults: ', inputVar[2], PDIdefaultInputComparator[inputVar[1]])
                     unfilledFields.append(inputVar[2])
                 else:
@@ -1393,7 +1452,16 @@ if __name__ == '__main__':
     gui.title('SCO Validation Tool v2.0') #title of main menu
     gui.geometry('420x450')  #dimensions of main menu window (W x H)
     
-    path_of_script = os.path.dirname (os.path.abspath(__file__))
+    #pathname = os.path.dirname(sys.argv[0])        
+    #path_ofScript = os.path.dirname(pathname)
+    path_ofScript = os.path.dirname (os.path.abspath(__file__))
+
+    try:
+        wd = sys._MEIPASS
+        path_of_script = os.path.join (wd, path_ofScript)
+    except AttributeError:
+        path_of_script = path_ofScript 
+
     wisconsin_icon_path = path_of_script + '\\assets\\V1.ico' 
     folder_gif_path =  path_of_script + '\\assets\\openfilefolder.gif' 
     gui.iconbitmap(wisconsin_icon_path)

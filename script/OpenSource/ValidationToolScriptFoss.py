@@ -11,9 +11,8 @@ import os
 from time import perf_counter
 #import fiona; fiona.supported_drivers
 #import fiona
-from osgeo import gdal, ogr, osr
+from osgeo import  ogr
 import pandas as pd
-import geopandas as gpd
 
 	
 	
@@ -51,8 +50,9 @@ def validation_tool_run_all(inputDict):
 	inFC_gdb = os.path.split (inputDict['inFC'])[0]
 	inFC_name = os.path.normpath(inputDict['inFC']).split(os.path.sep)[-1]
 
-	### reading with gdal/ogr 
-	datasource = ogr.GetDriverByName('FileGDB').Open(inFC_gdb, 0)
+	### reading with ogr
+	driver =  ogr.GetDriverByName('OpenFileGDB')
+	datasource = driver.Open(inFC_gdb, 0)
 	###  get layer/feature class from the datasource i.e., geodatabase 
 	inFC_layer = [ly for ly in datasource if ly.GetName() == inFC_name][0]
 
@@ -81,7 +81,8 @@ def validation_tool_run_all(inputDict):
 	mem_driver=ogr.GetDriverByName('MEMORY')
 	mem_ds=mem_driver.CreateDataSource('in_memory')
 	mem_driver.Open('in_memory',1)  ## open/returns the datasource object
-	output_fc_temp = mem_ds.CopyLayer( inFC_layer, 'temp', ['OVERWRITE=YES'])
+	# OGR_GEOMETRY_ACCEPT_UNCLOSED_RING = NO
+	output_fc_temp = mem_ds.CopyLayer( inFC_layer, 'temp', ['OVERWRITE=YES', 'METHOD=ONLY_CCW', 'METHOD=SKIP', 'OGR_GEOMETRY_ACCEPT_UNCLOSED_RING = NO' , 'OGR_ORGANIZE_POLYGONS=SKIP'])
 	inFC_layer = None
 	datasource = None
 
@@ -89,7 +90,6 @@ def validation_tool_run_all(inputDict):
 	#Check if the coordinate reference system is consistent with that of the parcel initiative
 	Error.checkCRS( totError, output_fc_temp)  #c_inFC)
 	#check input fc to ensure schema meets requirements.  If not, alert to missing/excess fields
-	##  Error.checkSchema(totError, output_fc_temp, parcelSchemaReq, fieldListPass)
 	Error.checkSchema(totError, output_fc_temp, parcelSchemaReq, fieldListPass)
 	#Ensure no coded domains exist -- NOT DONE YET, CHECK IF THIS IS NECESSARY YET
 	# Error.checkCodedDomains(totError, inputDict['inFC'])
@@ -115,7 +115,6 @@ def validation_tool_run_all(inputDict):
 	
 	###############  IT WORKS TO THIS POINT EXCEPT FOR THE CRS AND GEOM
 	#Create update cursor then use it to iterate through records in feature class
-	
 	
 	for row in output_fc_temp:  #.iterrows():    # use the fieldNames list from the External Dictionary
 		currParcel = Parcel(row, fieldNames)
@@ -176,11 +175,11 @@ def validation_tool_run_all(inputDict):
 		currParcel.writeErrors(row, fieldNames)
 		output_fc_temp.SetFeature(row)  #update feature class (datasource) with errorTypes
 		#row = None
-
 		currParcel = None
 
+		
 	totError = Error.fieldCompletenessComparison(totError,fieldNames,fieldListPass,CurrCompDict, getattr(LegacyCountyStats, (inputDict['county'].replace(" ","_").replace(".",""))+"LegacyDict"))
-	
+		
 	## creates a statistics table for calculating number of repeated parceldates 		
 	# output_stats_table_temp = os.path.join("in_memory", "WORKING_STATS")
 	parcelDatelist = [row.GetField("PARCELDATE") for row in output_fc_temp ]
@@ -226,6 +225,7 @@ def validation_tool_run_all(inputDict):
 		sys.tracebacklimit = 0
 		raise NameError("\n     FEATURE CLASS GEOMETRY NOT VALIDATED")
 		
+	
 		#Write the ini file if final
 	if inputDict['isFinal'] == 'finalModeSelected':   #  'true':
 		#summary.explainCertComplete(inputDict['inCert'])
@@ -243,26 +243,22 @@ def validation_tool_run_all(inputDict):
 		summary.writeSummaryTxt(outSummaryDir,inputDict['outName'],totError,outSummaryPage,outSummaryJSON)
 		
 		#Write feature class from memory back out to hard disk
-	
-		#print ( "driver: FILEGDB")
-		#print ( inputDict['outName'])
 		
-		out_driv = ogr.GetDriverByName('FileGDB')
-		#try:
-		out_ds = out_driv.Open(inputDict['outDir'], 1)
-		outlayer = out_ds.CopyLayer (output_fc_temp, inputDict['outName'], 
+		out_driv = ogr.GetDriverByName('OpenFileGDB')
+		try:
+			out_ds = out_driv.Open(inputDict['outDir'], 1)
+			outlayer = out_ds.CopyLayer (output_fc_temp, inputDict['outName'], 
 						['OVERWRITE=YES', 'METHOD=SKIP', 'OGR_ORGANIZE_POLYGONS=SKIP'] ) 
-		#delete layers and datasources
-		
-		output_fc_temp = None
-		mem_ds = None
-		outlayer = None
-		out_ds = None
-		#except:
-		#	print ( " driver failed")
+			#delete layers and datasources
+			output_fc_temp = None
+			mem_ds = None
+			outlayer = None
+			out_ds = None
+		except:
+			print( "   Feature Class creation failed")
 		
 		print("\n\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
-		print("  TEST RUN COMPLETE\n")
+		print("   TEST RUN COMPLETE\n")
 
 		if  totError.uniqueparcelDatePercent >= 25.0: 
 			# print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")

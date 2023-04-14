@@ -341,28 +341,27 @@ class Summary:
 			otherGDBPath  = os.path.join(outPath, other_gdb)
 			parcelGDBPath = os.path.join(outPath, parcel_gdb)
 			
-			### create Parcels gdb	
+			# creating PARCELS AND OTHER geodatabases
+			# ### create Parcels gdb	
 			if inputDict['inFC'] != '':			
 				
 				inFC_gdb = os.path.split (inputDict['inFC'])[0]
 				inFC_name = os.path.normpath(inputDict['inFC']).split(os.path.sep)[-1]
 				### open datasource again 
-				datasource = ogr.GetDriverByName('FileGDB').Open(inFC_gdb, 0)
+				datasource = ogr.GetDriverByName('OpenFileGDB').Open(inFC_gdb, 0)
 				###  get layer/feature class from the datasource i.e., geodatabase 
 				inFC_layer = [ly for ly in datasource if ly.GetName() == inFC_name][0]
 
-				fgdb_drv = ogr.GetDriverByName("FileGDB")	
+				fgdb_drv = ogr.GetDriverByName("OpenFileGDB")	
 				if os.path.exists(parcelGDBPath):
 					print( "deleting parcel gdb:  \n\n")
 					fgdb_drv.DeleteDataSource(parcelGDBPath)
 				pds = fgdb_drv.CreateDataSource( parcelGDBPath)
-				#fgdb_drv.Open( parcelGDBPath, 1)  #not sure if this is needed
 				pds.CopyLayer (inFC_layer, 'PARCELS', ['OVERWRITE=YES', 'METHOD=SKIP', 'OGR_ORGANIZE_POLYGONS=SKIP']) 
 				pds = None 
 				inFC_layer = None
 				datasource = None
 
-			# creating PARCELS AND OTHER geodatabases
 			# TODO: ask if this is actually just checking
 			# for existence of data before deleting it; and twice?
 			# Will this actually ever exist? Its a GDB inside a GDB.  there are two gdbs inside a folder
@@ -392,7 +391,6 @@ class Summary:
 							plss_fc_name = county_name + '_PLSS_' + year
 							#if os.path.exists(plss_path + plss_name):
 							
-
 							shp_drv  =  ogr.GetDriverByName("ESRI Shapefile")  
 							# open user plss shape file
 							ds = shp_drv.Open(plssOtherDigitalFile, 0)
@@ -407,10 +405,10 @@ class Summary:
 							print("\n    ------>  PLSS FILE COPIED SUCCESSFULLY!  <------\n")
 							plss_lyr = None
 							ds = None
+			# end of function
 
-
-			#Create fgdb for other layers				
-			# append inFeatures list other features provided in the GUI
+			#Create Other gdb		
+			# append inFeatures-list other features provided in the GUI
 			inFeatures = []
 			coName = county_name
 			for fc in other_fc_list:  
@@ -446,23 +444,29 @@ class Summary:
 						fc_name = coName + '_RECREATION_' + year	
 					inFeatures.append( [inputDict[fc],  fc_name])  # list with Feat classes with their new neme 
 
-			ofgdb_drv = ogr.GetDriverByName("FileGDB")			
+			ofgdb_drv = ogr.GetDriverByName("OpenFileGDB")			
+			## creates gdb for the other layers (ods)
 			if os.path.exists(otherGDBPath):
-				print( "deleting other gdb:  \n\n")
+				print( "    deleting other gdb:  \n\n")
 				ofgdb_drv.DeleteDataSource(otherGDBPath)				
 			ods = ofgdb_drv.CreateDataSource( otherGDBPath)
 		
 			if inFeatures != []:
 				#ofgdb_drv.Open( otherGDBPath, 1)  #not sure if this is needed
-				for oLFC in inFeatures:
-					#print ( "here\n")
-					of_drv  =  ogr.GetDriverByName("FileGDB")  
+				for oLFC in inFeatures: 
+					# driver for the user features 
+					of_drv  =  ogr.GetDriverByName("OpenFileGDB")  
 					# open other fgdb -- we cannot assume that all the fc are store in the same gdb, so I have to open the/a gdb for each fc
+					## read other layer from input 
 					o_gdb = os.path.split (oLFC[0])[0]
 					oFC_name = os.path.normpath(oLFC[0]).split(os.path.sep)[-1]
 					of_ds = of_drv.Open( o_gdb , 0)
-					#print  (of_ds)
+					#print ("input name ")
+					#print  (oFC_name)
 					of_lyr = [ly for ly in of_ds if ly.GetName() == oFC_name][0]
+					#print (of_lyr)
+					#print ( "new name")
+					#print ( oLFC[1])
 					ods.CopyLayer (of_lyr, oLFC[1], ['OVERWRITE=YES', 'METHOD=SKIP','OGR_ORGANIZE_POLYGONS=SKIP']) 
 					of_lyr = None
 					of_ds = None

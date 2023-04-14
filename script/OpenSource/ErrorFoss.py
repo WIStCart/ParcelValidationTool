@@ -3,10 +3,10 @@ from Parcel import Parcel
 import re
 import urllib.parse, urllib.request, os, json
 import sys
-from osgeo import gdal, ogr, osr
+from osgeo import ogr
 #import fiona
-import geopandas as gpd
-from shapely.geometry import LinearRing
+#import geopandas as gpd
+#from shapely.geometry import LinearRing
 
 class Error:
 
@@ -65,8 +65,10 @@ class Error:
 					#print("couldn't validate")
 					if  self.xyShift >= 6:
 						self.geometryNotValidated = True
+						print("\n    Parcel geometry not validated, several parcel geometries appear to be spatially misplaced by about: " + str(self.xyShift) + " meters. \n" )
+					
 					elif self.xyShift >= 1.2 and self.xyShift < 6:
-						# print("\n  Parcel geometry validated, but several parcel geometries appear to be spatially misplaced by about: " + str(self.xyShift) + " meters. \n" )
+						print("\n  Parcel geometry validated, but several parcel geometries appear to be spatially misplaced by about: " + str(self.xyShift) + " meters. \n" )
 						self.geometricPlacementErrors = ["Several parcel geometries appear to be spatially misplaced " + str(self.xyShift) + " meters when comparing them against parcel geometries from last year. This issue is indicative of a re-projection error. Please see the following documentation: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf section #2, for advice on how to project native data to the Statewide Parcel CRS."]
 					else:
 						print("\n    Parcel geometry validated.")
@@ -183,7 +185,7 @@ class Error:
 			shape = True
 			coord = True
 			## Get coordinate reference system
-						
+			print( "in checkcrs: ")			
 			crs = featureClass.GetSpatialRef().ExportToWkt().split(",")[0].split("[")[1].replace('"','')
 			# spatialReference = desc.spatialReference
 			# Test for the Polygon feature class against the parcel project's, shape type, projection name, and units.
@@ -928,7 +930,7 @@ class Error:
 						if ('CANULL'  in address or 'NULL BLVD'  in address ):
 							pass
 
-						elif ('UNAVAILABLE' in address or 'ADDRESS' in address or 'ADDDRESS' in address or 'UNKNOWN' in address or ' 00000' in address or '-0000' in address or 'NULL' in address or  ('NONE' in address and 'HONONEGAH' not in address) or 'MAIL EXEMPT' in address or 'TAX EX' in address or 'UNASSIGNED' in address or 'N/A' in address) or(address in badPstladdSet) or any(x.islower() for x in address):
+						elif ('UNAVAILABLE' in address or 'ADDRESS' in address or 'ADDDRESS' in address or 'UNKNOWN' in address or ' 00000' in address or 'NULL' in address or  ('NONE' in address and 'HONONEGAH' not in address) or 'MAIL EXEMPT' in address or 'TAX EX' in address or 'UNASSIGNED' in address or 'N/A' in address) or(address in badPstladdSet) or any(x.islower() for x in address):
 							getattr(Parcel,errorType + "Errors").append("A value provided in the " + PostalAd.upper() + " field may contain an incomplete address. Please verify the value is correct or set to <Null> if complete address is unknown.")
 							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 							Error.flags_dict['postalCheck'] += 1
