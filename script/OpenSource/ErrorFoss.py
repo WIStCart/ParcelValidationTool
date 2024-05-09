@@ -3,10 +3,8 @@ from Parcel import Parcel
 import re
 import urllib.parse, urllib.request, os, json
 import sys
+import osgeo
 from osgeo import ogr
-#import fiona
-#import geopandas as gpd
-#from shapely.geometry import LinearRing
 
 class Error:
 
@@ -21,6 +19,8 @@ class Error:
 		self.geometricFileErrors = []
 		self.geometricPlacementErrors = []
 		self.pinSkipCount = 0
+		self.uniqueParcelDateDict = {}
+		self.uniqueparcelDatePercent = 0.0
 		self.trYearPast = 0
 		self.trYearExpected = 0
 		self.trYearFuture = 0
@@ -42,11 +42,11 @@ class Error:
 		self.xyShift = 0
 		self.codedDomainfields = []
 		self.badcharsCount = 0
-		self.uniqueparcelDatePercent = 0.0
 		self.ErrorSum = 0   #sum of generalErrorCount, geometricErrorCount, addressErrorCount, taxErrorCount
 		self.flags_dict = {'numericCheck': 0, 'duplicatedCheck': 0, 'prefixDom': 0, 'streettypeDom': 0, 'unitidtype': 0, 'placenameDom': 0, 'suffixDom': 0, 'trYear': 0, 'taxrollYr': 0, 'streetnameDom': 0, 'zipCheck': 0, 'cntCheck': 0, 'redundantId': 0, 'postalCheck':0, 'auxPropCheck': 0, 'fairmarketCheck': 0, 'mflvalueCheck': 0, 'auxclassFullyX4': 0, 'cntPropClassCheck': 0, 'matchContrib': 0, 'netvsGross': 0, 'schoolDist': 0 }
 
-	# Test records throughout the dataset to ensure that polygons exist within an actual county envelope ("Waukesha" issue or the "Lake Michigan" issue).
+	# Test records throughout the dataset to ensure that polygons exist within an actual county envelope 
+	#("Waukesha" issue or the "Lake Michigan" issue).
 	def checkGeometricQuality(self,Parcel,ignoreList):
 		if self.nextEnvelopeInterval == self.recordIterationCount:
 			if str(Parcel.parcelid).upper() in ignoreList:   
@@ -85,7 +85,7 @@ class Error:
 				self.xyShift = round((self.diffxy/self.notConfirmGeomCount),2)
 				# print("  Several parcel geometries appear to be spatially misplaced by about: " + str(self.xyShift) + " meters." )
 				self.geometricPlacementErrors = ["Several parcel geometries appear to be spatially misplaced " + str(self.xyShift) + " meters when comparing them against parcel geometries from last year. This issue is indicative of a re-projection error. Please see the following documentation: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf section #2, for advice on how to project native data to the Statewide Parcel CRS."]
-		self,Parcel = self.testParcelGeometry(Parcel)
+		self,Parcel = self.testParcelGeometry(Parcel,ignoreList)
 		self.recordIterationCount += 1
 		return (self, Parcel)
 
@@ -98,18 +98,19 @@ class Error:
 			while parcelid is not None and i in parcelid:
 				parcelid = parcelid[:parcelid.find(i)] + charsdict[i] + parcelid[parcelid.find(i)+1:]
 		try:
-			#baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP_V3/V3_Parcels/FeatureServer/0/query"
-			baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP/Parcels/FeatureServer/0/query"
+			#baseURL = "http://mapservices.legis.wisconsin.gov/arcgis/rest/services/WLIP/Parcels/FeatureServer/0/query"
+			baseURL = "https://services3.arcgis.com/n6uYoouQZW75n5WI/arcgis/rest/services/Wisconsin_Statewide_Parcels/FeatureServer/0/query"
 			where =  str(Parcel.parcelfips) + parcelid
-			query = "?f=json&where=STATEID+%3D+%27{0}%27&geometry=true&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=OBJECTID%2CPARCELID%2CTAXPARCELID%2CCONAME%2CPARCELSRC&outSR=3071&resultOffset=0&resultRecordCount=10000".format(where)
+			#query = "?f=json&where=STATEID+%3D+%27{0}%27&geometry=true&returnGeometry=true&spatialRel=esriSpatialRelIntersects&outFields=OBJECTID%2CPARCELID%2CTAXPARCELID%2CCONAME%2CPARCELSRC&outSR=3071&resultOffset=0&resultRecordCount=10000".format(where)
+			query = '?where=STATEID+%3D++%27{0}%27&geometry=&spatialRel=esriSpatialRelIntersects&outFields=OBJECTID%2C+PARCELID%2C+CONAME%2C+PARCELSRC&returnGeometry=true&outSR=3071&resultOffset=0&resultRecordCount=10000&f=pjson&token='.format(where)
 			fsURL = baseURL + query
 			#fs.load(fsURL)
 			fp = urllib.request.urlopen(fsURL)			
 			mybytes = fp.read()
 			currFC = mybytes.decode('utf_8')
 			currEsriJSON = json.loads(currFC)
-			fp.close()			
-	 		
+			fp.close()
+			
 			#centroidXY = LinearRing([tuple(coord) for coord in currGeoJSON['features'][0]['geometry']['rings'][0]]).centroid
 			# convert esriJson to geoJson; select the rings, then make a geojson string to create a ogr.geometry 
 			rings  =  currEsriJSON['features'][0]['geometry']['rings']   #there may be more than two rings in the case of multipolys
@@ -123,7 +124,6 @@ class Error:
 			v2x = round(v2x,2)
 			v1y = round(v1y,2)
 			v2y = round(v2y,2)
-
 			diffx = v2x - v1x
 			diffy = v2y - v1y
 			if diffx == 0 and diffy == 0: #(v2x == v1x) and (v2y == v1y):
@@ -140,6 +140,9 @@ class Error:
 				#print ( "no confirmed --- distance  " + str(diffxy))
 				self.diffxy = self.diffxy + diffxy
 				self.notConfirmGeomCount += 1
+				#print (parcelid)
+				#print ("New coord  " + str (v2x) + ", " + str(v2y) + " and O coord " + str (v1x) + ", " + str(v1y) )
+				#print ( diffxy )
 				if (self.notConfirmGeomCount % 10 == 0):
 					print("    Parcel geometry not validated yet, will attempt another record.")
 					#print ("P coord  " + str (v2x) + ", " + str(v2y) + " and O coord " + str (v1x) + ", " + str(v1y) )					
@@ -152,8 +155,9 @@ class Error:
 			return "Valid"
 		# return "Valid"
 
-	def testParcelGeometry(self,Parcel):
+	def testParcelGeometry(self,Parcel,ignoreList):
 		# Test for null geometries or other oddities
+		parcelid = str(Parcel.parcelid).upper()  ## parcelid not in ignoreList  ## allow oddities in pinskips 
 		try:
 			geom = Parcel.shapeXY
 			xCent = geom.GetX()
@@ -164,13 +168,15 @@ class Error:
 		try:
 			areaP = Parcel.shapeArea
 			lengthP = Parcel.shapeLength
-			if areaP < 0.01:
+			if areaP < 0.01 and areaP > 0 and (parcelid is None or parcelid not in ignoreList):  ### gdal may create open polygones 
 				Parcel.geometricErrors.append("Sliver Polygon: AREA")
 				self.geometricErrorCount += 1
-			if lengthP < 0.01:
+			if lengthP < 0.01 and (parcelid is None or parcelid not in ignoreList):
 				Parcel.geometricErrors.append("Sliver Polygon: LENGTH")
 				self.geometricErrorCount += 1
-			if (areaP/lengthP) < 0.01:
+			if areaP > 0 and (areaP/lengthP) < 0.01 and (parcelid is None or parcelid not in ignoreList):
+				#getattr(Parcel, "geometricErrors").append("Sliver Polygon: AREA/LENGTH")
+				#setattr(Error, "geometricErrorCount", getattr(Error, "geometricErrorCount") + 1)
 				Parcel.geometricErrors.append("Sliver Polygon: AREA/LENGTH")
 				self.geometricErrorCount += 1
 		except:
@@ -185,7 +191,7 @@ class Error:
 			shape = True
 			coord = True
 			## Get coordinate reference system
-			print( "in checkcrs: ")			
+			#print( "in checkcrs: ")			
 			crs = featureClass.GetSpatialRef().ExportToWkt().split(",")[0].split("[")[1].replace('"','')
 			# spatialReference = desc.spatialReference
 			# Test for the Polygon feature class against the parcel project's, shape type, projection name, and units.
@@ -202,21 +208,21 @@ class Error:
 				coord = False
 			#return Error
 			if var == False:
-				# print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
-				# print("     IMMEDIATE ERROR REQUIRING ATTENTION")
-				# print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+				print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+				print("     IMMEDIATE ERROR REQUIRING ATTENTION")
+				print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 				if shape == False:
-					# print("  THE FEATURE CLASS SHOULD BE OF POLYGON TYPE INSTEAD OF: " + geomtype.upper() + "\n")
-					# print("  PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
-					# print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+					print("  THE FEATURE CLASS SHOULD BE OF POLYGON TYPE INSTEAD OF: " + geomtype.upper() + "\n")
+					print("  PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
+					print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
 					sys.tracebacklimit = 0
 					raise NameError("\n     POLYGON GEOMETRY SYSTEM ERROR")
 					#exit()
 				if coord == False:
-					# print("  THE FEATURE CLASS SHOULD BE 'NAD_1983_HARN_Wisconsin_TM' INSTEAD OF: " + spatialReference.name + "\n")
-					# print("  PLEASE FOLLOW THIS DOCUMENTATION: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf TO PROJECT NATIVE DATA TO THE STATEWIDE PARCEL CRS\n")
-					# print("  PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
-					# print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+					print("  THE FEATURE CLASS SHOULD BE 'NAD_1983_HARN_Wisconsin_TM' INSTEAD OF: " + crs + "\n")
+					print("  PLEASE FOLLOW THIS DOCUMENTATION: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf TO PROJECT NATIVE DATA TO THE STATEWIDE PARCEL CRS\n")
+					print("  PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
+					print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
 					sys.tracebacklimit = 0
 					raise NameError("\n     COORDINATE REFERENCE SYSTEM ERROR")
 					#exit()
@@ -266,7 +272,7 @@ class Error:
 		return (Error, Parcel)
 
 	#Check if duplicates exist within an entire field(Error object, Parcel object, field to test, type of error to classify this as, are <Null>s are considered errors?, list of strings that are expected to be duplicates (to ignore), running list of strings to test against)
-	def checkIsDuplicate(Error,Parcel,field,errorType,acceptNull,ignoreList,testList):
+	def checkIsDuplicate(Error,Parcel,field,errorType,acceptNull,ignoreList,testList, acceptYears):
 		nullList = ["<Null>", "<NULL>", "NULL", ""]
 		try:
 			stringToTest = getattr(Parcel,field)
@@ -284,8 +290,14 @@ class Error:
 			else:
 				if acceptNull:
 					pass
+				elif field == 'parcelid':
+					taxrollyr = getattr (Parcel, "taxrollyear")
+					if taxrollyr == acceptYears[0] or taxrollyr == acceptYears[1] or taxrollyr is None:
+						getattr(Parcel,errorType + "Errors").append("<Null> value found in " + field.upper() + " field and a value is expected for non-parcel features and non-new taxable parcels..")
+						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
 				else:
-					getattr(Parcel,errorType + "Errors").append("<Null> Found on " + field.upper())
+					getattr(Parcel,errorType + "Errors").append("<Null> Found on " + field.upper() + " field. ")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
@@ -293,19 +305,34 @@ class Error:
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return (Error, Parcel)
 
-	def parcelDateCheck(Error,Parcel, parceldateField, uniqueDates, sameDates, errorType):
+	# Error.parcelDateUniquenessCheck(totError, currParcel,"parceldate")  generalErrorCount
+
+	def parcelDateUniquenessCheck(self,Parcel,field,errorType): 
+		nullList = ["<Null>", "<NULL>", "NULL",  "   ", " ", ""]
 		try:
-			parcelDate = getattr(Parcel, parceldateField)
+			parcelDate = getattr(Parcel, field)
 			if parcelDate is not None:
-				if parcelDate not in uniqueDates and parcelDate not in sameDates:
-					uniqueDates.append(parcelDate)
-				elif parcelDate in uniqueDates and parcelDate not in sameDates:
-					sameDates.append(parcelDate)
-					uniqueDates.remove(parcelDate)
+				if  parcelDate in nullList or parcelDate.isspace():				
+					getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + field.upper() + ". Please correct.")
+					setattr(self,errorType + "ErrorCount", getattr(self,errorType + "ErrorCount") + 1)
+					self.badcharsCount  +=1   #for wrong <null> values
+				else: 
+					self.uniqueParcelDateDict.setdefault( parcelDate,0)
+					self.uniqueParcelDateDict[ parcelDate ] += 1
+
 		except:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the PARCELDATE field. Please inspect the value of this field.")
-			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-		return (Error, Parcel)
+			setattr(self,errorType + "ErrorCount", getattr(self,errorType + "ErrorCount") + 1)
+		return (self, Parcel)
+
+
+	def maxFreq (self ):
+		if self.uniqueParcelDateDict:
+			inverse = [(value, key) for key, value in self.uniqueParcelDateDict.items()] 
+			parcelDateMoreFrequent = max (inverse)
+			self.uniqueparcelDatePercent = (parcelDateMoreFrequent[0]/self.recordTotalCount) * 100
+		#return self 
+
 
 	#Check to see if a domain string is within a list (good) otherwise report to user it isn't found..
 	def checkDomainString(Error,Parcel,field,errorType,acceptNull,testList):
@@ -518,6 +545,24 @@ class Error:
 			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please inspect the value of this field.")
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 		return(Error, Parcel)
+
+	#verify that UNITID contains a values if UNITTYPE field contains a value of "UNIT" or "APARTMENT"
+	def unittypeAndUnitidCheck(Error,Parcel,field,errorType):
+		utypeList = ["APARTMENT", "UNIT",  "CONDOMINIUM" ]
+		try:
+			stringToTest = getattr(Parcel, field)   #UnitID
+			unitTypeToTest = getattr(Parcel, "unittype")
+			if stringToTest is not None:
+				pass
+			elif  unitTypeToTest is not None and unitTypeToTest.upper() in utypeList:
+				getattr(Parcel,errorType + "Errors").append("<Null> value found on UNITID field but a value is expected when UNITTYPE field contains a value of #UNIT# or #APARTMENT#. ")
+				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+			return (Error, Parcel)
+		except:
+			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please inspect the value of this field.")
+			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+		return(Error, Parcel)
+
 
 	#Verify that value in Improved field is correct based on value provided in Impvalue field...
 	#We may want/need to tweak the logic in here depending on how strictly we enforce the value of <Null> allowed in Impvalue field (i.e. Only for non-tax parcels or allow either 0 or <Null>)
@@ -856,8 +901,8 @@ class Error:
 		### Get the description/definition of the layer i.e., feature class
 		defn = inFC.GetLayerDefn()
 		for i in range (defn.GetFieldCount()):
-			j = defn.GetFieldDefn(i).GetType()
-			fieldDictNames[defn.GetFieldDefn(i).GetName()] =[[defn.GetFieldDefn(i).GetFieldTypeName(j)], [defn.GetFieldDefn(i).GetWidth() ]]  #defn.GetFieldDefn(i).GetPrecision()
+			code = defn.GetFieldDefn(i).GetType()
+			fieldDictNames[defn.GetFieldDefn(i).GetName()] =[[defn.GetFieldDefn(i).GetFieldTypeName(code)], [defn.GetFieldDefn(i).GetWidth() ]]  #defn.GetFieldDefn(i).GetPrecision()
 		
 		i = 0
 		while i  < defn.GetFieldCount():
@@ -885,9 +930,9 @@ class Error:
 						var = False
 		
 		if var == False:
-			# print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
-			# print("     IMMEDIATE ERROR REQUIRING ATTENTION")
-			# print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			print("     IMMEDIATE ERROR REQUIRING ATTENTION")
+			print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 			print("  CERTAIN FIELDS DO NOT MEET THE PARCEL SCHEMA REQUIREMENTS.\n")
 			if len(incorrectFields) > 0:
 				# print("  THE PROBLEMATIC FIELDS INCLUDE: (" + str(incorrectFields).strip("[").strip("]").replace('u','') + ")\n")
@@ -913,6 +958,8 @@ class Error:
 		try:
 			address = getattr(Parcel,PostalAd)
 			year = getattr(Parcel, taxYear)
+			#print (str(year))
+			#print ( str (acceptYears))
 			pinToTest = getattr(Parcel,pinField)
 			if address is None:
 				pass
@@ -929,11 +976,11 @@ class Error:
 					if int(year) <= int(acceptYears[1]):   #or pinToTest in ignorelist:
 						if ('CANULL'  in address or 'NULL BLVD'  in address ):
 							pass
-
-						elif ('UNAVAILABLE' in address or 'ADDRESS' in address or 'ADDDRESS' in address or 'UNKNOWN' in address or ' 00000' in address or 'NULL' in address or  ('NONE' in address and 'HONONEGAH' not in address) or 'MAIL EXEMPT' in address or 'TAX EX' in address or 'UNASSIGNED' in address or 'N/A' in address) or(address in badPstladdSet) or any(x.islower() for x in address):
+						elif ('NOT AVAILABLE' in address or 'NONE PROVIDED' in address  or 'UNAVAILABLE' in address or 'ADDRESS' in address or 'ADDDRESS' in address or 'UNKNOWN' in address or ' 00000' in address or 'NULL' in address or  ('NONE' in address and 'HONONEGAH' not in address) or 'MAIL EXEMPT' in address or 'TAX EX' in address or 'UNASSIGNED' in address or 'N/A' in address) or(address in badPstladdSet) or  any(x.islower() for x in address):
 							getattr(Parcel,errorType + "Errors").append("A value provided in the " + PostalAd.upper() + " field may contain an incomplete address. Please verify the value is correct or set to <Null> if complete address is unknown.")
 							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 							Error.flags_dict['postalCheck'] += 1
+							#print (address)
 						else:
 							pass
 			return(Error,Parcel)
@@ -988,6 +1035,10 @@ class Error:
 					Error.flags_dict['mflvalueCheck'] += 1
 				elif re.search('W4', auxToTest) is not None:
 					getattr(Parcel, errorType + "Errors").append("MFLVALUE does not include properties with AUXCLASS value of W4. Please verify.")
+					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					Error.flags_dict['mflvalueCheck'] += 1
+				elif re.search('AW', auxToTest) is not None:
+					getattr(Parcel, errorType + "Errors").append("MFLVALUE does not include properties with AUXCLASS value of AWO/AW. Please verify.")
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					Error.flags_dict['mflvalueCheck'] += 1
 			else:
@@ -1175,12 +1226,12 @@ class Error:
 		if (centroidDict[coname][0] - 100) <= round(iNxMid,0) <= (centroidDict[coname][0] + 100) and (centroidDict[coname][1] - 100) <= round(iNyMid,0) <= (centroidDict[coname][1] + 100):
 			print("  THE GEOMETRY OF THIS FEATURE CLASS WAS VALIDATED.  \n")
 		else:
-			# print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 			print("  THE GEOMETRY OF THIS FEATURE CLASS WAS NOT VALIDATED.  \n")
 			# print("  THIS ISSUE CAN BE INDICATIVE OF A RE-PROJECTION ERROR. \n ")
 			# print("  REMINDER: YOUR DATA SHOULD BE RE-PROJECTED TO NAD_1983_HARN_Wisconsin_TM (Meters) PRIOR TO LOADING DATA INTO THE TEMPLATE FEATURE CLASS.\n")
 			# print("  PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
-			# print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+			print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
 			sys.tracebacklimit = 0
 			raise NameError("\n     GEOMETRY OF FEATURE CLASS NOT VALIDATED")
 			#exit()
@@ -1226,24 +1277,15 @@ class Error:
 		return (Error, Parcel)
 
 	@staticmethod
-	# TODO: change so that it actually chekcs version or gives option for open source or old closed version
+
 	def versionCheck(inVersion):
 		# try:
-		# print('  Checking Tool Version...\n')
-		# self.message_t.insert(END, 'Checking Tool Version...\n' )
 		currVersion = urllib.request.urlopen('http://www.sco.wisc.edu/parcels/tools/Validation/validation_version.txt').read().decode("utf8")
 		# print(  inVersion)
 		if inVersion == currVersion:
-			print("\n\n    Tool up to date.\n")
-			print("    "+ str(inVersion) + "\n")
+			print("\n    Tool up to date.\n\n")
+			#print("    "+ str(inVersion) + "\n")
 		else:
-			# print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-			# print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-			# print("  !!!!!!!!!!Error tool not up to date!!!!!!!!!!")
-			# print("  Please download the latest version of the tool at")
-			# print("  http://www.sco.wisc.edu/parcels/tools/")
-			# print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-			# print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
 			#exit()
 			sys.tracebacklimit = 0
 			raise NameError("\n     TOOL VERSION ERROR")
@@ -1252,3 +1294,20 @@ class Error:
 			# print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 			# print("Check the change log at http://www.sco.wisc.edu/parcels/tools/")
 			# print("to make sure the latest version of the tool is installed before submitting")
+
+
+	@staticmethod
+
+	def loadParcelData(  ):
+		"""load parcel data from website"""
+		# try:
+		data = urllib.request.urlopen('http://www.sco.wisc.edu/parcels/tools/Validation/parcelsData.txt')
+		# print(  inVersion)
+
+		dataList = []
+		for lines in data.readlines():
+			dataList.append(lines.decode("utf8"))
+	
+		#pinSkips, taxRollYears, prefixDomains, suffixDomains, streetTypes, unitType, unitId, badPstladdSet, stNameDict
+
+		return dataList 

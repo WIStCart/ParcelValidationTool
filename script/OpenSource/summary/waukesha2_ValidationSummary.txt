@@ -1,0 +1,90 @@
+C:\Users\ajwells.AD\Documents\GitHub\ValidationTool\ParcelValidationTool\script\OpenSource\summary\waukesha2_ValidationSummary.txt
+Validation Summary Table: 
+This validation summary table contains an overview of any errors found by the Parcel Validation Tool. Please review the contents of this file and make changes to your parcel dataset as necessary.
+
+************************************************************************
+* In-line errors
+************************************************************************
+The following lines summarized the element-specific errors that were found while validating your parcel dataset.  The stats below are meant as a means of reviewing the output.  Please see the GeneralElementErrors, AddressElementErrors, TaxrollElementErrors, and GeometricElementErrors fields to address these errors individually.
+	General Errors: 0
+	Geometric Errors: 0
+	Address Errors: 292
+	Tax Errors: 0
+	------------------
+	ERROR SUM: 292
+
+
+************************************************************************
+* Uniform ParcelDate:
+************************************************************************
+************************************************************************
+* Broad-level errors:
+************************************************************************
+The following lines explain any broad geometric errors that were found while validating your parcel dataset.
+	*No broad-level geometric errors found!
+
+
+Percentage of records with various Taxroll Years
+	Previous Taxroll Year: 0.0%
+	Expected Taxroll Year: 99.26%
+	Future Taxroll Years: 0.74%
+	Other Taxroll Years: 0.0%
+
+
+Records missing CONAME, PARCELFIPS, or PARCELSOURCE
+	Missing CONAME: 0
+	Missing PARCELFIPS: 0
+	Missing PARCELSRC: 0
+
+If any of the above values are greater than 0, please add missing values.  These 3 fields should be populated for all records submitted.
+
+
+BELOW IS A COMPARISON OF COMPLETENESS VALUES FROM YOUR PREVIOUS PARCEL SUBMISSION AND THIS CURRENT SUBMISSION.
+-->If the value shown is a seemingly large negative number, please verify that all data was joined correctly and no data was lost during processing.
+-->Note: This does not necessarily mean your data is incorrect, we just want to highlight large discrepancies that could indicate missing or incorrect data.
+
+          FIELD     DIFFERENCE
+         ------     ----------
+       PARCELID:  0.46
+    TAXPARCELID:  0.0
+     PARCELDATE:  0.0
+    TAXROLLYEAR:  0.5
+      OWNERNME1:  0.49
+      OWNERNME2:  -3.04
+     PSTLADRESS:  0.54
+     SITEADRESS:  0.71
+   ADDNUMPREFIX:  0.79
+         ADDNUM:  0.7
+   ADDNUMSUFFIX:  5.19
+         PREFIX:  -10.84
+     STREETNAME:  0.71
+     STREETTYPE:  0.75
+         SUFFIX:  -14.96
+   LANDMARKNAME:  0.0
+       UNITTYPE:  3.05
+         UNITID:  -10.05
+      PLACENAME:  0.36
+        ZIPCODE:  0.51
+           ZIP4:  7.34
+     SCHOOLDIST:  0.49
+   SCHOOLDISTNO:  0.49
+   CNTASSDVALUE:  1.39
+       LNDVALUE:  1.39
+       IMPVALUE:  1.39
+       MFLVALUE:  -5.33
+    ESTFMKVALUE:  4.49
+       NETPRPTA:  1.39
+       GRSPRPTA:  1.39
+      PROPCLASS:  0.68
+       AUXCLASS:  -0.35
+      ASSDACRES:  0.66
+      DEEDACRES:  1.06
+       GISACRES:  0.46
+         CONAME:  0.46
+     PARCELFIPS:  0.46
+      PARCELSRC:  0.46
+
+
+
+* Within: C:\Users\ajwells.AD\Documents\GitHub\ValidationTool\ParcelValidationTool\script\OpenSource\summary\waukesha2
+************************************************************************

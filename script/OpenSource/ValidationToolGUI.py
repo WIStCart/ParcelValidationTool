@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import tix 
-#import tkinter.tix as Tix
 from tkinter import ttk
 from tkinter import *
 from tkinter.ttk import *
@@ -10,20 +9,27 @@ from tkinter import scrolledtext
 #from tkinter.scrolledtext import ScrolledText
 from tkinter import messagebox
 
+from osgeo import gdal, ogr
 import os, sys
 from os import path
 import collections
 
-from osgeo import ogr, gdal
-
 import ValidationToolScriptFoss
 from ValidationToolScriptFoss import validation_tool_run_all
 
-#from threading import *
+#import shutil 
+#import imp
+#fp, pathname, description = imp.find_module('_gdal', [os.path.dirname(gdal.__file__)])
+#print (os.path.dirname(sys.argv[0]))
+#print (pathname)
 
 class App(ttk.Frame):    
     def __init__(self, master=None):
         self.folder_icon = tk.PhotoImage(file=folder_gif_path)
+
+        def emptyWork():
+            print('\n\n    Initializing Validation Tool...')
+            print('\n')
 
         ttk.Frame.__init__(self, master)
         self.pack(padx=5, pady=5)
@@ -53,9 +59,6 @@ class App(ttk.Frame):
         for i in self.inputNameList:
             self.input_dict[i] = tk.StringVar(value="")
             
-        #set initial value for redaction checkbox in parcelDataInformationWindow
-        # self.input_dict['isNameRedact'] = tk.StringVar(value='false')
-
         # simplify certification functionality slightly
         self.input_dict['inCert'] = {element: tk.StringVar(value = '') for element in ['explainedErrorsNumber',
                                                                           'noticeOfNewStreetName',
@@ -70,13 +73,15 @@ class App(ttk.Frame):
 
         # variables to control input in children windows
         global plssRunWindow, parcelinfoRunWindow, explainCertifyRunWindow, zoningRunWindow, othersRunWindow 
-        plssRunWindow = tk.BooleanVar()
-        parcelinfoRunWindow = tk.BooleanVar()
-        explainCertifyRunWindow = tk.BooleanVar()
-        zoningRunWindow = tk.BooleanVar()
-        othersRunWindow = tk.BooleanVar()
+        plssRunWindow = tk.BooleanVar(False)
+        parcelinfoRunWindow = tk.BooleanVar(False)
+        explainCertifyRunWindow = tk.BooleanVar(False)
+        zoningRunWindow = tk.BooleanVar(False)
+        othersRunWindow = tk.BooleanVar(False)
         
         self.create_widgets()
+
+        emptyWork()
     
        ### App class methods ###
     # this function is outside of the scope of all windows
@@ -93,7 +98,8 @@ class App(ttk.Frame):
     def isExitableState(self, exitableStatus, exitButton):# inputObjectMap):
         unfilledFields = list()
         for inputVar in self.inputObjectMap:
-            #print('current input variable: ', inputVar[0].get(), inputVar[1])   
+            #print('current input variable: ', inputVar[0].get(), inputVar[1])  
+
             if (inputVar[0].get() == defaultInputComparator[inputVar[1]]) or \
                     (   inputVar[1] == 'inFC' and not self.FC_exists(inputVar[0].get())) or \
                     (  (inputVar[1] == 'outDir' and os.path.exists(inputVar[0].get()) and inputVar[0].get()[-4:] != '.gdb') or
@@ -112,24 +118,6 @@ class App(ttk.Frame):
             exitableStatus.bind_widget(exitButton, balloonmsg = 'Ready to Execute')        
         #print('unfill :' , unfilledFields)
         return unfilledFields
- 
- 
-    '''
-    def FC_exists(self, fc):
-        ogr.UseExceptions()
-        datasource = os.path.split (fc)[0]
-        layer = os.path.normpath(fc).split(os.path.sep)[-1]   
-        try:
-            driver = ogr.GetDriverByName('OpenFileGDB')
-            ds = driver.Open(datasource,0 )
-            if layer is not None:
-                return ds.GetLayerByName(layer) is not None
-            else:
-                return True
-        except RuntimeError as e:
-            return False
-
-    '''
 
 
     def FC_exists(self, fc):
@@ -144,13 +132,6 @@ class App(ttk.Frame):
                 return True
         except RuntimeError as e:
             return False
-
-    def browse_to_GDB(self, gdb):
-        """browse to selected a gdb directory (no Feature Class)"""
-        gdb_dir = askdirectory()   
-        if gdb_dir:
-            if gdb_dir.endswith('.gdb'):
-                gdb.set(gdb_dir)   
                     
     def askdir_basic(self, path_name):
         """returns a path to a directory - no gdb, and no path checking"""
@@ -164,6 +145,7 @@ class App(ttk.Frame):
         ('Text files', '*.txt'),
         ('Excel files', '*.xlsx; *.xls'),
         ('CSV files', '*.csv'),
+        ('Shape files', '*.shp'),
         ('All files', '*.*'))
         start_path = os.path.dirname (os.path.abspath(__file__))
         filename = askopenfilename(title='Open PLSS file',
@@ -206,13 +188,13 @@ class App(ttk.Frame):
         self.feature_classes = []
         path_name = str()
 
-        # TODO: insert some warning for wrong file type
-        # in either external logging window or reactive 
-        # pop-up message
-        while not(path_name.lower().endswith('.gdb')):
+        while True: 
             path_name = askdirectory()
-
-        if path_name:
+            if (path_name.lower().endswith('.gdb')) or path_name is None:
+                break
+        
+        #print (path_name)         
+        if path_name and path_name.lower().endswith('.gdb') :
             dr = ogr.GetDriverByName('OpenFileGDB')
             datasource = dr.Open(path_name, 0)
 
@@ -224,22 +206,30 @@ class App(ttk.Frame):
             self.open_win(full_path, childWin = childWin2)
             datasource = None
 
+    def browse_to_GDB(self, gdb):
+        """browse to selected a gdb directory (no Feature Class)"""
+        gdb_dir = askdirectory()   
+        
+        if gdb_dir:
+            if gdb_dir.endswith('.gdb'):
+                gdb.set(gdb_dir)   
+
     def create_widgets(self):
         """create the widgets in the app gui """
 
         # inputObjectMap = [(inputObject, inputVariable, alias), TODO]
 
         def statusDrawer(event):
-            colorizer = lambda colorState: "grey" if colorState == False else "green"
+            colorizer = lambda colorState: "grey" if colorState == False else "#00FF00"
             if (self.input_dict['isFinal'].get() == 'finalModeSelected'): # redundant given calling scope below
-                canvasDrawer.create_rectangle(3, 15, 12, 24, fill = colorizer(parcelinfoRunWindow))
-                canvasDrawer.create_rectangle(3, 60, 12, 69, fill = colorizer(plssRunWindow))
-                canvasDrawer.create_rectangle(3, 105, 12, 114, fill = colorizer(zoningRunWindow))
-                canvasDrawer.create_rectangle(3, 150, 12, 159, fill = colorizer(othersRunWindow))
-                canvasDrawer.create_rectangle(3, 195, 12, 204, fill = colorizer(all([parcelinfoRunWindow,
-                                                                                    plssRunWindow,
-                                                                                    zoningRunWindow,
-                                                                                    othersRunWindow])))
+                canvasDrawer.create_rectangle(3, 15, 12, 24, fill = colorizer(parcelinfoRunWindow.get()))
+                canvasDrawer.create_rectangle(3, 60, 12, 69, fill = colorizer(plssRunWindow.get()))
+                canvasDrawer.create_rectangle(3, 105, 12, 114, fill = colorizer(zoningRunWindow.get()))
+                canvasDrawer.create_rectangle(3, 150, 12, 159, fill = colorizer(othersRunWindow.get()))
+                canvasDrawer.create_rectangle(3, 195, 12, 204, fill = colorizer(all([parcelinfoRunWindow.get(),
+                                                                                    plssRunWindow.get(),
+                                                                                    zoningRunWindow.get(),
+                                                                                    othersRunWindow.get()])))
             else:
                 colorizable = all([True if (self.input_dict[item].get() != "") else False for item in ['county', 'inFC', 'outDir', 'outName']])
                 canvasDrawer.create_rectangle(3, 195, 12, 204, fill = colorizer(colorizable))
@@ -287,8 +277,10 @@ class App(ttk.Frame):
                 else:
                     windowsNameMaps = [['Parcel Data Information', 'PLSS Layer', 'Explain Certification', 'Zoning Layer', 'Other Layers'],
                                        [parcelinfoRunWindow, plssRunWindow, explainCertifyRunWindow, zoningRunWindow, othersRunWindow]]
+                    #print("here")
                     inputtedWindows = [window if state.get() else None for window, state in zip(windowsNameMaps[0], windowsNameMaps[1])]
-                    movMsg = "You are about to leave Final mode and have input in subwindow(s) ({}) which would be deleted. Continue?".format(*[inputted for inputted in inputtedWindows if inputted != None])
+                    #print (inputtedWindows)
+                    movMsg = "You are about to leave Final mode and have input in subwindow(s) ({}) which would be deleted. Continue?".format([inputted for inputted in inputtedWindows if inputted != None])
                     moveToTest = messagebox.askokcancel(title = "Proceed to Test Mode", message = movMsg)
                     if moveToTest:
                         self.input_dict['isFinal'].set('testModeSelected')
@@ -359,11 +351,12 @@ class App(ttk.Frame):
                                 "WALWORTH","WASHBURN","WASHINGTON","WAUKESHA","WAUPACA","WAUSHARA","WINNEBAGO","WOOD"]
         county_input['state'] = 'readonly' # prevent typing in combo box
 
-        global defaultInputComparator 
+        '''
+        #global defaultInputComparator 
         defaultInputComparator = {'county': '', 'inFC': '', 'outName': '', 'outDir': '',
                                     'plssRunWindow': False, 'parcelinfoRunWindow': False, 'explainCertifyRunWindow': False,
                                     'zoningRunWindow': False, 'othersRunWindow': False}
-
+        '''
         def updateCounty(_):
             self.input_dict['county'].set(county_input.get())
             #print(self.input_dict['county'].get())
@@ -384,13 +377,14 @@ class App(ttk.Frame):
         outDir_input_label.grid(column=0, row=5, sticky=tk.W)
         outDir_input = ttk.Entry(self, width=56, textvariable= self.input_dict['outDir'])
         outDir_input.grid(column=0, row=6, sticky=tk.W)
-        #TO ASK - ask how and why this lambda function works
+        
         outDir_input_dirBut = ttk.Button(self, width=8, image=self.folder_icon, 
                                         command = lambda: self.browse_to_GDB(self.input_dict['outDir']))
         outDir_input_dirBut.grid(column=1, row=6, sticky=tk.W, padx=5)
         
         outName_input_label = ttk.Label(self, text='Output Feature Class File Name:')
         outName_input_label.grid(column=0, row=7, sticky=tk.W)
+        
         outName_input = ttk.Entry(self, width=56, textvariable= self.input_dict['outName'])
         outName_input.grid(column=0, row=8, sticky=tk.W)
 
@@ -415,8 +409,7 @@ class App(ttk.Frame):
         
         button_main_5 = ttk.Button(buttonsFrame, width=15, text = "Run", command = self.big_run_button) 
         button_main_5.grid(column=0, row=4, sticky=tk.N, pady=10)
-
-    
+ 
         runStatus = tix.Balloon(self)
         
         startScreenWidgetStateMutator() # hacky way to enforce state on first load
@@ -436,7 +429,7 @@ class App(ttk.Frame):
         parcelDataInformationWindow.iconbitmap(wisconsin_icon_path)
         parcelDataInformationWindow.title('Parcel Data Information')
 
-        outINIDir_input_label = ttk.Label(parcelDataInformationWindow, text='Output Directory for PARCEL and OTHER gdb and *.ini:')
+        outINIDir_input_label = ttk.Label(parcelDataInformationWindow, text= 'Output folder DIRECTORY for final .gdbs and *.ini:')
         outINIDir_input_label.grid(row=0, column=0, padx=5, sticky='w')
         outINIDir_input = ttk.Entry(parcelDataInformationWindow,  width=56, textvariable= self.input_dict['outINIDir'])
         outINIDir_input.grid(row=1, column=0, padx=5, sticky='w')
@@ -508,7 +501,6 @@ class App(ttk.Frame):
             def onFrameConfigure(canvas):
                 canvas.configure(scrollregion=canvas.bbox("all"))
             
-            
             explanationCertifyCanvas = tk.Canvas (explanationCertificateWindow )
             explanationCertifyCanvas.pack(side=LEFT, fill = BOTH, expand = True)
 
@@ -524,10 +516,7 @@ class App(ttk.Frame):
                     anchor = NW, tags = explanationCertifyFrame)
             explanationCertifyFrame.bind ("<Configure>", lambda event, 
                     explanationCertifyCanvas=explanationCertifyCanvas: onFrameConfigure(explanationCertifyCanvas))        
-
-
-            
-            
+           
             noticeOfNewStreetName_input_label = ttk.Label(explanationCertifyFrame, text='Notice of New Street Names:')
             noticeOfNewStreetName_input_label.pack () #grid(column=0, row=0, sticky=tk.W)
             noticeOfNewStreetName_input = scrolledtext.ScrolledText(explanationCertifyFrame, #state = 'normal',
@@ -663,7 +652,7 @@ class App(ttk.Frame):
         redactPolicy_input.insert(0, self.input_dict['redactPolicy'].get())  #Displays value stored in dictionary in the entry box
         redactPolicy_input.grid(row=12, column=0, pady=5, padx=5, sticky='w')
 
-        ## new section
+        
         s = ttk.Separator(parcelDataInformationWindow, orient='horizontal')
         s.grid(row=13, column = 0, columnspan=2, padx= 5, pady=10, sticky='ew') 
 
@@ -732,7 +721,7 @@ class App(ttk.Frame):
             
             if len(unfilledFields) > 0:
                 ok_button['state'] = 'disabled'
-                PDIStatus.bind_widget(ok_button, balloonmsg = 'Missing input: {}'.format(unfilledFields))
+                PDIStatus.bind_widget(ok_button, balloonmsg = 'Missing or incorrect input: {}'.format(unfilledFields))
             elif len(unfilledFields) == 0:
                 ok_button['state'] = 'normal'
                 PDIStatus.bind_widget(ok_button, balloonmsg = 'Ready to Save')
@@ -740,7 +729,7 @@ class App(ttk.Frame):
             return unfilledFields
 
         def PDIsaveableStateRunner():
-            return "Missing input: {}".format(isPDIReadytoRun(None))
+            return "Missing or incorrect input: {}".format(isPDIReadytoRun(None))
 
         PDIStatus = tix.Balloon(parcelDataInformationWindow)
         ok_button.bind('<Enter>', isPDIReadytoRun)
@@ -760,6 +749,7 @@ class App(ttk.Frame):
             # with a key summarizing it in a single word
             if (self.input_dict['PLSSType'].get() == 'Maintained by county as other digital format'):
                 plssFC_input['state'] = 'disabled'
+                #plssFC_input_holder.set( '')
                 plssFC_input_dirBut['state'] = 'disabled'
                 plssOtherDigitalFile_input['state'] = 'normal'
                 plssOtherDigitalFile_input_dirBut['state'] = 'normal'
@@ -767,11 +757,14 @@ class App(ttk.Frame):
                 plssFC_input['state'] = 'normal'
                 plssFC_input_dirBut['state'] = 'normal'
                 plssOtherDigitalFile_input['state'] = 'disabled'
+                plssOtherDigitalFile_input_holder.set('')
                 plssOtherDigitalFile_input_dirBut['state'] = 'disabled'
             else:
                 plssFC_input['state'] = 'disabled'
+                #plssFC_input_holder.set( '')
                 plssFC_input_dirBut['state'] = 'disabled'
                 plssOtherDigitalFile_input['state'] = 'disabled'
+                plssOtherDigitalFile_input_holder.set('')
                 plssOtherDigitalFile_input_dirBut['state'] = 'disabled'
 
         ## PLSS combo box (drop down) menu
@@ -875,6 +868,8 @@ class App(ttk.Frame):
         def saveableStateRunner():
                 return "Missing input: {}".format(isPLSSReadytoRun(None))
 
+        #selectDataFormatStateMutator(None)   #do we need this?
+    
         plssStatus = tix.Balloon(plssLayerWindow)
         ok_button.bind('<Enter>', isPLSSReadytoRun)
         plssStatus.bind_widget(ok_button, balloonmsg = saveableStateRunner () )
@@ -894,6 +889,7 @@ class App(ttk.Frame):
                 zoningGenFC_input_dirBut['state'] = 'normal'
             else:
                 zoningGenFC_input['state'] = 'disabled'
+                self.input_dict['zoningGenFC'].set('')
                 zoningGenFC_input_dirBut['state'] = 'disabled'
 
         #combo box
@@ -909,7 +905,11 @@ class App(ttk.Frame):
         zoningGenFC_input_label = ttk.Label(zoningLayerWindow, text='County General Feature Class:')
         zoningGenFC_input_label.grid(row=3, column=0, padx=5, sticky='w') #grid(column=0, row=0, sticky=tk.W)
         zoningGenFC_input = ttk.Entry(zoningLayerWindow,  width=56, textvariable= self.input_dict['zoningGenFC'])
-        zoningGenFC_input.insert(0, self.input_dict['zoningGenFC'].get())  #Displays value stored in dictionary in the entry box
+        
+        if self.input_dict['zoningGenFC'].get() == '':  #to prevent overwrite entry
+            zoningGenFC_input.insert(0, self.input_dict['zoningGenFC'].get())  #Displays value stored in dictionary in the entry box
+
+        #zoningGenFC_input.insert(0, self.input_dict['zoningGenFC'].get())  #Displays value stored in dictionary in the entry box
         zoningGenFC_input.grid(row=4, column=0, padx=5)
         zoningGenFC_input_dirBut = ttk.Button(zoningLayerWindow, width=8, image=self.folder_icon, 
                                                 command = lambda: self.browseFor_inFC(self.input_dict['zoningGenFC'],
@@ -922,6 +922,7 @@ class App(ttk.Frame):
                 zoningShoreFC_input_dirBut['state'] = 'normal'
             else:
                 zoningShoreFC_input['state'] = 'disabled'
+                self.input_dict['zoningShoreFC'].set('')
                 zoningShoreFC_input_dirBut['state'] = 'disabled'
         
         #combo box
@@ -938,7 +939,9 @@ class App(ttk.Frame):
         zoningShoreFC_input_label = ttk.Label(zoningLayerWindow, text='Shoreland Feature Class:')
         zoningShoreFC_input_label.grid(row=7, column=0, padx=5, sticky='w') #grid(column=0, row=0, sticky=tk.W)
         zoningShoreFC_input = ttk.Entry(zoningLayerWindow,  width=56, textvariable= self.input_dict['zoningShoreFC'])
-        zoningShoreFC_input.insert(0, self.input_dict['zoningShoreFC'].get())  #Displays value stored in dictionary in the entry box
+        if self.input_dict['zoningShoreFC'].get() == '':  #to prevent overwrite entry
+            zoningShoreFC_input.insert(0, self.input_dict['zoningShoreFC'].get())  #Displays value stored in dictionary in the entry box
+        #zoningShoreFC_input.insert(0, self.input_dict['zoningShoreFC'].get())  #Displays value stored in dictionary in the entry box
         zoningShoreFC_input.grid(row=8, column=0, padx=5)
         zoningShoreFC_input_dirBut = ttk.Button(zoningLayerWindow, width=8, image=self.folder_icon, 
                                                 command = lambda: self.browseFor_inFC(self.input_dict['zoningShoreFC'],
@@ -951,6 +954,7 @@ class App(ttk.Frame):
                 zoningAirFC_input_dirBut['state'] = 'normal'
             else:
                 zoningAirFC_input['state'] = 'disabled'
+                self.input_dict['zoningAirFC'].set('')
                 zoningAirFC_input_dirBut['state'] = 'disabled'
         
         #combo box
@@ -965,7 +969,9 @@ class App(ttk.Frame):
         zoningAirFC_input_label = ttk.Label(zoningLayerWindow, text='Airport Protection Feature Class:')
         zoningAirFC_input_label.grid(row=11, column=0, padx=5, sticky='w') #grid(column=0, row=0, sticky=tk.W)
         zoningAirFC_input = ttk.Entry(zoningLayerWindow,  width=56, textvariable= self.input_dict['zoningAirFC'])
-        zoningAirFC_input.insert(0, self.input_dict['zoningAirFC'].get())  #Displays value stored in dictionary in the entry box
+        if self.input_dict['zoningAirFC'].get() == '':  #to prevent overwrite entry
+            zoningAirFC_input.insert(0, self.input_dict['zoningAirFC'].get())  #Displays value stored in dictionary in the entry box
+        #zoningAirFC_input.insert(0, self.input_dict['zoningAirFC'].get())  #Displays value stored in dictionary in the entry box
         zoningAirFC_input.grid(row=12, column=0, padx=5)
         zoningAirFC_input_dirBut = ttk.Button(zoningLayerWindow, width=8, image=self.folder_icon, 
                                                 command = lambda: self.browseFor_inFC(self.input_dict['zoningAirFC'],
@@ -1031,8 +1037,13 @@ class App(ttk.Frame):
             elif len (unfilledFields) == 0 :
                 ZLStatus.bind_widget(ok_button, balloonmsg  = "Ready to Continue")
                 ok_button['state'] = 'normal'
+
             return unfilledFields
       
+        zoningGenStateMutator(None)
+        zoningShoreStateMutator(None)
+        zoningAirStateMutator(None)
+
         def saveableStateRunner():
                 return "Missing input: {}".format(isZLReadytoRun(None))
 
@@ -1058,6 +1069,7 @@ class App(ttk.Frame):
                 rightsOfWayFCInputDirBut['state'] = 'normal'
             else:
                 rightsOfWayFCInput['state'] = 'disabled'
+                self.input_dict['RightOfWayFC'].set('')
                 rightsOfWayFCInputDirBut['state'] = 'disabled'
 
         rightOfWayLabel = Label(otherLayerWindow, text = 'Rights-of-Way') # remove optionals
@@ -1071,7 +1083,9 @@ class App(ttk.Frame):
         rightOfWayFCLabel.grid(row = 2, column = 0, sticky = tk.W)
         rightsOfWayFCInput = ttk.Entry(otherLayerWindow, width=56,
                                        textvariable = self.input_dict['RightOfWayFC'])
-        rightsOfWayFCInput.insert(0, self.input_dict['RightOfWayFC'].get()) # displays stored value
+        #rightsOfWayFCInput.insert(0, self.input_dict['RightOfWayFC'].get()) # displays stored value
+        if self.input_dict['RightOfWayFC'].get() == '':  #to prevent overwrite entry                        
+            rightsOfWayFCInput.insert(0, self.input_dict['RightOfWayFC'].get()) # displays stored value
         rightsOfWayFCInput.grid(row = 3, column = 0, padx = 5, sticky = tk.W)
         rightsOfWayFCInputDirBut = ttk.Button(otherLayerWindow, width = 8, image = self.folder_icon,
                                               command = lambda: self.browseFor_inFC(self.input_dict['RightOfWayFC'],
@@ -1084,6 +1098,7 @@ class App(ttk.Frame):
                 roadsStreetCenterFCInputDirBut['state'] = 'normal'
             else:
                 roadsStreetCenterFCInput['state'] = 'disabled'
+                self.input_dict['RoadStreetCenterlineFC'].set('')
                 roadsStreetCenterFCInputDirBut['state'] = 'disabled'
         
         roadStreetsCenterLabel = Label(otherLayerWindow, text = 'Roads/Streets/Centerline')
@@ -1097,7 +1112,9 @@ class App(ttk.Frame):
         roadStreetCenterFCLabel.grid(row = 6, column = 0, sticky = tk.W)
         roadsStreetCenterFCInput = ttk.Entry(otherLayerWindow, width=56, 
                                        textvariable = self.input_dict['RoadStreetCenterlineFC'])
-        roadsStreetCenterFCInput.insert(0, self.input_dict['RoadStreetCenterlineFC'].get()) # displays stored value
+        if self.input_dict['RoadStreetCenterlineFC'].get() == '':  #to prevent overwrite entry                                                
+            roadsStreetCenterFCInput.insert(0, self.input_dict['RoadStreetCenterlineFC'].get()) # displays stored value
+        #roadsStreetCenterFCInput.insert(0, self.input_dict['RoadStreetCenterlineFC'].get()) # displays stored value
         roadsStreetCenterFCInput.grid(row = 7, column = 0, padx = 5, sticky = tk.W)
         roadsStreetCenterFCInputDirBut = ttk.Button(otherLayerWindow, width = 8, image = self.folder_icon,
                                                     command = lambda: self.browseFor_inFC(self.input_dict['RoadStreetCenterlineFC'],
@@ -1123,7 +1140,9 @@ class App(ttk.Frame):
         hydroFCLabel.grid(row = 10, column = 0, sticky = tk.W)
         hydroFCInput = ttk.Entry(otherLayerWindow, width=56, 
                                        textvariable = self.input_dict['HydroLineFC'])
-        hydroFCInput.insert(0, self.input_dict['HydroLineFC'].get()) # displays stored value
+        if self.input_dict['HydroLineFC'].get() == '':  #to prevent overwrite entry                                                
+            hydroFCInput.insert(0, self.input_dict['HydroLineFC'].get()) # displays stored value
+        #hydroFCInput.insert(0, self.input_dict['HydroLineFC'].get()) # displays stored value
         hydroFCInput.grid(row = 11, column = 0, padx = 5, sticky = tk.W)
         hydroFCInputDirBut = ttk.Button(otherLayerWindow, width = 8, image = self.folder_icon,
                                         command = lambda: self.browseFor_inFC(self.input_dict['HydroLineFC'],
@@ -1136,6 +1155,7 @@ class App(ttk.Frame):
                 hydroPolyFCInputDirBut['state'] = 'normal'
             else:
                 hydroPolyFCInput['state'] = 'disabled'
+                self.input_dict['HydroPolyFC'].set('')
                 hydroPolyFCInputDirBut['state'] = 'disabled'
         
         hydroPolyLabel = Label(otherLayerWindow, text = 'Hydrography (poly)')
@@ -1149,7 +1169,10 @@ class App(ttk.Frame):
         hydroPolyFCLabel.grid(row = 14, column = 0, sticky = tk.W)
         hydroPolyFCInput = ttk.Entry(otherLayerWindow, width=56, 
                                        textvariable = self.input_dict['HydroPolyFC'])
-        hydroPolyFCInput.insert(0, self.input_dict['HydroPolyFC'].get()) # displays stored value
+               
+        if self.input_dict['HydroPolyFC'].get() == '':  #to prevent overwrite entry                                                
+            hydroPolyFCInput.insert(0, self.input_dict['HydroPolyFC'].get()) # displays stored value
+        #hydroPolyFCInput.insert(0, self.input_dict['HydroPolyFC'].get()) # displays stored value
         hydroPolyFCInput.grid(row = 15, column = 0, padx = 5, sticky = tk.W)
         hydroPolyFCInputDirBut = ttk.Button(otherLayerWindow, width = 8, image = self.folder_icon,
                                               command = lambda: self.browseFor_inFC(self.input_dict['HydroPolyFC'],
@@ -1162,11 +1185,12 @@ class App(ttk.Frame):
                 addressesFCInputDirBut['state'] = 'normal'
             else:
                 addressesFCInput['state'] = 'disabled'
+                self.input_dict['AddressesFC'].set('')
                 addressesFCInputDirBut['state'] = 'disabled'
         
         addressesLabel = Label(otherLayerWindow, text = 'Addresses')
         addressesLabel.grid(row = 16, column = 0, sticky = tk.W)
-        addressesComboBox = ttk.Combobox(otherLayerWindow, width = 40, values = comboBoxOptions,
+        addressesComboBox = ttk.Combobox(otherLayerWindow, width = 40, values = comboBoxOptions[1:3],
                                                 textvariable = self.input_dict['AddressesType'])
         addressesComboBox.bind("<<ComboboxSelected>>", addressesMutator)
         addressesComboBox.grid(row = 17, column = 0, padx = 5, sticky = tk.W)
@@ -1175,7 +1199,9 @@ class App(ttk.Frame):
         addressesFCLabel.grid(row = 18, column = 0, sticky = tk.W)
         addressesFCInput = ttk.Entry(otherLayerWindow, width=56, 
                                        textvariable = self.input_dict['AddressesFC'])
-        addressesFCInput.insert(0, self.input_dict['AddressesFC'].get()) # displays stored value
+        if self.input_dict['AddressesFC'].get() == '':  #to prevent overwrite entry                                                
+            addressesFCInput.insert(0, self.input_dict['AddressesFC'].get()) # displays stored value
+        #addressesFCInput.insert(0, self.input_dict['AddressesFC'].get()) # displays stored value
         addressesFCInput.grid(row = 19, column = 0, padx = 5, sticky = tk.W)
         addressesFCInputDirBut = ttk.Button(otherLayerWindow, width = 8, image = self.folder_icon,
                                               command = lambda: self.browseFor_inFC(self.input_dict['AddressesFC'],
@@ -1188,6 +1214,7 @@ class App(ttk.Frame):
                 bldgFCInputDirBut['state'] = 'normal'
             else:
                 bldgFCInput['state'] = 'disabled'
+                self.input_dict['BuildingBuildingFootprintFC'].set('')
                 bldgFCInputDirBut['state'] = 'disabled'
         
         bldgLabel = Label(otherLayerWindow, text = 'Building(s) Footprints')
@@ -1201,7 +1228,10 @@ class App(ttk.Frame):
         bldgFCLabel.grid(row = 2, column = 2, sticky = tk.W)
         bldgFCInput = ttk.Entry(otherLayerWindow, width=56, 
                                        textvariable = self.input_dict['BuildingBuildingFootprintFC'])
-        bldgFCInput.insert(0, self.input_dict['BuildingBuildingFootprintFC'].get()) # displays stored value
+        
+        if self.input_dict['BuildingBuildingFootprintFC'].get() == '':  #to prevent overwrite entry                                                
+            bldgFCInput.insert(0, self.input_dict['BuildingBuildingFootprintFC'].get()) # displays stored value
+        #bldgFCInput.insert(0, self.input_dict['BuildingBuildingFootprintFC'].get()) # displays stored value
         bldgFCInput.grid(row = 3, column = 2, padx = 5, sticky = tk.W)
         bldgFCInputDirBut = ttk.Button(otherLayerWindow, width = 8, image = self.folder_icon,
                                        command = lambda: self.browseFor_inFC(self.input_dict['BuildingBuildingFootprintFC'],
@@ -1214,6 +1244,7 @@ class App(ttk.Frame):
                 luFCInputDirBut['state'] = 'normal'
             else:
                 luFCInput['state'] = 'disabled'
+                self.input_dict['LandUseFC'].set('')
                 luFCInputDirBut['state'] = 'disabled'
         
         luLabel = Label(otherLayerWindow, text = 'Land Use')
@@ -1227,7 +1258,9 @@ class App(ttk.Frame):
         luFCLabel.grid(row = 6, column = 2, sticky = tk.W)
         luFCInput = ttk.Entry(otherLayerWindow, width=56, 
                                        textvariable = self.input_dict['LandUseFC'])
-        luFCInput.insert(0, self.input_dict['LandUseFC'].get()) # displays stored value
+        if self.input_dict['LandUseFC'].get() == '':  #to prevent overwrite entry                                                
+            luFCInput.insert(0, self.input_dict['LandUseFC'].get()) # displays stored value
+        #luFCInput.insert(0, self.input_dict['LandUseFC'].get()) # displays stored value
         luFCInput.grid(row = 7, column = 2, padx = 5, sticky = tk.W)
         luFCInputDirBut = ttk.Button(otherLayerWindow, width = 8, image = self.folder_icon,
                                        command = lambda: self.browseFor_inFC(self.input_dict['LandUseFC'],
@@ -1240,6 +1273,7 @@ class App(ttk.Frame):
                 parksFCInputDirBut['state'] = 'normal'
             else:
                 parksFCInput['state'] = 'disabled'
+                self.input_dict['ParksOpenSpaceFC'].set('')
                 parksFCInputDirBut['state'] = 'disabled'
         
         parksLabel = Label(otherLayerWindow, text = 'Parks/Open Space (e.g. county forests)')
@@ -1253,7 +1287,9 @@ class App(ttk.Frame):
         parksFCLabel.grid(row = 10, column = 2, sticky = tk.W)
         parksFCInput = ttk.Entry(otherLayerWindow, width=56,
                                  textvariable = self.input_dict['ParksOpenSpaceFC'])
-        parksFCInput.insert(0, self.input_dict['ParksOpenSpaceFC'].get()) # displays stored value
+        if self.input_dict['ParksOpenSpaceFC'].get() == '':  #to prevent overwrite entry                                                
+            parksFCInput.insert(0, self.input_dict['ParksOpenSpaceFC'].get()) # displays stored value
+        #parksFCInput.insert(0, self.input_dict['ParksOpenSpaceFC'].get()) # displays stored value
         parksFCInput.grid(row = 11, column = 2, padx = 5, sticky = tk.W)
         parksFCInputDirBut = ttk.Button(otherLayerWindow, width = 8, image = self.folder_icon,
                                         command = lambda: self.browseFor_inFC(self.input_dict['ParksOpenSpaceFC'],
@@ -1266,6 +1302,7 @@ class App(ttk.Frame):
                 trailsFCInputDirBut['state'] = 'normal'
             else:
                 trailsFCInput['state'] = 'disabled'
+                self.input_dict['TrailsFC'].set('')
                 trailsFCInputDirBut['state'] = 'disabled'
         
         trailsLabel = Label(otherLayerWindow, text = 'Trails')
@@ -1279,7 +1316,9 @@ class App(ttk.Frame):
         trailsFCLabel.grid(row = 14, column = 2, sticky = tk.W)
         trailsFCInput = ttk.Entry(otherLayerWindow, width=56,
                                  textvariable = self.input_dict['TrailsFC'])
-        trailsFCInput.insert(0, self.input_dict['TrailsFC'].get()) # displays stored value
+        if self.input_dict['TrailsFC'].get() == '':  #to prevent overwrite entry                                                  
+            trailsFCInput.insert(0, self.input_dict['TrailsFC'].get()) # displays stored value
+        #trailsFCInput.insert(0, self.input_dict['TrailsFC'].get()) # displays stored value
         trailsFCInput.grid(row = 15, column = 2, padx = 5, sticky = tk.W)
         trailsFCInputDirBut = ttk.Button(otherLayerWindow, width = 8, image = self.folder_icon,
                                        command = lambda: self.browseFor_inFC(self.input_dict['TrailsFC'],
@@ -1291,7 +1330,8 @@ class App(ttk.Frame):
                 otherRecFCInput['state'] = 'normal'
                 otherRecFCInputDirBut['state'] = 'normal'
             else:
-                otherRecFCInput['state'] = 'disabled'
+                otherRecFCInput['state'] = 'disabled'            
+                self.input_dict['OtherRecreationFC'].set('')
                 otherRecFCInputDirBut['state'] = 'disabled'
         
         otherRecLabel = Label(otherLayerWindow, text = 'Other Recreation (boat launches, etc.)')
@@ -1305,7 +1345,9 @@ class App(ttk.Frame):
         otherRecFCLabel.grid(row = 18, column = 2, sticky = tk.W)
         otherRecFCInput = ttk.Entry(otherLayerWindow, width=56,
                                  textvariable = self.input_dict['OtherRecreationFC'])
-        otherRecFCInput.insert(0, self.input_dict['OtherRecreationFC'].get()) # displays stored value
+        if self.input_dict['OtherRecreationFC'].get() == '':  #to prevent overwrite entry                                                
+            otherRecFCInput.insert(0, self.input_dict['OtherRecreationFC'].get()) # displays stored value
+        #otherRecFCInput.insert(0, self.input_dict['OtherRecreationFC'].get()) # displays stored value
         otherRecFCInput.grid(row = 19, column = 2, padx = 5, sticky = tk.W)
         otherRecFCInputDirBut = ttk.Button(otherLayerWindow, width = 8, image = self.folder_icon,
                                        command = lambda: self.browseFor_inFC(self.input_dict['OtherRecreationFC'], 
@@ -1381,10 +1423,11 @@ class App(ttk.Frame):
                                 (otherRecComboBox, 'OtherRecreationType', 'Other Recreation Type' ),
                                 (otherRecFCInput, 'OtherRecreationFC', 'Other Reacreation Feature Class' )    ]
 
-        defaultInputComparator = {'RightOfWayType': '', 'RightOfWayFC': '', 'RoadStreetCenterlineType': '', 'RoadStreetCenterlineFC': '', 'HydroLineType': '', 'HydroLineFC': '',
-                                    'HydroPolyType': '', 'HydroPolyFC': '', 'AddressesType': '', 'AddressesFC': '', 'BuildingBuildingFootprintType': '', 'BuildingBuildingFootprintFC': '', 
-                                    'LandUseType': '', 'LandUseFC': '', 'ParksOpenSpaceType': '', 'ParksOpenSpaceFC': '', 'TrailsType': '', 'TrailsFC': '',
-                                    'OtherRecreationType': '', 'OtherRecreationFC': ''    }
+        defaultInputComparator = {'RightOfWayType': '', 'RightOfWayFC': '', 'RoadStreetCenterlineType': '', 'RoadStreetCenterlineFC': '', 
+                                    'HydroLineType': '', 'HydroLineFC': '', 'HydroPolyType': '', 'HydroPolyFC': '', 
+                                    'AddressesType': '', 'AddressesFC': '', 'BuildingBuildingFootprintType': '', 'BuildingBuildingFootprintFC': '', 
+                                    'LandUseType': '', 'LandUseFC': '', 'ParksOpenSpaceType': '', 'ParksOpenSpaceFC': '', 
+                                    'TrailsType': '', 'TrailsFC': '', 'OtherRecreationType': '', 'OtherRecreationFC': ''    }
 
         def isOLReadytoRun(event ):
             unfilledFields = list()
@@ -1426,8 +1469,7 @@ class App(ttk.Frame):
         #Convert Tkinter strings to regular string in dictionary
         self.input_string_dict = collections.OrderedDict()
 
-        #Convert Tkinter strings to regular string in dictionary
-        # self.input_string_dict = collections.OrderedDict()
+        #Convert tkinter strings to regular string in dictionary
         self.input_string_dict['inCert'] = {element: '' for element in ['explainedErrorsNumber',
                                                                     'noticeOfNewStreetName',
                                                                     'noticeOfNewNonParcelFeaturePARCELIDs',
@@ -1452,8 +1494,9 @@ if __name__ == '__main__':
     gui.title('SCO Validation Tool v2.0') #title of main menu
     gui.geometry('420x450')  #dimensions of main menu window (W x H)
     
-    #pathname = os.path.dirname(sys.argv[0])        
-    #path_ofScript = os.path.dirname(pathname)
+    ogr.UseExceptions()
+  
+            
     path_ofScript = os.path.dirname (os.path.abspath(__file__))
 
     try:
@@ -1462,6 +1505,8 @@ if __name__ == '__main__':
     except AttributeError:
         path_of_script = path_ofScript 
 
+    #print ( "the paths: ")
+    #print ( sys.path )
     wisconsin_icon_path = path_of_script + '\\assets\\V1.ico' 
     folder_gif_path =  path_of_script + '\\assets\\openfilefolder.gif' 
     gui.iconbitmap(wisconsin_icon_path)

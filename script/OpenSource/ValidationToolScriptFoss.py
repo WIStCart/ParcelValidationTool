@@ -9,10 +9,8 @@ import LegacyCountyStats
 from externalDicts import *
 import os
 from time import perf_counter
-#import fiona; fiona.supported_drivers
-#import fiona
+import osgeo
 from osgeo import  ogr
-import pandas as pd
 
 	
 	
@@ -24,7 +22,7 @@ def validation_tool_run_all(inputDict):
 	#inputNameList = ['isFinal','county','inFC','outDir','outName','outINIDir','subName','subEmail','condoModel','inCert','isNameReact','redactPolicy','zoningGenType','zoningGenFC','zoningShoreType','zoningShoreFC','zoningAirType','zoningAirFC','PLSSType','PLSSFC','RightOfWayType','RightOfWayFC','RoadStreetCenterlineType','RoadStreetCenterlineFC','HydroLineType','HydroLineFC','HydroPolyType','HydroPolyFC','AddressesType','AddressesFC','BuildingBuildingFootprintType','BuildingBuildingFootprintFC','LandUseType','LandUseFC','ParksOpenSpaceType','ParksOpenSpaceFC','TrailsType','TrailsFC','OtherRecreationType','OtherRecreationFC','certifiedBy','PLSSOtherDigitalFile']
 
 	# Current tool version number & function that checks to ensure running most current version available
-	inputDict['version'] = 'V7.0.1'
+	inputDict['version'] =    'V8.0.0' 
 	Error.versionCheck(inputDict['version'])
 
 	#Creates schooldist name/number key value pair dictionaries
@@ -37,6 +35,7 @@ def validation_tool_run_all(inputDict):
 		schoolDist_noName_dict[k] = v
 		schoolDist_nameNo_dict[v] = k
 
+	
 	#Creates CONAME/FIPS key value pair dictinaries
 	reader = csv.reader(open(base + '\data\CoNameFips.csv','rU'))
 	county_nameNo_dict = {}
@@ -45,6 +44,19 @@ def validation_tool_run_all(inputDict):
 		k,v = row
 		county_nameNo_dict[k] = v
 		county_noName_dict[v] = k
+
+	
+	## read Parcel Data from website
+	dataList = Error.loadParcelData(  )
+	pinSkips = eval (dataList[0]) 
+	taxRollYears = eval (dataList[1]) 
+	prefixDomains = eval (dataList[2]) 
+	suffixDomains = eval (dataList[3]) 
+	streetTypes = eval (dataList[4]) 
+	unitType = eval (dataList[5]) 
+	unitId = eval (dataList[6]) 
+	badPstladdSet = eval (dataList[7]) 
+	stNameDict = eval (dataList[8]) 
 
 	## datasource and layer name
 	inFC_gdb = os.path.split (inputDict['inFC'])[0]
@@ -77,7 +89,7 @@ def validation_tool_run_all(inputDict):
 	#dynamic_workspace =  "in_memory
 	
 	### call a driver for memory to write/copy a layer to memory
-	print("    Writing to Memory\n")
+	print("    Writing to Memory\n\n")
 	mem_driver=ogr.GetDriverByName('MEMORY')
 	mem_ds=mem_driver.CreateDataSource('in_memory')
 	mem_driver.Open('in_memory',1)  ## open/returns the datasource object
@@ -86,7 +98,6 @@ def validation_tool_run_all(inputDict):
 	inFC_layer = None
 	datasource = None
 
-	# TODO: check out why this doesn't work
 	#Check if the coordinate reference system is consistent with that of the parcel initiative
 	Error.checkCRS( totError, output_fc_temp)  #c_inFC)
 	#check input fc to ensure schema meets requirements.  If not, alert to missing/excess fields
@@ -95,7 +106,7 @@ def validation_tool_run_all(inputDict):
 	# Error.checkCodedDomains(totError, inputDict['inFC'])
 	
 	#Adding new fields for error reporting.  We can change names, lenght, etc...
-	print ("\n    Adding error Fields\n\n")
+	print ("    Adding error Fields\n\n")
 	### creating error fields 
 	field_GeneralElementErrors = ogr.FieldDefn("GeneralElementErrors", ogr.OFTString)
 	field_GeneralElementErrors.SetWidth(1000)
@@ -110,18 +121,30 @@ def validation_tool_run_all(inputDict):
 	field_GeometricElementErrors.SetWidth(1000)
 	output_fc_temp.CreateField(field_GeometricElementErrors)
 
-	print ("    Begining to test "+ inFC_name  +" Parcels data for various attribute error types \n\n") 
+	print ("    Beginning to test "+ inFC_name  +" Parcels data for various attribute error types \n\n") 
+	print ("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+	print ("    NOTE:  THE GEOMETRY OF THIS FEATURE CLASS WILL BE VALIDATED IN FINAL MODE  \n")
+	print ("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
 	print ("    The process may take a few minutes, please, don't close this window \n\n") 
-	
-	###############  IT WORKS TO THIS POINT EXCEPT FOR THE CRS AND GEOM
-	#Create update cursor then use it to iterate through records in feature class
-	
-	for row in output_fc_temp:  #.iterrows():    # use the fieldNames list from the External Dictionary
+
+	parcelNumber = 	totError.recordTotalCount
+	numOfMessages = 5
+	interval = int(parcelNumber / 5)
+	j = 1
+
+	#Create update cursor then use it to iterate through records in feature class	
+	for row in output_fc_temp:     # use the fieldNames list from the External Dictionary
 		currParcel = Parcel(row, fieldNames)
-	
+
 		#Execute in-cursor error tests
 		#EXAMPLE FUNCTION # totError,currParcel = Error.reallyBadChars(totError,currParcel,fieldNames,fieldNamesBadChars,'general')
-		totError,currParcel = Error.checkGeometricQuality(totError,currParcel, pinSkips)
+		if inputDict['isFinal'] == 'finalModeSelected': 
+			totError,currParcel = Error.checkGeometricQuality(totError,currParcel, pinSkips)
+		else:
+			if j % interval == 0:    # message to user while waiting
+				print("\n    Testing parcel data attributes for errors ...")
+			j += 1
+			totError,currParcel = Error.testParcelGeometry(totError,currParcel, pinSkips)		
 		
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"addnum","address", True)
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"parcelfips","general", False)
@@ -138,8 +161,8 @@ def validation_tool_run_all(inputDict):
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"deedacres","tax",True)
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"gisacres","tax",True)
 		
-		totError,currParcel = Error.checkIsDuplicate(totError,currParcel,"parcelid","general", True, pinSkips, uniquePinList)
-		totError,currParcel = Error.checkIsDuplicate(totError,currParcel,"taxparcelid","general", True, pinSkips, uniqueTaxparList)
+		totError,currParcel = Error.checkIsDuplicate(totError,currParcel,"parcelid","general", False, pinSkips, uniquePinList, taxRollYears)
+		totError,currParcel = Error.checkIsDuplicate(totError,currParcel,"taxparcelid","general", True, pinSkips, uniqueTaxparList, taxRollYears)
 		totError,currParcel = Error.checkDomainString(totError,currParcel,"prefix","address",True, prefixDomains)
 		totError,currParcel = Error.checkDomainString(totError,currParcel,"streettype","address",True,streetTypes)
 		totError,currParcel = Error.checkDomainString(totError,currParcel,"unittype","address",True,unitType)
@@ -151,6 +174,7 @@ def validation_tool_run_all(inputDict):
 		totError,currParcel = Error.streetNameCheck(totError,currParcel,"streetname","siteadress","address",True,stNameDict,inputDict['county'])
 		totError,currParcel = Error.zipCheck(totError,currParcel,"zipcode","address",True)
 		totError,currParcel = Error.zip4Check(totError,currParcel,"zip4","address",True)		
+		totError,currParcel = Error.unittypeAndUnitidCheck(totError,currParcel,"unitid","address")
 		totError,currParcel = Error.totCheck(totError,currParcel,"impvalue","cntassdvalue","lndvalue","tax")
 		totError,currParcel = Error.checkRedundantID(totError,currParcel,'taxparcelid','parcelid',True,'general')
 		totError,currParcel = Error.postalCheck(totError,currParcel,'pstladress','general',pinSkips,'taxrollyear','parcelid',badPstladdSet, taxRollYears)
@@ -167,6 +191,7 @@ def validation_tool_run_all(inputDict):
 		totError,currParcel = Error.propClassNetGrosCheck(totError,currParcel,"propclass","auxclass","netprpta","grsprpta","tax")
 		totError,currParcel = Error.propClassCntCheck(totError,currParcel,"propclass","auxclass","cntassdvalue","tax")
 		
+		totError,currParcel = Error.parcelDateUniquenessCheck(totError, currParcel,"parceldate","general")
 		totError,currParcel = Error.fieldCompleteness(totError,currParcel,fieldNames,fieldListPass,CurrCompDict)
 		
 		Error.checkBadChars (totError)   #check for checking '<Null>', NULL, etc values
@@ -174,29 +199,20 @@ def validation_tool_run_all(inputDict):
 		
 		currParcel.writeErrors(row, fieldNames)
 		output_fc_temp.SetFeature(row)  #update feature class (datasource) with errorTypes
-		#row = None
 		currParcel = None
 
 		
 	totError = Error.fieldCompletenessComparison(totError,fieldNames,fieldListPass,CurrCompDict, getattr(LegacyCountyStats, (inputDict['county'].replace(" ","_").replace(".",""))+"LegacyDict"))
 		
-	## creates a statistics table for calculating number of repeated parceldates 		
-	# output_stats_table_temp = os.path.join("in_memory", "WORKING_STATS")
-	parcelDatelist = [row.GetField("PARCELDATE") for row in output_fc_temp ]
-	pDatadf = pd.DataFrame(parcelDatelist)
-	uniqueParcelDates = pDatadf.value_counts( normalize = True)   #frequency of parceldate values
-
-	for row in uniqueParcelDates.values:
-		#print( float(row[1])/float(totError.recordTotalCount) * 100)
-		if row is not None and row * 100 >= 25.0: #max_uniform_parceldate :
-			totError.uniqueparcelDatePercent = row * 100
+	## calculating number of parceldates with unique value 		
+	Error.maxFreq (totError)
 	
 	# populate the error field:TaxrollElementErrors for mflLnd errors
 	if totError.mflLnd > 10:  
 		totError.taxErrorCount += 10
 		item = ''
 		#	for row in cursor:
-		for row in output_fc_temp:       #.iterrows():
+		for row in output_fc_temp:       
 			for parcelid in parcelidList_MFL:
 				if row.GetField("PARCELID") == parcelid: # change from hard-code to column name
 					totError.flags_dict['mflvalueCheck'] += 1
@@ -213,28 +229,28 @@ def validation_tool_run_all(inputDict):
 		Error.ctyExtentCentCheck(totError, output_fc_temp, ctyCentroidDict)
 
 	if totError.geometryNotValidated == True:
-		print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
-		print("  THE GEOMETRY OF THIS FEATURE CLASS WAS NOT VALIDATED  \n")
-		print("  THE FEATURE CLASS IS ABOUT " + str(totError.xyShift) + " METERS DISPLACED FROM DATA SUBMITTED LAST YEAR. \n")
+		print("    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+		print("    THE GEOMETRY OF THIS FEATURE CLASS WAS NOT VALIDATED  \n")
+		print("    THE FEATURE CLASS IS ABOUT " + str(totError.xyShift) + " METERS DISPLACED FROM DATA SUBMITTED LAST YEAR. \n")
 		# print("  THIS ISSUE IS INDICATIVE OF A RE-PROJECTION ERROR. \n ")
 		# print("  PLEASE MAKE NEEDED ALTERATIONS TO THE FEATURE CLASS AND RUN THE TOOL AGAIN.\n")
 		# print("  CHECK THE DOCUMENTATION: http://www.sco.wisc.edu/parcels/tools/FieldMapping/Parcel_Schema_Field_Mapping_Guide.pdf Section 2 \n" )
-		print("  CONTACT THE PARCEL TEAM AT SCO WITH QUESTIONS ABOUT THIS ISSUE.\n")
-		print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+		print("    CONTACT THE PARCEL TEAM AT SCO WITH QUESTIONS ABOUT THIS ISSUE.\n")
+		print("    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
 		#exit()
 		sys.tracebacklimit = 0
 		raise NameError("\n     FEATURE CLASS GEOMETRY NOT VALIDATED")
 		
 	
 		#Write the ini file if final
-	if inputDict['isFinal'] == 'finalModeSelected':   #  'true':
+	if inputDict['isFinal'] == 'finalModeSelected':   
 		#summary.explainCertComplete(inputDict['inCert'])
 		summary.fieldConstraints(totError)
 		summary.createFGDBs (inputDict, taxRollYears)
 		summary.writeIniFile(inputDict,totError)
 
 
-	if inputDict['isFinal'] == 'testModeSelected':    #'false'
+	if inputDict['isFinal'] == 'testModeSelected':    
 		# Write all summary errors to file
 		outSummaryJSON = base + '\summary\summary.js' # full (hard coded) path to the output .json
 		outSummaryPage = base + '\summary\\validation.html' # full (hard coded) path to the Validation Summary Page (escape \v with a \\)
@@ -255,22 +271,19 @@ def validation_tool_run_all(inputDict):
 			outlayer = None
 			out_ds = None
 		except:
-			print( "   Feature Class creation failed")
+			print("    Feature Class creation failed")
 		
 		print("\n\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
-		print("   TEST RUN COMPLETE\n")
+		print("    TEST RUN COMPLETE\n")
 
-		if  totError.uniqueparcelDatePercent >= 25.0: 
+		if  totError.uniqueparcelDatePercent >= 51.0: 
 			# print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 			print("    " + str(round ( totError.uniqueparcelDatePercent,2)) + "% OF ALL RECORDS CONTAIN THE SAME PARCELDATE VALUE " )
 				#OF " + uniform_date )
 			print("    REVIEW SUBMISSION DOCUMENTATION AND SET TO <Null> IF NECESSARY.\n")
 			# print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 			pass
-		# print("  REVIEW THE VALIDATION SUMMARY PAGE (" + outSummaryPage.replace("\script\..","") + ") FOR A SUMMARY OF THE POTENTIAL ISSUES FOUND.\n")
-		# print("  REVIEW AND CORRECT IF NECESSARY, THE OUPUT PARCEL FEATURE CLASS.  RECORD-SPECIFIC ERRORS CAN BE FOUND IN THE FOUR COLUMNS ADDED TO THE END OF THE OUTPUT FEATURE CLASS:\n")
-		# print("	" + inputDict['outDir'] + "\\" + inputDict['outName']  + "\n")
-		# print("  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+
 	print("  General Errors:   " + str(totError.generalErrorCount))
 	print("  Geometric Errors: " + str(totError.geometricErrorCount))
 	print("  Address Errors:   " + str(totError.addressErrorCount))
@@ -281,7 +294,8 @@ def validation_tool_run_all(inputDict):
 		# print("   GREAT JOB, NO ERRORS!!!!!!! \n")
 		pass
 	
-	print ("	DONE!!!\n")
+	print ("	     DONE!!!\n")
 	end  = perf_counter()
-	print (f'    Elapse time: { end - start: .2f} seconds')
+	minutes = (end - start)/60
+	print (f'    Elapse time: { minutes: .2f} minutes')
 	

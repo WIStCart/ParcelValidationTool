@@ -9,7 +9,8 @@ a = Analysis(
     pathex=['C:\\Users\\ajwells.AD\\Documents\\GitHub\\ValidationTool\\ParcelValidationTool\\script\\OpenSource', 
 'C:\\OSGeo4W\\apps\\gdal\\lib\\gdalplugins','C:\\OSGeo4W\\apps\\gdal\\share\\gdal', 'C:\\OSGeo4W\\share\\proj', 'C:\\OSGeo4W\\bin'],
     binaries=[  
-('C:\\OSGeo4W\\bin\\python39.dll', 'python39'),
+('C:\\OSGeo4W\\bin\\python39.dll', 'python39'), 
+('C:\\OSGeo4W\\bin\\gdal307.dll', 'gdal307'),
 ('C:\\OSGeo4W\\apps\\gdal\\lib\\gdalplugins\\ogr_FileGDB.dll', '.')
 ],
     datas=[('C:\\OSGeo4W\\apps\\Python39\\tcl\\tix8.4.3', 'tcl\\tix8.4.3'),
@@ -36,11 +37,11 @@ a = Analysis(
 ('C:\\Users\\ajwells.AD\\Documents\\GitHub\\ValidationTool\\ParcelValidationTool\\script\\OpenSource\\summary\\tippy.css', 'summary'), 
 ('C:\\Users\\ajwells.AD\\Documents\\GitHub\\ValidationTool\\ParcelValidationTool\\script\\OpenSource\\summary\\withumb.png', 'summary')
 ],
-    hiddenimports=[ 'osgeo', 'osgeo.ogr', 'osgeo.gdal'],
+    hiddenimports=[ 'osgeo', 'osgeo.ogr', 'osgeo.gdal', 'osgeo._gdal', 'osgeo._ogr'],
     hookspath=[ ],
     hooksconfig={},
     runtime_hooks=['hook.py'],
-    excludes=['matplotlib', 'scipy', 'fiona', 'geopandas', 
+    excludes=['matplotlib', 'scipy', 'fiona', 'geopandas', 'pandas',
  'site', 'tornado', 'PIL', 'PyQt4', 'PyQt5',
  'pydoc', 'pythoncom', 'pywintypes','sqlite3', 'pyz', 'sklearn', 'scapy', 'scrapy', 
  'sympy', 'kivy', 'pyramid', 'opencv', 'lxml',  

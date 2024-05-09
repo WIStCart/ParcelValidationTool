@@ -49,12 +49,15 @@ class Parcel:
 		self.parcelsrc = row.GetField("PARCELSRC")
 		self.shapeLength = row.GetField("SHAPE_Length")
 		self.shapeArea = row.GetField("SHAPE_Area")
-		# self.geometry = row.GetField("geometry")
-		self.shapeXY =  row.GetGeometryRef().Centroid()  #row.GetField("SHAPE@XY")
+		# self.geometry = row.GetField("geometry")		
 		self.geometricErrors = []
 		self.addressErrors = []
 		self.taxErrors = []
 		self.generalErrors = []
+		try:
+			self.shapeXY =  row.GetGeometryRef().Centroid()  #row.GetField("SHAPE@XY")
+		except:
+			self.shapeXY = None
 
 	def writeErrors(self, row, fieldNames):
 		#Write all accumulated errors to their respective rows, then update the row within the cursor

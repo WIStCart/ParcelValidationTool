@@ -1,0 +1,90 @@
+C:\Users\ajwells.AD\Documents\GitHub\ValidationTool\ParcelValidationTool\script\OpenSource\summary\rusk_ValidationSummary.txt
+Validation Summary Table: 
+This validation summary table contains an overview of any errors found by the Parcel Validation Tool. Please review the contents of this file and make changes to your parcel dataset as necessary.
+
+************************************************************************
+* In-line errors
+************************************************************************
+The following lines summarized the element-specific errors that were found while validating your parcel dataset.  The stats below are meant as a means of reviewing the output.  Please see the GeneralElementErrors, AddressElementErrors, TaxrollElementErrors, and GeometricElementErrors fields to address these errors individually.
+	General Errors: 86483
+	Geometric Errors: 9
+	Address Errors: 6003
+	Tax Errors: 33
+	------------------
+	ERROR SUM: 92528
+
+
+************************************************************************
+* Uniform ParcelDate:
+************************************************************************
+************************************************************************
+* Broad-level errors:
+************************************************************************
+The following lines explain any broad geometric errors that were found while validating your parcel dataset.
+	*No broad-level geometric errors found!
+
+
+Percentage of records with various Taxroll Years
+	Previous Taxroll Year: 0.0%
+	Expected Taxroll Year: 99.7%
+	Future Taxroll Years: 0.3%
+	Other Taxroll Years: 0.0%
+
+
+Records missing CONAME, PARCELFIPS, or PARCELSOURCE
+	Missing CONAME: 0
+	Missing PARCELFIPS: 0
+	Missing PARCELSRC: 0
+
+If any of the above values are greater than 0, please add missing values.  These 3 fields should be populated for all records submitted.
+
+
+BELOW IS A COMPARISON OF COMPLETENESS VALUES FROM YOUR PREVIOUS PARCEL SUBMISSION AND THIS CURRENT SUBMISSION.
+-->If the value shown is a seemingly large negative number, please verify that all data was joined correctly and no data was lost during processing.
+-->Note: This does not necessarily mean your data is incorrect, we just want to highlight large discrepancies that could indicate missing or incorrect data.
+
+          FIELD     DIFFERENCE
+         ------     ----------
+       PARCELID:  -82.56
+    TAXPARCELID:  0.0
+     PARCELDATE:  0.0
+    TAXROLLYEAR:  -82.35
+      OWNERNME1:  -82.35
+      OWNERNME2:  -81.98
+     PSTLADRESS:  -82.21
+     SITEADRESS:  -93.21
+   ADDNUMPREFIX:  -87.94
+         ADDNUM:  -93.23
+   ADDNUMSUFFIX:  -100.0
+         PREFIX:  -89.6
+     STREETNAME:  -93.21
+     STREETTYPE:  -94.41
+         SUFFIX:  -31.59
+   LANDMARKNAME:  0.0
+       UNITTYPE:  -100.0
+         UNITID:  -100.0
+      PLACENAME:  -82.35
+        ZIPCODE:  -93.47
+           ZIP4:  -100.0
+     SCHOOLDIST:  -82.35
+   SCHOOLDISTNO:  -82.35
+   CNTASSDVALUE:  -82.2
+       LNDVALUE:  -85.57
+       IMPVALUE:  -82.2
+       MFLVALUE:  3437.33
+    ESTFMKVALUE:  -88.32
+       NETPRPTA:  -82.2
+       GRSPRPTA:  -82.2
+      PROPCLASS:  -85.57
+       AUXCLASS:  6.26
+      ASSDACRES:  -82.21
+      DEEDACRES:  -81.32
+       GISACRES:  -100.0
+         CONAME:  -82.29
+     PARCELFIPS:  -82.29
+      PARCELSRC:  -82.29
+
+
+
+* Within: C:\Users\ajwells.AD\Documents\GitHub\ValidationTool\ParcelValidationTool\script\OpenSource\summary\rusk
+************************************************************************

@@ -7,6 +7,7 @@ import webbrowser
 import configparser
 import os
 import sys
+import osgeo
 from osgeo import ogr
 
 class Summary:
@@ -116,7 +117,7 @@ class Summary:
 			self.errorSummaryFile.write("************************************************************************\n")
 			self.errorSummaryFile.write("* Uniform ParcelDate:\n")
 			self.errorSummaryFile.write("************************************************************************\n")
-			if totError.uniqueparcelDatePercent >= 25.0:
+			if totError.uniqueparcelDatePercent >= 51.0:
 				self.errorSummaryFile.write( str(round (totError.uniqueparcelDatePercent,2)) + "% of all records contain the same PARCELDATE value\n")
 				self.errorSummaryFile.write("Review submission documentation and set <Null> if necessary.\n\n")
 			self.errorSummaryFile.write("************************************************************************\n")
@@ -246,16 +247,20 @@ class Summary:
 			config.add_section('EXPLAIN CERTIFY')
 			explain_certify = inputDict['inCert']
 			config.set('EXPLAIN CERTIFY','Explained Error Number', '\n' + explain_certify['explainedErrorsNumber'])
-			config.set('EXPLAIN CERTIFY','Notice Of New StreetName', '\n' + explain_certify['noticeOfNewStreetName'])
-			config.set('EXPLAIN CERTIFY','Notice Of New NonParcels IDs', '\n' + explain_certify['noticeOfNewNonParcelFeaturePARCELIDs'])
-			config.set('EXPLAIN CERTIFY','Notice Of Missing Data Omissions', '\n' + explain_certify['noticeOfMissingDataOmissions'])
-			config.set('EXPLAIN CERTIFY','Notice Of Error Sum Unsolvable', '\n' + explain_certify['noticeErrorsSumsUnresolvable'])
-			config.set('EXPLAIN CERTIFY','Other', '\n' + explain_certify['noticeOther'])
+			streetName =  explain_certify['noticeOfNewStreetName'].replace("%", "percentage")
+			config.set('EXPLAIN CERTIFY','Notice Of New StreetName', '\n' + streetName )        #explain_certify['noticeOfNewStreetName'])
+			newNonParcels = explain_certify['noticeOfNewNonParcelFeaturePARCELIDs'].replace("%", "percentage")
+			config.set('EXPLAIN CERTIFY','Notice Of New NonParcels IDs', '\n' + newNonParcels ) #explain_certify['noticeOfNewNonParcelFeaturePARCELIDs'])
+			omissions = explain_certify['noticeOfMissingDataOmissions'].replace("%", "percentage")
+			config.set('EXPLAIN CERTIFY','Notice Of Missing Data Omissions', '\n' + omissions ) # explain_certify['noticeOfMissingDataOmissions'])
+			unsolvable = explain_certify['noticeErrorsSumsUnresolvable'].replace("%", "percentage")
+			config.set('EXPLAIN CERTIFY','Notice Of Error Sum Unsolvable', '\n' + unsolvable )  #explain_certify['noticeErrorsSumsUnresolvable'])
+			other =  explain_certify['noticeOther'].replace("%", "percentage")
+			config.set('EXPLAIN CERTIFY','Other', '\n' + other)  #explain_certify['noticeOther'])
 		
 		county_name = inputDict['county'].replace(' ', '_')
 		outPath =  inputDict['outINIDir'] + '/'+ county_name + '_Final_Submission'
 	
-
 		try:
 			#Write out .ini file
 			with open( outPath +'/'+ county_name +'.ini','w') as configFile:
@@ -263,13 +268,11 @@ class Summary:
 				#with open(inputDict['inCert'],'r') as certFile:
 				#	for line in certFile:
 						#configFile.write(line)
-			# print("\n\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 			print("    Writing .ini file to " + outPath)
 			print("\n")
-			print("  ------>  .ini FILE CREATION COMPLETE!  GREAT WORK!!   <------\n\n")
-			#print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+			print("    ------>  .ini FILE CREATION COMPLETE!  GREAT WORK!!   <------\n\n")
 		except Exception as e:
-			print("  !!!!!!!!!!Error writing .ini file!!!!!!!!!!")
+			print("    !!!!!!!!!!Error writing .ini file!!!!!!!!!!")
 			print(str(e))
 			pass
 
@@ -279,7 +282,7 @@ class Summary:
 			    and (explain_certify['noticeOfNewNonParcelFeaturePARCELIDs'] == ''  or explain_certify['noticeOfNewNonParcelFeaturePARCELIDs'] ==  "Enter new Non-Parcel Feature Parcel IDs, or None if no Values exist") \
 				and (explain_certify['noticeOfMissingDataOmissions'] == '' or explain_certify['noticeOfMissingDataOmissions'] == "Enter omission information here, or None if no omissions exist") \
 				and (explain_certify['noticeErrorsSumsUnresolvable'] == '' or explain_certify['noticeErrorsSumsUnresolvable'] == "Enter number of Unresolvable errors, or None if no Values exist"):
-				
+
 			# print("\n\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 			# print("     IMMEDIATE ISSUE REQUIRING ATTENTION")
 			# print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
@@ -289,21 +292,18 @@ class Summary:
 			# print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 			sys.tracebacklimit = 0
 			raise NameError("\n     EXPLAIN-CERTIFY FORM INCOMPLETE")
-  			#exit()
 		else:
 			pass 	
 		
-
 	def fieldConstraints(self,totError):
 		if totError.coNameMiss > 0 or totError.fipsMiss > 0 or totError.srcMiss > 0:
-			# print("\n\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
-			# print("     IMMEDIATE ISSUE REQUIRING ATTENTION")
-			# print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
-			# print("  ONE OF THE FOLLOWING FIELDS: CONAME, PARCELSRC or PARCELFIPS ARE NOT FULLY POPULATED.\n\n")
-			# print("  THESE FIELDS SHOULD BE POPULATED FOR EVERY RECORD IN THE SUMBITTED PARCEL FEATURE CLASS.\n\n")
-			# print("  PLEASE ENSURE THESE FIELDS ARE POPULATED FOR ALL RECORDS AND RE-RUN THE TOOL IN FINAL MODE.")
-			# print("n\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-			# print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+			print("\n\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+			print("    IMMEDIATE ISSUE REQUIRING ATTENTION")
+			print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
+			print("    ONE OF THE FOLLOWING FIELDS: CONAME, PARCELSRC or PARCELFIPS ARE NOT FULLY POPULATED.\n\n")
+			print("    THESE FIELDS SHOULD BE POPULATED FOR EVERY RECORD IN THE SUMBITTED PARCEL FEATURE CLASS.\n\n")
+			print("    PLEASE ENSURE THESE FIELDS ARE POPULATED FOR ALL RECORDS AND RE-RUN THE TOOL IN FINAL MODE.")
+			print("\n\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
 			sys.tracebacklimit = 0
 			raise NameError("\n     CONAME, PARCELSRC or PARCELFIPS NOT FULLY POPULATED")
 			#exit()
@@ -332,9 +332,7 @@ class Summary:
 		except OSError as error:
 			print("\n    Directory can not be created")
 
-
-		#also need to check if the plss files is in other format
-		#and the html or document with the names 
+		#also need to check if the plss files is in other format 
 		if os.path.exists(outPath):
     	
 			print("\n    Creating PARCEL and OTHER geodatabases\n")
@@ -347,11 +345,11 @@ class Summary:
 				
 				inFC_gdb = os.path.split (inputDict['inFC'])[0]
 				inFC_name = os.path.normpath(inputDict['inFC']).split(os.path.sep)[-1]
-				### open datasource again 
+				### open input datasource again 
 				datasource = ogr.GetDriverByName('OpenFileGDB').Open(inFC_gdb, 0)
 				###  get layer/feature class from the datasource i.e., geodatabase 
 				inFC_layer = [ly for ly in datasource if ly.GetName() == inFC_name][0]
-
+				### new geodatabase 
 				fgdb_drv = ogr.GetDriverByName("OpenFileGDB")	
 				if os.path.exists(parcelGDBPath):
 					print( "deleting parcel gdb:  \n\n")
@@ -361,51 +359,77 @@ class Summary:
 				pds = None 
 				inFC_layer = None
 				datasource = None
-
-			# TODO: ask if this is actually just checking
-			# for existence of data before deleting it; and twice?
-			# Will this actually ever exist? Its a GDB inside a GDB.  there are two gdbs inside a folder
 				
 			def writePlssFile (outPath, plssOtherDigitalFile, ods, year):
-				""" If plss file is different"""
+				""" If plss file is in different format"""
+
+				def copyFields (inLayer, outLayer):
+					"""Copy inLayer Fields to the output Layer"""
+					inLayerDefn = inLayer.GetLayerDefn()
+					for i in range(inLayerDefn.GetFieldCount()):
+					    outLayer.CreateField(inLayerDefn.GetFieldDefn(i))
+
+				def copyAtributes (inFeature, outFeature):
+					"""Copy attributes from inFeature to outFeature with same fields"""
+					for i in range(inFeature.GetFieldCount()):
+						fieldName = inFeature.GetFieldDefnRef(i).GetName()
+						outFeature.SetField(fieldName, inFeature.GetField(fieldName))
 
 				plss_file = plssOtherDigitalFile.split('/')
 				plss_file_name = plss_file[len(plss_file)-1]
 				destination = outPath + '/' + county_name + '_' + year + '_' + plss_file_name 
 				extension = plss_file_name.split('.')[-1]
 
-				if extension != 'shp':	#copy a plss file like text, or excel 
+				if extension != 'shp':	#copy a plss file like text, or excel, csv 
 					if not os.path.isfile(destination):
 						shutil.copy(plssOtherDigitalFile, destination)
 						print("\n\n    Wrote PLSS file to "+ destination)
-						print("\n\n  ------>  PLSS FILE COPIED SUCCESSFULLY!  <------\n")
+						print("\n\n    ------>  PLSS FILE COPIED SUCCESSFULLY!  <------\n")
 						# print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n")
 					else:
 						pass     #print("\n\n  PLSS file already existed.\n")
-				else:   # for shape files use arcpy
-					#    #double check that the shapefile exists
+				else:   
+					# double check that the shapefile exists
 					if os.path.exists(plssOtherDigitalFile):
 						
 						if (plssOtherDigitalFile.lower().endswith('.shp')):
 							plss_gdb_path = outPath + '/' + other_gdb
 							plss_fc_name = county_name + '_PLSS_' + year
-							#if os.path.exists(plss_path + plss_name):
-							
+														
 							shp_drv  =  ogr.GetDriverByName("ESRI Shapefile")  
-							# open user plss shape file
-							ds = shp_drv.Open(plssOtherDigitalFile, 0)
+							# open users plss shape file datasource
+							ds = shp_drv.Open(plssOtherDigitalFile, 1)
+							#ds = ogr.Open(plssOtherDigitalFile, update=True)
 							plss_lyr = ds.GetLayer()
-							#plss_fc = plss_gdb_path + "/" + plss_fc_name
-							#if os.path.exists(plss_fc):
-							#	shp_drv.DeleteDataSource(plss_fc)
-							ods.CopyLayer (plss_lyr, plss_fc_name,
-									['OVERWRITE=YES', 'METHOD=SKIP', 'OGR_ORGANIZE_POLYGONS=SKIP'] )     
-							#
+
+							### we need to create a new layer with same crs and point geom in the othergdb to copy the shapefile
+							crs = plss_lyr.GetSpatialRef()
+							outLayer = ods.CreateLayer(plss_fc_name, crs, geom_type=ogr.wkbPoint)
+							### then it can be copied into the datasource of the othergdb
+							## First, copy field definitions	
+							copyFields (plss_lyr, outLayer)
+
+							# Now, populate the new layer. 
+							# Get the output layer Feature Definition
+							outLayerDefn = outLayer.GetLayerDefn()
+							### for each point, copy the atributes i.e, field values
+							for inFeature in plss_lyr:
+								# Create output features
+								outFeature = ogr.Feature(outLayerDefn)
+								# Copy the field values from input Layer to output Layer
+								copyAtributes (inFeature, outFeature)
+								## copy geometry -- point geometry
+								outFeature.SetGeometry(inFeature.GetGeometryRef().Clone()) 
+								inFeature = None
+								# Add new feature to output Layer
+								outLayer.CreateFeature(outFeature)
+								outFeature = None
+								
 							print("\n\n    Wrote PLSS file to "+ plss_gdb_path +"/"+ plss_fc_name)
 							print("\n    ------>  PLSS FILE COPIED SUCCESSFULLY!  <------\n")
 							plss_lyr = None
 							ds = None
-			# end of function
+			# end of writePlssFile function
 
 			#Create Other gdb		
 			# append inFeatures-list other features provided in the GUI
@@ -419,7 +443,7 @@ class Summary:
 					elif fc ==  'zoningShoreFC':
 						fc_name = coName + '_SHORELAND_' + year
 					elif fc == 'zoningAirFC':
-						fc_name = coName + 'A_IRPORT_' + year
+						fc_name = coName + '_AIRPORT_' + year
 					elif fc == 'PLSSFC':
 						fc_name = coName + '_PLSS_' + year
 					elif fc == 'RightOfWayFC':
@@ -444,7 +468,7 @@ class Summary:
 						fc_name = coName + '_RECREATION_' + year	
 					inFeatures.append( [inputDict[fc],  fc_name])  # list with Feat classes with their new neme 
 
-			ofgdb_drv = ogr.GetDriverByName("OpenFileGDB")			
+			ofgdb_drv = ogr.GetDriverByName("FileGDB")			
 			## creates gdb for the other layers (ods)
 			if os.path.exists(otherGDBPath):
 				print( "    deleting other gdb:  \n\n")
@@ -455,18 +479,35 @@ class Summary:
 				#ofgdb_drv.Open( otherGDBPath, 1)  #not sure if this is needed
 				for oLFC in inFeatures: 
 					# driver for the user features 
-					of_drv  =  ogr.GetDriverByName("OpenFileGDB")  
+					of_drv = ogr.GetDriverByName("FileGDB")  
 					# open other fgdb -- we cannot assume that all the fc are store in the same gdb, so I have to open the/a gdb for each fc
 					## read other layer from input 
-					o_gdb = os.path.split (oLFC[0])[0]
+					o_gdb  = os.path.split (oLFC[0])[0]
 					oFC_name = os.path.normpath(oLFC[0]).split(os.path.sep)[-1]
 					of_ds = of_drv.Open( o_gdb , 0)
-					#print ("input name ")
-					#print  (oFC_name)
 					of_lyr = [ly for ly in of_ds if ly.GetName() == oFC_name][0]
-					#print (of_lyr)
-					#print ( "new name")
-					#print ( oLFC[1])
+
+					layerDefinition = of_lyr.GetLayerDefn()
+					# inLayerIDColname = of_lyr.GetFIDColumn() ## returns name of objectid/fid
+					###  check that the fields are not duplicated ids
+					###  if they are remove the "ID" characters from the fieldname
+					
+					### Check for 3D Multi Polygon 3D Measured Point
+					#geomtype = ogr.GeometryTypeToName(of_lyr.GetLayerDefn().GetGeomType())					 
+					#if geomtype in ('3D Measured Point'):
+						## need to encode this data
+
+					### Check for duplicated objectID 
+					for i in range(layerDefinition.GetFieldCount()):
+						fieldDefn = layerDefinition.GetFieldDefn(i)
+						fieldName = fieldDefn.GetName()
+						if fieldName.upper() in ('OBJECTID', 'ID', 'OBJECTID_1') :
+							new_name = fieldName.replace( 'ID', '_NUM_')
+							fieldDefn.SetName (new_name) 
+
+					## copy the layer into the datasource - the "FileGDB" api can encode ZM point_type
+					print ("  ALMOST THERE ") 
+					print (ogr.GeometryTypeToName(of_lyr.GetLayerDefn().GetGeomType()))
 					ods.CopyLayer (of_lyr, oLFC[1], ['OVERWRITE=YES', 'METHOD=SKIP','OGR_ORGANIZE_POLYGONS=SKIP']) 
 					of_lyr = None
 					of_ds = None
@@ -474,7 +515,7 @@ class Summary:
 				#for oLFC in inFeatures:
 				#
 			if (inputDict['PLSSType'] != '' and inputDict['PLSSType'] == 'Maintained by county as other digital format'):
-				#need to check for shapefile 
+				#need to check for shapefile or other formats
 				writePlssFile ( outPath, plssOtherDigitalFile, ods, year)
 			
 			ods = None
