@@ -1,6 +1,0 @@
-# "Compiled" python code
-*.pyc
-*.lock
-.vscode/
-V6_ValidationTool_dist/TEST_DATASET_PARCELS_2019/
-summary/*ValidationSummary.txt
