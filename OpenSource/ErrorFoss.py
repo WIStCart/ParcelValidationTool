@@ -11,9 +11,13 @@ class Error:
 	def __init__(self,featureClass,coName):
 		self.coName = coName
 		self.generalErrorCount = 0
+		self.generalErrorStatements = {}  #for new dictionary
 		self.geometricErrorCount = 0
+		self.geometricErrorStatements = {}
 		self.addressErrorCount = 0
+		self.addressErrorStatements = {}
 		self.taxErrorCount = 0
+		self.taxErrorStatements = {}
 		self.comparisonDict = {}
 		self.attributeFileErrors = []
 		self.geometricFileErrors = []
@@ -163,22 +167,54 @@ class Error:
 			xCent = geom.GetX()
 			yCent = geom.GetY()
 		except:
-			Parcel.geometricErrors.append("Corrupt Geometry: The geometry of the feature class could not be accessed.")
+			errorStatement = "Corrupt Geometry: The geometry of the feature class could not be accessed."
+			Parcel.geometricErrors.append(errorStatement)
 			self.geometricErrorCount += 1
+			errCategory = getattr(Error, "geometricErrorStatements")
+
+			if errorStatement in errCategory:
+				errCategory[errorStatement] += 1
+			else:
+				errCategory[errorStatement] = 1
 		try:
 			areaP = Parcel.shapeArea
 			lengthP = Parcel.shapeLength
 			if areaP < 0.01 and areaP > 0 and (parcelid is None or parcelid not in ignoreList):  ### gdal may create open polygones 
-				Parcel.geometricErrors.append("Sliver Polygon: AREA")
+				errorStatement = "Sliver Polygon: AREA"
+				Parcel.geometricErrors.append(errorStatement)
 				self.geometricErrorCount += 1
+				errCategory = getattr(Error, "geometricErrorStatements" )
+
+				if errorStatement in errCategory:
+					errCategory[errorStatement] += 1
+				else:
+					errCategory[errorStatement] = 1
+
 			if lengthP < 0.01 and (parcelid is None or parcelid not in ignoreList):
-				Parcel.geometricErrors.append("Sliver Polygon: LENGTH")
+				errorStatement = "Sliver Polygon: LENGTH"
+				Parcel.geometricErrors.append(errorStatement)
 				self.geometricErrorCount += 1
+				errCategory = getattr(Error, "geometricErrorStatements")
+
+				if errorStatement in errCategory:
+					errCategory[errorStatement] += 1 
+				else:
+					errCategory[errorStatement] = 1
+					
 			if areaP > 0 and (areaP/lengthP) < 0.01 and (parcelid is None or parcelid not in ignoreList):
 				#getattr(Parcel, "geometricErrors").append("Sliver Polygon: AREA/LENGTH")
 				#setattr(Error, "geometricErrorCount", getattr(Error, "geometricErrorCount") + 1)
-				Parcel.geometricErrors.append("Sliver Polygon: AREA/LENGTH")
+				errorStatement = "Sliver Polygon: AREA/LENGTH"
+				Parcel.geometricErrors.append(errorStatement)
 				self.geometricErrorCount += 1
+
+				errCategory = getattr(Error, "geometricErrorStatements")
+
+				if errorStatement in errCategory:
+					errCategory[errorStatement] += 1
+				else:
+					errCategory[errorStatement] = 1
+
 		except:
 			Parcel.geometricErrors.append("Corrupt Geometry: The area and/or length of the feature class could not be accessed.")
 			self.geometricErrorCount += 1
@@ -246,29 +282,70 @@ class Error:
 					except ValueError:
 						try:
 							if stringToTest in nullList or stringToTest.isspace():
-								getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + field.upper() + ". Please correct.")
+								errorStatement = "String values of #<Null>#; #NULL# or blanks occurred in " + field.upper() + ". Please correct."
+
+								getattr(Parcel,errorType + "Errors").append(errorStatement)
 								setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+								errCategory = getattr(Error, errorType + "ErrorStatements")
+					
+								if errorStatement in errCategory:
+									errCategory[errorStatement] += 1
+								else:
+									errCategory[errorStatement] = 1
+
 								Error.badcharsCount  += 1
+
 								return (Error, Parcel)  #for wrong <null> values
 							else:
-								getattr(Parcel,errorType + "Errors").append("Value in " + field.upper() + " does not appear to be a numeric value.")
+								errorStatement = "Value in " + field.upper() + " does not appear to be a numeric value."
+
+								getattr(Parcel,errorType + "Errors").append(errorStatement)
 								setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+								errCategory = getattr(Error, errorType + "ErrorStatements")
+
+								if errorStatement in errCategory:
+									errCategory[errorStatement] += 1
+								else:
+									errCategory[errorStatement] = 1
+
 								Error.flags_dict['numericCheck'] += 1
+
 								return (Error, Parcel)
 						except: pass
 			else:
 				if acceptNull:
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("<Null> Found on " + field.upper())
+					errorStatement = "<Null> Found on " + field.upper()
+
+					getattr(Parcel,errorType + "Errors").append(errorStatement)
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+					
+					errCategory = getattr(Error, errorType + "ErrorStatements")
+
+					if errorStatement in errCategory:
+						errCategory[errorStatement] += 1
+					else:
+						errCategory[errorStatement] = 1
+					
 					if field == 'parcelfips' :
 						Error.flags_dict['matchContrib'] += 1
 
 				return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + "field. Please inspect the value of this field.")
+			errorStatement = "An unknown issue occurred with the " + field.upper() + "field. Please inspect the value of this field."
+
+			getattr(Parcel,errorType + "Errors").append(errorStatement)
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+			errCategory = getattr(Error, errorType + "ErrorStatements")
+
+			if errorStatement in errCategory:
+				errCategory[errorStatement] += 1
+			else:
+				errCategory[errorStatement] = 1
 		return (Error, Parcel)
 
 	#Check if duplicates exist within an entire field(Error object, Parcel object, field to test, type of error to classify this as, are <Null>s are considered errors?, list of strings that are expected to be duplicates (to ignore), running list of strings to test against)
@@ -281,8 +358,18 @@ class Error:
 					pass
 				else:
 					if stringToTest in testList:
-						getattr(Parcel,errorType + "Errors").append("Appears to be a duplicate value in " + field.upper())
+						errorStatement = "Appears to be a duplicate value in " + field.upper()
+
+						getattr(Parcel,errorType + "Errors").append(errorStatement)
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+						errCategory = getattr(Error, errorType + "ErrorStatements")
+
+						if errorStatement in errCategory:
+							errCategory[errorStatement] += 1
+						else:
+							errCategory[errorStatement] = 1
+
 						Error.flags_dict['duplicatedCheck'] += 1
 					else:
 						testList.append(stringToTest)
@@ -293,36 +380,71 @@ class Error:
 				elif field == 'parcelid':
 					taxrollyr = getattr (Parcel, "taxrollyear")
 					if taxrollyr == acceptYears[0] or taxrollyr == acceptYears[1] or taxrollyr is None:
-						getattr(Parcel,errorType + "Errors").append("<Null> value found in " + field.upper() + " field and a value is expected for non-parcel features and non-new taxable parcels..")
+						errorStatement = "<Null> value found in " + field.upper() + " field and a value is expected for non-parcel features and non-new taxable parcels.."
+						getattr(Parcel,errorType + "Errors").append(errorStatement)
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 
+						errCategory = getattr(Error, errorType + "ErrorStatements")
+
+						if errorStatement in errCategory:
+							errCategory[errorStatement] += 1
+						else:
+							errCategory[errorStatement] = 1
+
 				else:
-					getattr(Parcel,errorType + "Errors").append("<Null> Found on " + field.upper() + " field. ")
+					errorStatement = "<Null> Found on " + field.upper() + " field. "
+					getattr(Parcel,errorType + "Errors").append(errorStatement)
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 				return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please inspect the value of this field.")
+			errorStatement = "An unknown issue occurred with the " + field.upper() + " field. Please inspect the value of this field."
+			getattr(Parcel,errorType + "Errors").append(errorStatement)
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+			errCategory = getattr(Error, errorType + "ErrorStatements")
+
+			if errorStatement in errCategory:
+				errCategory[errorStatement] += 1
+			else:
+				errCategory[errorStatement] = 1
 		return (Error, Parcel)
 
 	# Error.parcelDateUniquenessCheck(totError, currParcel,"parceldate")  generalErrorCount
-
 	def parcelDateUniquenessCheck(self,Parcel,field,errorType): 
 		nullList = ["<Null>", "<NULL>", "NULL",  "   ", " ", ""]
 		try:
 			parcelDate = getattr(Parcel, field)
 			if parcelDate is not None:
-				if  parcelDate in nullList or parcelDate.isspace():				
-					getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + field.upper() + ". Please correct.")
+				if  parcelDate in nullList or parcelDate.isspace():	
+					errorStatement = "String values of #<Null>#; #NULL# or blanks occurred in " + field.upper() + ". Please correct."
+
+					getattr(Parcel,errorType + "Errors").append(errorStatement)
 					setattr(self,errorType + "ErrorCount", getattr(self,errorType + "ErrorCount") + 1)
+
+					errCategory = getattr(self, errorType + "ErrorStatements")
+
+					if errorStatement in errCategory:
+						errCategory[errorStatement] += 1
+					else:
+						errCategory[errorStatement] = 1
+
 					self.badcharsCount  +=1   #for wrong <null> values
 				else: 
 					self.uniqueParcelDateDict.setdefault( parcelDate,0)
 					self.uniqueParcelDateDict[ parcelDate ] += 1
 
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the PARCELDATE field. Please inspect the value of this field.")
+			errorStatement = "An unknown issue occurred with the PARCELDATE field. Please inspect the value of this field."
+
+			getattr(Parcel,errorType + "Errors").append(errorStatement)
 			setattr(self,errorType + "ErrorCount", getattr(self,errorType + "ErrorCount") + 1)
+
+			errCategory = getattr(self, errorType + "ErrorStatements")
+
+			if errorStatement in errCategory:
+				errCategory[errorStatement] += 1
+			else:
+				errCategory[errorStatement] = 1
 		return (self, Parcel)
 
 
@@ -342,14 +464,34 @@ class Error:
 			if field == 'placename':
 				if stringToTest is not None:
 					if  stringToTest in nullList or stringToTest.isspace() or any(x.islower() for x in stringToTest):
-						getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + field.upper() + ". Please correct.")
+						errorStatement = "String values of #<Null>#; #NULL# or blanks occurred in " + field.upper() + ". Please correct."
+
+						getattr(Parcel,errorType + "Errors").append(errorStatement)
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+						errCategory = getattr(Error, errorType + "ErrorStatements")
+
+						if errorStatement in errCategory:
+							errCategory[errorStatement] += 1
+						else:
+							errCategory[errorStatement] = 1
+
 						Error.badcharsCount  +=1   #for wrong <null> values
 					elif any(substring in stringToTest for substring in testList):
 						pass
 					else:
-						getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " does not contain required LSAD descriptor.")
+						errorStatement = "Value provided in " + field.upper() + " does not contain required LSAD descriptor."
+
+						getattr(Parcel,errorType + "Errors").append(errorStatement)
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+						errCategory = getattr(Error, errorType + "ErrorStatements")
+
+						if errorStatement in errCategory:
+							errCategory[errorStatement] += 1
+						else:
+							errCategory[errorStatement] = 1
+
 						Error.flags_dict['placenameDom'] += 1
 					return (Error,Parcel)
 
@@ -360,23 +502,53 @@ class Error:
 					#print("This value is <Null>... or exists in our list..." + str(stringToTest))
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("The value in " + field.upper() + " is not in standardized domain list. Please standarize/spell out values for affected records.")
+					errorStatement = "The value in " + field.upper() + " is not in standardized domain list. Please standarize/spell out values for affected records."
+					
+					getattr(Parcel,errorType + "Errors").append(errorStatement)
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+					errCategory = getattr(Error, errorType + "ErrorStatements")
+
+					if errorStatement in errCategory:
+						errCategory[errorStatement] += 1
+					else:
+						errCategory[errorStatement] = 1
+
 					#Error.flags_dict['unitidtype'] += 1
 
 				return (Error,Parcel)
 			else:
 				if stringToTest is not None:
 					if  stringToTest in nullList or stringToTest.isspace() or any(x.islower() for x in stringToTest):
-						getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + field.upper() + ". Please correct.")
+						errorStatement = "String values of #<Null>#; #NULL# or blanks occurred in " + field.upper() + ". Please correct."
+
+						getattr(Parcel,errorType + "Errors").append(errorStatement)
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+						errCategory = getattr(Error, errorType + "ErrorStatements")
+
+						if errorStatement in errCategory:
+							errCategory[errorStatement] += 1
+						else:
+							errCategory[errorStatement] = 1
+
 						Error.badcharsCount  +=1   #for wrong <null> values
 
 					elif stringToTest in testList:
 						pass
 					else:
-						getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " not in acceptable domain list.")
+						errorStatement = "Value provided in " + field.upper() + " not in acceptable domain list."
+
+						getattr(Parcel,errorType + "Errors").append(errorStatement)
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+						errCategory = getattr(Error, errorType + "ErrorStatements")
+
+						if errorStatement in errCategory:
+							errCategory[errorStatement] += 1
+						else:
+							errCategory[errorStatement] = 1
+
 						Error_string = field + 'Dom'
 						Error.flags_dict[Error_string] += 1
 
@@ -385,12 +557,30 @@ class Error:
 					if acceptNull:
 						pass
 					else:
-						getattr(Parcel,errorType + "Errors").append("<Null> Found on " + field.upper())
+						errorStatement = "<Null> Found on " + field.upper()
+
+						getattr(Parcel,errorType + "Errors").append(errorStatement)
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+						errCategory = getattr(Error, errorType + "ErrorStatements")
+
+						if errorStatement in errCategory:
+							errCategory[errorStatement] += 1
+						else:
+							errCategory[errorStatement] = 1
 					return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please inspect the value of this field.")
+			errorStatement = "An unknown issue occurred with the " + field.upper() + " field. Please inspect the value of this field."
+
+			getattr(Parcel,errorType + "Errors").append(errorStatement)
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+			errCategory = getattr(Error, errorType + "ErrorStatements")
+
+			if errorStatement in errCategory:
+				errCategory[errorStatement] += 1
+			else:
+				errCategory[errorStatement] = 1
 		return (Error, Parcel)
 
 	#Check to see if taxroll year provided is what expected, old, future or other value (which we plan to ask for explaination in submission form...)
@@ -401,8 +591,18 @@ class Error:
 			pinToTest = getattr(Parcel,pinField)
 			if stringToTest is not None:
 				if  stringToTest in nullList or stringToTest.isspace():
-					getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + field.upper() + ". Please correct.")
+					errorStatement = "String values of #<Null>#; #NULL# or blanks occurred in " + field.upper() + ". Please correct."
+
+					getattr(Parcel,errorType + "Errors").append(errorStatement)
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+					errCategory = getattr(Error, errorType + "ErrorStatements")
+
+					if errorStatement in errCategory:
+						errCategory[errorStatement] += 1
+					else:
+						errCategory[errorStatement] = 1
+
 					Error.badcharsCount  +=1   #for wrong <null> values
 				elif stringToTest == acceptYears[0]:
 					Error.trYearPast += 1
@@ -420,14 +620,33 @@ class Error:
 					if pinToTest in ignoreList or pinToTest is None:
 						Error.pinSkipCount += 1
 					else:
-						getattr(Parcel,errorType + "Errors").append("Value in " + field.upper() + " is flagged. See schema definition. In most cases; value should be expected year (" + acceptYears[1] + "); or future year (" + acceptYears[2] + ") if new parcel/split.")
+						errorStatement = "Value in " + field.upper() + " is flagged. See schema definition. In most cases; value should be expected year (" + acceptYears[1] + "); or future year (" + acceptYears[2] + ") if new parcel/split."
+
+						getattr(Parcel,errorType + "Errors").append(errorStatement)
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+						errCategory = getattr(Error, errorType + "ErrorStatements")
+
+						if errorStatement in errCategory:
+							errCategory[errorStatement] += 1
+						else:
+							errCategory[errorStatement] = 1
+
 						Error.flags_dict['trYear'] += 1
 
 			return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please inspect the value of this field.")
+			errorStatement = "An unknown issue occurred with the " + field.upper() + " field. Please inspect the value of this field."
+
+			getattr(Parcel,errorType + "Errors").append(errorStatement)
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+			errCategory = getattr(Error, errorType + "ErrorStatements")
+
+			if errorStatement in errCategory:
+				errCategory[errorStatement] += 1
+			else:
+				errCategory[errorStatement] = 1
 		return (Error, Parcel)
 
 	#Verify that all tax roll data is <Null> when the record represent a New Parcel (indicated by a future tax roll year)
@@ -446,8 +665,18 @@ class Error:
 						if val is not None:
 							probFields.append(key)
 					if len(probFields) > 0:
-						getattr(Parcel,errorType + "Errors").append("Future Year (" + str(taxRollYear) + ") found and " + " / ".join(probFields) + " field(s) is/are not <Null>. A <Null> value is expected in all tax roll data for records annotated with future tax roll years. Please verify.")
+						errorStatement = "Future Year (" + str(taxRollYear) + ") found and " + " / ".join(probFields) + " field(s) is/are not <Null>. A <Null> value is expected in all tax roll data for records annotated with future tax roll years. Please verify."
+
+						getattr(Parcel,errorType + "Errors").append(errorStatement)
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+						errCategory = getattr(Error, errorType + "ErrorStatements")
+
+						if errorStatement in errCategory:
+							errCategory[errorStatement] += 1
+						else:
+							errCategory[errorStatement] = 1
+
 						Error.flags_dict['taxrollYr'] += 1
 
 				else:  #other years are okay
@@ -456,8 +685,17 @@ class Error:
 			elif acceptNull:  # it is null -> TAXROLLYEAR for parcel splits/new parcels may be <Null>
 				pass
 		except: # using generic error handling because we don't know what errors to expect yet.
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please inspect the value of this field.")
+			errorStatement = "An unknown issue occurred with the " + field.upper() + " field. Please inspect the value of this field."
+
+			getattr(Parcel,errorType + "Errors").append(errorStatement)
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+			errCategory = getattr(Error, errorType + "ErrorStatements")
+
+			if errorStatement in errCategory:
+				errCategory[errorStatement] += 1
+			else:
+				errCategory[errorStatement] = 1
 		return (Error, Parcel)
 
 	#Check to see if street name provided is within a list created from V2.
@@ -468,35 +706,83 @@ class Error:
 			stringToTest = getattr(Parcel,field)
 			siteAddToTest = getattr(Parcel,siteAddField)
 			if stringToTest is not None:
-				if  stringToTest in nullList or stringToTest.isspace() or any(x.islower() for x in stringToTest) :
-					getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + field.upper() + ". Please correct.")
+				if  stringToTest in nullList or stringToTest.isspace() or any(x.islower() for x in stringToTest):
+					errorStatement = "String values of #<Null>#; #NULL# or blanks occurred in " + field.upper() + ". Please correct."
+
+					getattr(Parcel,errorType + "Errors").append(errorStatement)
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+					errCategory = getattr(Error, errorType + "ErrorStatements")
+
+					if errorStatement in errCategory:
+						errCategory[errorStatement] += 1
+					else:
+						errCategory[errorStatement] = 1
+
 					Error.badcharsCount  +=1   #for wrong <null> values
 
 				elif stringToTest.strip() in stNameDict[coname]:
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " does not appear in list created from data of last year. Please verify this value contains only the STREETNAME and street name is correct.")
+					errorStatement = "Value provided in " + field.upper() + " does not appear in list created from data of last year. Please verify this value contains only the STREETNAME and street name is correct."
+
+					getattr(Parcel,errorType + "Errors").append(errorStatement)
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+					errCategory = getattr(Error, errorType + "ErrorStatements")
+
+					if errorStatement in errCategory:
+						errCategory[errorStatement] += 1
+					else:
+						errCategory[errorStatement] = 1
+
 					Error.flags_dict['streetnameDom'] += 1
 
 				return(Error, Parcel)
 			else:
 				if siteAddToTest is not None and stringToTest is None:
-					getattr(Parcel,errorType + "Errors").append(field.upper() + " is <Null> but " + siteAddField.upper() + " is populated. Please ensure elements are in the appropriate field.")
+					errorStatement = field.upper() + " is <Null> but " + siteAddField.upper() + " is populated. Please ensure elements are in the appropriate field."
+
+					getattr(Parcel,errorType + "Errors").append(errorStatement)
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+					errCategory = getattr(Error, errorType + "ErrorStatements")
+
+					if errorStatement in errCategory:
+						errCategory[errorStatement] += 1
+					else:
+						errCategory[errorStatement] = 1
+
 					Error.flags_dict['streetnameDom'] += 1
 
 				elif acceptNull:
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("<Null> Found on " + field.upper() + " field and value is expected.")
+					errorStatement = "<Null> Found on " + field.upper() + " field and value is expected."
+
+					getattr(Parcel,errorType + "Errors").append(errorStatement)
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+					errCategory = getattr(Error, errorType + "ErrorStatements")
+
+					if errorStatement in errCategory:
+						errCategory[errorStatement] += 1
+					else:
+						errCategory[errorStatement] = 1
 
 				return (Error, Parcel)
 		except: # using generic error handling because we don't know what errors to expect yet.
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please inspect the value of this field.")
+			errorStatement = "An unknown issue occurred with the " + field.upper() + " field. Please inspect the value of this field."
+
+			getattr(Parcel,errorType + "Errors").append(errorStatement)
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+			errCategory = getattr(Error, errorType + "ErrorStatements")
+
+			if errorStatement in errCategory:
+				errCategory[errorStatement] += 1
+			else:
+				errCategory[errorStatement] = 1
 		return (Error, Parcel)
 
 	#verify that the values provided in the zip field are 5 digits in length and begin with a '5'.
@@ -507,8 +793,18 @@ class Error:
 				if len(stringToTest) == 5 and stringToTest[0] == '5':
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " is either not 5 digits long or does not appear to be a Wisconsin zipcode.")
+					errorStatement = "Value provided in " + field.upper() + " is either not 5 digits long or does not appear to be a Wisconsin zipcode."
+
+					getattr(Parcel,errorType + "Errors").append(errorStatement)
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+					errCategory = getattr(Error, errorType + "ErrorStatements")
+
+					if errorStatement in errCategory:
+						errCategory[errorStatement] += 1
+					else:
+						errCategory[errorStatement] = 1
+
 					Error.flags_dict['zipCheck'] += 1
 				return(Error,Parcel)
 
@@ -516,14 +812,33 @@ class Error:
 				if acceptNull:
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("<Null> Found on " + field.upper() + " field and value is expected.")
+					errorStatement = "<Null> Found on " + field.upper() + " field and value is expected."
+
+					getattr(Parcel,errorType + "Errors").append(errorStatement)
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+					errCategory = getattr(Error, errorType + "ErrorStatements")
+
+					if errorStatement in errCategory:
+						errCategory[errorStatement] += 1
+					else:
+						errCategory[errorStatement] = 1
+
 					Error.flags_dict['zipCheck'] += 1
 				return (Error, Parcel)
 
 		except: # using generic error handling because we don't know what errors to expect yet.
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please inspect the value of this field.")
+			errorStatement = "An unknown issue occurred with the " + field.upper() + " field. Please inspect the value of this field."
+
+			getattr(Parcel,errorType + "Errors").append(errorStatement)
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+			errCategory = getattr(Error, errorType + "ErrorStatements")
+
+			if errorStatement in errCategory:
+				errCategory[errorStatement] += 1
+			else:
+				errCategory[errorStatement] = 1
 		return (Error, Parcel)
 
 	#verify that the values provided in the zip4 field is 4 characters long
@@ -534,16 +849,35 @@ class Error:
 				if len(stringToTest) == 4:
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " is not 4 digits long.")
+					errorStatement = "Value provided in " + field.upper() + " is not 4 digits long."
+
+					getattr(Parcel,errorType + "Errors").append(errorStatement)
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+					errCategory = getattr(Error, errorType + "ErrorStatements")
+
+					if errorStatement in errCategory:
+						errCategory[errorStatement] += 1
+					else:
+						errCategory[errorStatement] = 1
+
 					Error.flags_dict['zipCheck'] += 1
 
 				return (Error, Parcel)
 			elif acceptNull:
 				pass
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please inspect the value of this field.")
+			errorStatement = "An unknown issue occurred with the " + field.upper() + " field. Please inspect the value of this field."
+
+			getattr(Parcel,errorType + "Errors").append(errorStatement)
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+			errCategory = getattr(Error, errorType + "ErrorStatements")
+
+			if errorStatement in errCategory:
+				errCategory[errorStatement] += 1
+			else:
+				errCategory[errorStatement] = 1
 		return(Error, Parcel)
 
 	#verify that UNITID contains a values if UNITTYPE field contains a value of "UNIT" or "APARTMENT"
@@ -555,12 +889,30 @@ class Error:
 			if stringToTest is not None:
 				pass
 			elif  unitTypeToTest is not None and unitTypeToTest.upper() in utypeList:
-				getattr(Parcel,errorType + "Errors").append("<Null> value found on UNITID field but a value is expected when UNITTYPE field contains a value of #UNIT# or #APARTMENT#. ")
+				errorStatement = "<Null> value found on UNITID field but a value is expected when UNITTYPE field contains a value of #UNIT# or #APARTMENT#."
+
+				getattr(Parcel,errorType + "Errors").append(errorStatement)
 				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+				errCategory = getattr(Error, errorType + "ErrorStatements")
+
+				if errorStatement in errCategory:
+					errCategory[errorStatement] += 1
+				else:
+					errCategory[errorStatement] = 1
 			return (Error, Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + field.upper() + " field. Please inspect the value of this field.")
+			errorStatement = "An unknown issue occurred with the " + field.upper() + " field. Please inspect the value of this field."
+
+			getattr(Parcel,errorType + "Errors").append(errorStatement)
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+			errCategory = getattr(Error, errorType + "ErrorStatements")
+
+			if errorStatement in errCategory:
+				errCategory[errorStatement] += 1
+			else:
+				errCategory[errorStatement] = 1
 		return(Error, Parcel)
 
 
@@ -574,18 +926,54 @@ class Error:
 				pass
 
 			elif (imprTest == None and impValue is not None) or (imprTest is not None and impValue is None):
-				getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " does not correspond with 'IMPVALUE' for this record - please verify.")
+				errorStatement = "Value provided in " + field.upper() + " does not correspond with 'IMPVALUE' for this record - please verify."
+
+				getattr(Parcel,errorType + "Errors").append(errorStatement)
 				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+				errCategory = getattr(Error, errorType + "ErrorStatements")
+
+				if errorStatement in errCategory:
+					errCategory[errorStatement] += 1
+				else:
+					errCategory[errorStatement] = 1
 			elif (imprTest.upper() == 'NO' and float(impValue) != 0):
-				getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " does not correspond with 'IMPVALUE' for this record - please verify.")
+				errorStatement = "Value provided in " + field.upper() + " does not correspond with 'IMPVALUE' for this record - please verify."
+
+				getattr(Parcel,errorType + "Errors").append(errorStatement)
 				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+				errCategory = getattr(Error, errorType + "ErrorStatements")
+
+				if errorStatement in errCategory:
+					errCategory[errorStatement] += 1
+				else:
+					errCategory[errorStatement] = 1
 			elif (imprTest.upper() == 'YES' and float(impValue) <= 0):
-				getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " does not correspond with 'IMPVALUE' for this record - please verify.")
-				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCounty") + 1)
+				errorStatement = "Value provided in " + field.upper() + " does not correspond with 'IMPVALUE' for this record - please verify."
+
+				getattr(Parcel,errorType + "Errors").append(errorStatement)
+				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+				errCategory = getattr(Error, errorType + "ErrorStatements")
+
+				if errorStatement in errCategory:
+					errCategory[errorStatement] += 1
+				else:
+					errCategory[errorStatement] = 1
 			return (Error,Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occured with the " + field.upper() + " field. Please inspect the value of this field.")
+			errorStatement = "An unknown issue occured with the " + field.upper() + " field. Please inspect the value of this field."
+
+			getattr(Parcel,errorType + "Errors").append(errorStatement)
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+			errCategory = getattr(Error, errorType + "ErrorStatements")
+
+			if errorStatement in errCategory:
+				errCategory[errorStatement] += 1
+			else:
+				errCategory[errorStatement] = 1
 		return (Error,Parcel)
 
 	#Verify that CNTASSDVALUE is different to LandValue when ImpValue is greater than zero
@@ -600,22 +988,51 @@ class Error:
 				if (cntassvalue is not None and lndvalue is not None) and (float(cntassvalue) == float(lndvalue)):
 					pass
 				elif (cntassvalue is not None and lndvalue is not None) and (float(cntassvalue) != float(lndvalue)):
-					getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " is zero or <Null>. 'CNTASSDVALUE' should be equal to 'LNDVALUE' for this record - please verify.")
+					errorStatement = "Value provided in " + field.upper() + " is zero or <Null>. 'CNTASSDVALUE' should be equal to 'LNDVALUE' for this record - please verify."
+
+					getattr(Parcel,errorType + "Errors").append(errorStatement)
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+					errCategory = getattr(Error, errorType + "ErrorStatements")
+
+					if errorStatement in errCategory:
+						errCategory[errorStatement] += 1
+					else:
+						errCategory[errorStatement] = 1
+					
 					Error.flags_dict['cntCheck'] += 1
 
 			elif (impvalue is not None and float(impvalue) > 0):
 				if (cntassvalue is not None and lndvalue is not None) and (float(cntassvalue) > float(lndvalue)) :
 					pass
 				elif (cntassvalue is not None and lndvalue is not None) and (float(cntassvalue) == float(lndvalue)):
-					getattr(Parcel,errorType + "Errors").append("Value provided in " + field.upper() + " is greater than zero. 'CNTASSDVALUE' should not be equal to 'LNDVALUE' for this record - please verify.")
+					errorStatement = "Value provided in " + field.upper() + " is greater than zero. 'CNTASSDVALUE' should not be equal to 'LNDVALUE' for this record - please verify."
+
+					getattr(Parcel,errorType + "Errors").append(errorStatement)
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)  #Error.taxErrorCount +=
+
+					errCategory = getattr(Error, errorType + "ErrorStatements")
+
+					if errorStatement in errCategory:
+						errCategory[errorStatement] += 1
+					else:
+						errCategory[errorStatement] = 1
+
 					Error.flags_dict['cntCheck'] += 1
 
 			return(Error,Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with IMPROVED, LANDVALUE or CNTASSVALUE field. Please inspect the value of this field.")
+			errorStatement = "An unknown issue occurred with IMPROVED, LANDVALUE or CNTASSVALUE field. Please inspect the value of this field."
+
+			getattr(Parcel,errorType + "Errors").append(errorStatement)
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+			errCategory = getattr(Error, errorType + "ErrorStatements")
+
+			if errorStatement in errCategory:
+				errCategory[errorStatement] += 1
+			else:
+				errCategory[errorStatement] = 1
 		return(Error,Parcel)
 
 	#checking taxparcelID and parcelID for redundancy
@@ -629,15 +1046,34 @@ class Error:
 				pass
 
 			elif taxIDToTest == parcelIDToTest:
-				getattr(Parcel, errorType + "Errors").append("Redundant information in " + taxField.upper() + " and " + parcelField.upper() + " fields.")
+				errorStatement = "Redundant information in " + taxField.upper() + " and " + parcelField.upper() + " fields."
+
+				getattr(Parcel, errorType + "Errors").append(errorStatement)
 				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+				errCategory = getattr(Error, errorType + "ErrorStatements")
+
+				if errorStatement in errCategory:
+					errCategory[errorStatement] += 1
+				else:
+					errCategory[errorStatement] = 1
+				
 				Error.flags_dict['redundantId'] += 1
 			else:
 				pass
 			return (Error, Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + taxField.upper() + "or" + parcelField.upper() + " fields. Please inspect the values of these fields.")
+			errorStatement = "An unknown issue occurred with the " + taxField.upper() + "or" + parcelField.upper() + " fields. Please inspect the values of these fields."
+
+			getattr(Parcel,errorType + "Errors").append(errorStatement)
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+			errCategory = getattr(Error, errorType + "ErrorStatements")
+
+			if errorStatement in errCategory:
+				errCategory[errorStatement] += 1
+			else:
+				errCategory[errorStatement] = 1
 		return (Error, Parcel)
 
 	#Check for PROP/AUX value existing when expected and then check existing values for dups and for values not in expected domain lists...(Makes classOfPropCheck fcn obsolete)
@@ -654,56 +1090,120 @@ class Error:
 				pass
 			else:
 				if copToTest is None and auxToTest is None:
-					#print( str(year) + " and " + str(acceptYears[1]) )
-					getattr(Parcel,errorType + "Errors").append("The " + propField.upper() + " and " + auxField.upper() + " fields are <Null> and a value is expected for any non-new parcels.")
+					#print( str(year) + " and " + str(acceptYears[1]))
+					errorStatement = "The " + propField.upper() + " and " + auxField.upper() + " fields are <Null> and a value is expected for any non-new parcels."
+
+					getattr(Parcel,errorType + "Errors").append(errorStatement)
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+					errCategory = getattr(Error, errorType + "ErrorStatements")
+
+					if errorStatement in errCategory:
+						errCategory[errorStatement] += 1
+					else:
+						errCategory[errorStatement] = 1
+
 					Error.flags_dict['auxPropCheck'] += 1
 
 				if copToTest is not None and (copToTest in nullList or copToTest.isspace()):
-						getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + propField.upper() + ". Please correct.")
-						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-						Error.badcharsCount  +=1   #for wrong <null> values
+                                        errorStatement = "String values of #<Null>#; #NULL# or blanks occurred in " + propField.upper() + ". Please correct."
+                                        getattr(Parcel,errorType + "Errors").append( errorStatement)
+                                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                                        if errorStatement in errCategory:
+                                        	errCategory[errorStatement] += 1
+                                        else:
+                                        	errCategory[errorStatement] = 1
+
+                                        Error.badcharsCount  +=1   #for wrong <null> values
 
 				elif copToTest is not None:
 					checkVal = copToTest.split(",")
 					for val in checkVal:
 						if val.strip() not in copDomainList:
-							getattr(Parcel,errorType + "Errors").append("A value provided in " + propField.upper() + " field is not in acceptable domain list.")
-							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-							Error.flags_dict['auxPropCheck'] += 1
+                                                        errorStatement = "String values of #<Null>#; #NULL# or blanks occurred in " + propField.upper() + ". Please correct."
+                                                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                                                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                                                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                                                        if errorStatement in errCategory:
+                                                        	errCategory[errorStatement] += 1
+                                                        else:
+                                                        	errCategory[errorStatement] = 1
+
+                                                        Error.flags_dict['auxPropCheck'] += 1
 
 						elif val.strip() in testListCop:
-							getattr(Parcel,errorType + "Errors").append("Duplicate values exist in " + propField.upper() + " field.")
-							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-							Error.flags_dict['auxPropCheck'] += 1
+                                                        errorStatement = "Duplicate values exist in " + propField.upper() + " field."
+                                                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                                                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                                                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                                                        if errorStatement in errCategory:
+                                                        	errCategory[errorStatement] += 1
+                                                        else:
+                                                        	errCategory[errorStatement] = 1
+
+                                                        Error.flags_dict['auxPropCheck'] += 1
 
 						else:
 							testListCop.append(val.strip())
 
 				if auxToTest is not None and (auxToTest in nullList or auxToTest.isspace()):
-						getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + auxField.upper() + ". Please correct.")
-						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-						Error.badcharsCount  +=1   #for wrong <null> values
+                                        errorStatement = "String values of #<Null>#; #NULL# or blanks occurred in " + auxField.upper() + ". Please correct."
+                                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+                                        Error.badcharsCount  +=1   #for wrong <null> values
 
 				elif auxToTest is not None:
 					checkAuxVal = auxToTest.split(",")
 					for val in checkAuxVal:
 						if val.strip() not in auxDomainList:
-							getattr(Parcel,errorType + "Errors").append("A value provided in " + auxField.upper() + " field is not in AUXCLASS domain list. Standardize values for AUXCLASS domains.")
-							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-							Error.flags_dict['auxPropCheck'] += 1
+                                                        errorStatement = "A value provided in " + auxField.upper() + " field is not in AUXCLASS domain list. Standardize values for AUXCLASS domains."
+                                                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                                                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                                                        errCategory = getattr(Error, errorType + "ErrorStatements")
+                                                        if errorStatement in errCategory:
+                                                        	errCategory[errorStatement] += 1
+                                                        else:
+                                                        	errCategory[errorStatement] = 1
+
+                                                        Error.flags_dict['auxPropCheck'] += 1
 
 						elif val.strip() in testListAux:
-							getattr(Parcel,errorType + "Errors").append("Duplicate values exist in " + auxField.upper() + " field.")
-							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-							Error.flags_dict['auxPropCheck'] += 1
+                                                        errorStatement = "Duplicate values exist in " + auxField.upper() + " field."
+                                                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                                                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                                                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                                                        if errorStatement in errCategory:
+                                                        	errCategory[errorStatement] += 1
+                                                        else:
+                                                        	errCategory[errorStatement] = 1
+            
+                                                        Error.flags_dict['auxPropCheck'] += 1
 
 						else:
 							testListAux.append(val.strip())
 			return(Error, Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("!!!!!!An unknown issue occurred with the " + propField.upper() + " and/or " + auxField.upper() + " field. Please inspect the values of these fields.")
-			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+                        errorStatement = "!!!!An unknown issue occurred with the " + propField.upper() + " and/or " + auxField.upper() + " field. Please inspect the values of these fields."
+                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                        if errorStatement in errCategory:
+                        	errCategory[errorStatement] += 1
+                        else:
+                        	errCategory[errorStatement] = 1
+
 		return (Error, Parcel)
 
 	#checking ESTFMKVALUE field against PROPCLASS field for erroneous not null values when PROPCLASS of 4, 5, 5M or AUXCLASS field
@@ -716,8 +1216,10 @@ class Error:
 			estFmkValueTest = getattr(Parcel,estFmkValue)
 			
 			if (estFmkValueTest is None or float(estFmkValueTest) == 0 ) and auxClassValue is None and propClassTest is not None:
+                                
 				if  re.search('4', propClassTest) is None and re.search('5', propClassTest) is None and (re.search('1', propClassTest) is not None or re.search('2', propClassTest) is not None or re.search('3', propClassTest) is not None or re.search('6', propClassTest) is not None or re.search('7', propClassTest) is not None):
-					getattr(Parcel, errorType + "Errors").append("A value greater than zero is expected in ESTFMKVALUE for fully taxable properties with PROPCLASS of (" + str(propClassTest) + "). Verify value.")
+					errorStatement = "A value greater than zero is expected in ESTFMKVALUE for fully taxable properties with PROPCLASS of (" + str(propClassTest) + "). Verify value."
+					getattr(Parcel, errorType + "Errors").append(errorStatement )
 					setattr(Error, errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					Error.flags_dict['fairmarketCheck'] += 1
 				else:
@@ -734,8 +1236,17 @@ class Error:
 				#	pass
 				return(Error,Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + propClass.upper() + "  or  " + estFmkValue.upper() + " field. Please inspect the values of these fields.")
-			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+                        errorStatement = "An unknown issue occurred with the " + propClass.upper() + "  or  " + estFmkValue.upper() + " field. Please inspect the values of these fields."
+                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                        if errorStatement in errCategory:
+                        	errCategory[errorStatement] += 1
+                        else:
+                        	errCategory[errorStatement] = 1
+
 		return (Error, Parcel)
 
 	#checking CONAME, PARCELFIPS and PARCELSRC fields to ensure they match expected and meet domain requirements
@@ -747,19 +1258,35 @@ class Error:
 			srcToTest = getattr(Parcel,srcfield)
 			if coNameToTest is not None:
 				if coNameToTest in nullList or coNameToTest.isspace()  or any(x.islower() for x in coNameToTest):
-					getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + coNamefield.upper() + ". Please correct.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					Error.badcharsCount  +=1   #for wrong <null> values
+                                        errorStatement = "String values of #<Null>#; #NULL# or blanks occurred in " + coNamefield.upper() + ". Please correct."
+                                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 
-					Error.coNameMiss += 1
-					Error.flags_dict['matchContrib'] += 1
-					Error.badcharsCount  +=1   #for wrong <null> values
+                                        errCategory = getattr(Error, errorType + "ErrorStatements")
 
-				elif coNameToTest != Error.coName and (str(Error.coName) != 'OUTAGAMIE' and str( Error.coName) != 'WINNEBAGO' ): 
-					getattr(Parcel,errorType + "Errors").append("The value provided in " + coNamefield.upper() + " field does not match expected county name.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					Error.flags_dict['matchContrib'] += 1
-					#Error.coNameMiss += 1
+                                        if errorStatement in errCategory:
+                                        	errCategory[errorStatement] += 1
+                                        else:
+                                        	errCategory[errorStatement] = 1
+
+                                        Error.badcharsCount  +=1   #for wrong <null> values
+                                        Error.coNameMiss += 1
+                                        Error.flags_dict['matchContrib'] += 1
+                                        Error.badcharsCount  +=1   #for wrong <null> values
+
+				elif coNameToTest != Error.coName and (str(Error.coName) != 'OUTAGAMIE' and str( Error.coName) != 'WINNEBAGO' ):
+                                        errorStatement = "The value provided in " + coNamefield.upper() + " field does not match expected county name."
+                                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                                        if errorStatement in errCategory:
+                                        	errCategory[errorStatement] += 1
+                                        else:
+                                        	errCategory[errorStatement] = 1
+
+                                        Error.flags_dict['matchContrib'] += 1					
 
 			else:
 				if acceptNull:
@@ -769,48 +1296,92 @@ class Error:
 
 			if fipsToTest is not None:
 				if fipsToTest in nullList or fipsToTest.isspace()  or any(x.islower() for x in fipsToTest):
-					getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + fipsfield.upper() + ". Please correct.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					Error.fipsMiss += 1
-					Error.flags_dict['matchContrib'] += 1
-					Error.badcharsCount  +=1   #for wrong <null> values
+                                        errorStatement = "String values of #<Null>#; #NULL# or blanks occurred in " + fipsfield.upper() + ". Please correct."
+                                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                                        if errorStatement in errCategory:
+                                        	errCategory[errorStatement] += 1
+                                        else:
+                                        	errCategory[errorStatement] = 1
+
+                                        Error.fipsMiss += 1
+                                        Error.flags_dict['matchContrib'] += 1
+                                        Error.badcharsCount  +=1   #for wrong <null> values
 
 				elif fipsToTest.upper() != coNameDict[Error.coName]:
-					getattr(Parcel,errorType + "Errors").append("The value provided in " + fipsfield.upper() + " field does not match submitting county fips.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					Error.flags_dict['matchContrib'] += 1
-					#Error.fipsMiss += 1
+                                        errorStatement = "The value provided in " + fipsfield.upper() + " field does not match submitting county fips."
+                                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                                        if errorStatement in errCategory:
+                                        	errCategory[errorStatement] += 1
+                                        else:
+                                        	errCategory[errorStatement] = 1
+
+                                        Error.flags_dict['matchContrib'] += 1
+					
 			else:
 				if acceptNull:
 					pass
 				else:
 					Error.fipsMiss += 1
-					#Error.flags_dict['matchContrib'] += 1
 
 			if srcToTest is not None:
 				if srcToTest in nullList or srcToTest.isspace()  or any(x.islower() for x in srcToTest):
-					getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + srcfield.upper() + ". Please correct.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					Error.srcMiss += 1
-					Error.flags_dict['matchContrib'] += 1
-					Error.badcharsCount  +=1   #for wrong <null> values
+                                        errorStatement = "String values of #<Null>#; #NULL# or blanks occurred in " + srcfield.upper() + ". Please correct."
+                                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                                        if errorStatement in errCategory:
+                                        	errCategory[errorStatement] += 1
+                                        else:
+                                        	errCategory[errorStatement] = 1
+
+                                        Error.srcMiss += 1
+                                        Error.flags_dict['matchContrib'] += 1
+                                        Error.badcharsCount  +=1   #for wrong <null> values
 
 				elif srcToTest.upper() != coNumberDict[coNameDict[Error.coName]]:
-					getattr(Parcel,errorType + "Errors").append("The value provided in " + srcfield.upper() + " field does not match submitting county name.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					Error.flags_dict['matchContrib'] += 1
-					#Error.srcMiss += 1
+                                        errorStatement = "The value provided in " + srcfield.upper() + " field does not match submitting county name."
+                                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                                        if errorStatement in errCategory:
+                                        	errCategory[errorStatement] += 1
+                                        else:
+                                        	errCategory[errorStatement] = 1
+
+                                        Error.flags_dict['matchContrib'] += 1
+					
 
 			else:
 				if acceptNull:
 					pass
 				else:
 					Error.srcMiss += 1
-					#Error.flags_dict['matchContrib'] += 1
+					
 			return(Error,Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + srcfield.upper() + " field. Please inspect the value of this field.")
-			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+                        errorStatement = "An unknown issue occurred with the " + srcfield.upper() + " field. Please inspect the value of this field."
+                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                        if errorStatement in errCategory:
+                        	errCategory[errorStatement] += 1
+                        else:
+                        	errCategory[errorStatement] = 1
+
 		return (Error, Parcel)
 
 	#checking values provided in SCHOOLDISTNO and SCHOOLDIST field to ensure they are in our domain list and represent the same school dist (if both provided)
@@ -825,37 +1396,91 @@ class Error:
 				'''schNa = schNa.replace("SCHOOL DISTRICT", "").replace("SCHOOL DISTIRCT", "").replace("SCHOOL DIST","").replace("SCHOOL DIST.", "").replace("SCH DIST", "").replace("SCHOOL", "").replace("SCH D OF", "").replace("SCH", "").replace("SD", "").strip()'''
 				try:
 					if schNo != schNameNoDict[schNa] or schNa != schNoNameDict[schNo]:
-						getattr(Parcel,errorType + "Errors").append("The values provided in " + schDistNoField.upper() + " and " + schDistField.upper() + " field do not match. Please verify values are in acceptable domain list.")
-						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-						Error.flags_dict['schoolDist'] += 1
+                                                errorStatement = "The values provided in " + schDistNoField.upper() + " and " + schDistField.upper() + " field do not match. Please verify values are in acceptable domain list."
+                                                getattr(Parcel,errorType + "Errors").append(errorStatement)
+                                                setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                                                errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                                                if errorStatement in errCategory:
+                                                	errCategory[errorStatement] += 1
+                                                else:
+                                                	errCategory[errorStatement] = 1
+
+                                                Error.flags_dict['schoolDist'] += 1
 
 				except:
-					getattr(Parcel,errorType + "Errors").append("One or both of the values in the SCHOOLDISTNO field or SCHOOLDIST field are not in the acceptable domain list. Please verify values.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+                                        errorStatement = "One or both of the values in the SCHOOLDISTNO field or SCHOOLDIST field are not in the acceptable domain list. Please verify values."
+                                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                                        if errorStatement in errCategory:
+                                        	errCategory[errorStatement] += 1
+                                        else:
+                                        	errCategory[errorStatement] = 1
+
 
 				return (Error,Parcel)
 			if schNo is None and schNa is not None:
 				'''schNa = schNa.replace("SCHOOL DISTRICT", "").replace("SCHOOL DISTIRCT", "").replace("SCHOOL DIST","").replace("SCHOOL DIST.", "").replace("SCH DIST", "").replace("SCHOOL", "").replace("SCH D OF", "").replace("SCH", "").replace("SD", "").strip()'''
 				if schNa not in schNameNoDict:
-					getattr(Parcel,errorType + "Errors").append("The value provided in " + schDistField.upper() + " is not within the acceptable domain list. Please verify value.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					Error.flags_dict['schoolDist'] += 1
+                                        errorStatement = "The value provided in " + schDistField.upper() + " is not within the acceptable domain list. Please verify value."
+                                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                                        if errorStatement in errCategory:
+                                        	errCategory[errorStatement] += 1
+                                        else:
+                                        	errCategory[errorStatement] = 1
+
+                                        Error.flags_dict['schoolDist'] += 1
 
 			if schNa is None and schNo is not None:
 				if schNo not in schNoNameDict or len(schNo) != 4:
-					getattr(Parcel,errorType + "Errors").append("The value provided in " + schDistNoField.upper() + " is not within the acceptable domain list or is not 4 digits long as expected. Please verify value.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					Error.flags_dict['schoolDist'] += 1
+                                        errorStatement = "The value provided in " + schDistNoField.upper() + " is not within the acceptable domain list or is not 4 digits long as expected. Please verify value."
+                                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                                        if errorStatement in errCategory:
+                                        	errCategory[errorStatement] += 1
+                                        else:
+                                        	errCategory[errorStatement] = 1
+
+                                        Error.flags_dict['schoolDist'] += 1
 
 			if schNo is None and schNa is None and pinToTest not in ignoreList and pinToTest is not None and (year is not None and int(year) <= 2018):
-				getattr(Parcel,errorType + "Errors").append("Both the " + schDistNoField.upper() + " &  the " + schDistField.upper() + " are <Null> and a value is expected.")
-				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-				Error.flags_dict['schoolDist'] += 1
+                                errorStatement = "Both the " + schDistNoField.upper() + " &  the " + schDistField.upper() + " are <Null> and a value is expected."
+                                getattr(Parcel,errorType + "Errors").append(errorStatement)
+                                setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                                errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                                if errorStatement in errCategory:
+                                	errCategory[errorStatement] += 1
+                                else:
+                                	errCategory[errorStatement] = 1
+
+
+                                Error.flags_dict['schoolDist'] += 1
 
 			return (Error,Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + schDistField.upper() + " or " + schDistNoField.upper() + " field. Please inspect the values of these fields.")
-			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+                        errorStatement = "An unknown issue occurred with the " + schDistField.upper() + " or " + schDistNoField.upper() + " field. Please inspect the values of these fields."
+                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                        if errorStatement in errCategory:
+                        	errCategory[errorStatement] += 1
+                        else:
+                        	errCategory[errorStatement] = 1
 
 		return (Error, Parcel)
 
@@ -895,7 +1520,6 @@ class Error:
 		missingFields = []
 		var = True
 
-		#print("  Checking for all appropriate fields in " + str(inFc.GetName()) + "...\n")
 		print("\n    Checking for all appropriate fields \n")
 
 		### Get the description/definition of the layer i.e., feature class
@@ -912,9 +1536,7 @@ class Error:
 					inFC.DeleteField(i)
 			else:
 				i += 1
-		#print ("=====>>>>\n")
-		#print (fieldDictNames)	
-		#print (schemaType)
+				
 		for field in fieldDictNames:
 			if field.upper() not in fieldPassLst:
 				if field not in schemaType.keys():
@@ -958,38 +1580,62 @@ class Error:
 		try:
 			address = getattr(Parcel,PostalAd)
 			year = getattr(Parcel, taxYear)
-			#print (str(year))
-			#print ( str (acceptYears))
 			pinToTest = getattr(Parcel,pinField)
 			if address is None:
 				pass
 			else:
 
 				if address in nullList or address.isspace():
+                                        errorStatement = "String values of #<Null>#; #NULL# or blanks occurred in " + PostalAd.upper() + ". Please correct."
+                                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 
-					getattr(Parcel,errorType + "Errors").append("String values of #<Null>#; #NULL# or blanks occurred in " + PostalAd.upper() + ". Please correct.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					Error.flags_dict['postalCheck'] += 1
-					Error.badcharsCount  += 1   #for wrong <null> values
+                                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                                        if errorStatement in errCategory:
+                                        	errCategory[errorStatement] += 1
+                                        else:
+                                        	errCategory[errorStatement] = 1
+
+                                        Error.flags_dict['postalCheck'] += 1
+                                        Error.badcharsCount  += 1   #for wrong <null> values
 
 				elif year is not None:
 					if int(year) <= int(acceptYears[1]):   #or pinToTest in ignorelist:
 						if ('CANULL'  in address or 'NULL BLVD'  in address ):
 							pass
 						elif ('NOT AVAILABLE' in address or 'NONE PROVIDED' in address  or 'UNAVAILABLE' in address or 'ADDRESS' in address or 'ADDDRESS' in address or 'UNKNOWN' in address or ' 00000' in address or 'NULL' in address or  ('NONE' in address and 'HONONEGAH' not in address) or 'MAIL EXEMPT' in address or 'TAX EX' in address or 'UNASSIGNED' in address or 'N/A' in address) or(address in badPstladdSet) or  any(x.islower() for x in address):
-							getattr(Parcel,errorType + "Errors").append("A value provided in the " + PostalAd.upper() + " field may contain an incomplete address. Please verify the value is correct or set to <Null> if complete address is unknown.")
-							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-							Error.flags_dict['postalCheck'] += 1
-							#print (address)
+                                                        errorStatement = "A value provided in the " + PostalAd.upper() + " field may contain an incomplete address. Please verify the value is correct or set to <Null> if complete address is unknown."
+                                                        getattr(Parcel,errorType + "Errors").append()
+                                                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                                                        errCategory = getattr(Error,errorType + "ErrorStatements")
+
+                                                        if errorStatement in errCategory:
+                                                        	errCategory[errorStatement] += 1
+                                                        else:
+                                                        	errCategory[errorStatement] = 1
+
+                                                        Error.flags_dict['postalCheck'] += 1
+							
 						else:
 							pass
 			return(Error,Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the PSTLADRESS field.  Please inspect the value of this field.")
-			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+                        errorStatement = "An unknown issue occurred with the PSTLADRESS field.  Please inspect the value of this field."
+                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                        if errorStatement in errCategory:
+                        	errCategory[errorStatement] += 1
+                        else:
+                        	errCategory[errorStatement] = 1
+
 		return (Error, Parcel)
 
-	#totError = Error.checkBadChars (totError )
+	
 	def checkBadChars(Error):
 		if Error.badcharsCount >= 100:
 			print("\n  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
@@ -1007,13 +1653,31 @@ class Error:
 			lnd = 0.0 if (getattr(Parcel,lnd) is None) else float(getattr(Parcel,lnd))
 			imp = 0.0 if (getattr(Parcel,imp) is None) else float(getattr(Parcel,imp))
 			if lnd + imp != cnt:
-				getattr(Parcel,errorType + "Errors").append("CNTASSDVALUE is not equal to LNDVALUE + IMPVALUE as expected.  Correct this issue and refer to the submission documentation for futher clarification as needed.")
-				setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-				Error.flags_dict['cntCheck'] += 1
+                                errorStatement = "CNTASSDVALUE is not equal to LNDVALUE + IMPVALUE as expected.  Correct this issue and refer to the submission documentation for futher clarification as needed."
+                                getattr(Parcel,errorType + "Errors").append(errorStatement)
+                                setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                                errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                                if errorStatement in errCategory:
+                                	errCategory[errorStatement] += 1
+                                else:
+                                	errCategory[errorStatement] = 1
+
+                                Error.flags_dict['cntCheck'] += 1
 			return(Error,Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred when comparing your CNTASSDVALUE value to the sum of LNDVALUE and IMPVALUE.  Please inspect these fields.")
-			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+                        errorStatement = "An unknown issue occurred when comparing your CNTASSDVALUE value to the sum of LNDVALUE and IMPVALUE.  Please inspect these fields."
+                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                        if errorStatement in errCategory:
+                        	errCategory[errorStatement] += 1
+                        else:
+                        	errCategory[errorStatement] = 1
+
 
 		return (Error, Parcel)
 
@@ -1025,28 +1689,73 @@ class Error:
 
 			if mflValueTest is None or float(mflValueTest) == 0.0:
 				if auxToTest is not None and re.search('W', auxToTest) is not None and re.search('AW', auxToTest) is  None and re.search('W4', auxToTest) is  None and re.search('W10', auxToTest) is  None:
-					getattr(Parcel, errorType + "Errors").append("A <Null> or zero value provided in MFLVALUE field does not match the (" + str(auxToTest) + ") AUXCLASS value(s). Refer to submission documentation for verification.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					Error.flags_dict['mflvalueCheck'] += 1
+                                        errorStatement = "A <Null> or zero value provided in MFLVALUE field does not match the (" + str(auxToTest) + ") AUXCLASS value(s). Refer to submission documentation for verification."
+                                        getattr(Parcel, errorType + "Errors").append(errorStatement)
+                                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                                        if errorStatement in errCategory:
+                                        	errCategory[errorStatement] += 1
+                                        else:
+                                        	errCategory[errorStatement] = 1
+
+                                        Error.flags_dict['mflvalueCheck'] += 1
 			elif mflValueTest is not None and float(mflValueTest) > 0.0:
 				if auxToTest is None:
-					getattr(Parcel, errorType + "Errors").append("A <Null> value is expected in the MFLVALUE field according to the AUXCLASS field. Please verify.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					Error.flags_dict['mflvalueCheck'] += 1
+                                        errorStatement = "A <Null> value is expected in the MFLVALUE field according to the AUXCLASS field. Please verify."
+                                        getattr(Parcel, errorType + "Errors").append(errorStatement)
+                                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                                        if errorStatement in errCategory:
+                                        	errCategory[errorStatement] += 1
+                                        else:
+                                        	errCategory[errorStatement] = 1
+
+                                        Error.flags_dict['mflvalueCheck'] += 1
 				elif re.search('W4', auxToTest) is not None:
-					getattr(Parcel, errorType + "Errors").append("MFLVALUE does not include properties with AUXCLASS value of W4. Please verify.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					Error.flags_dict['mflvalueCheck'] += 1
+                                        errorStatement = "MFLVALUE does not include properties with AUXCLASS value of W4. Please verify."
+                                        getattr(Parcel, errorType + "Errors").append(errorStatement)
+                                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                                        if errorStatement in errCategory:
+                                        	errCategory[errorStatement] += 1
+                                        else:
+                                        	errCategory[errorStatement] = 1
+
+                                        Error.flags_dict['mflvalueCheck'] += 1
 				elif re.search('AW', auxToTest) is not None:
-					getattr(Parcel, errorType + "Errors").append("MFLVALUE does not include properties with AUXCLASS value of AWO/AW. Please verify.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					Error.flags_dict['mflvalueCheck'] += 1
+                                        errorStatement = "MFLVALUE does not include properties with AUXCLASS value of AWO/AW. Please verify."
+                                        getattr(Parcel, errorType + "Errors").append(errorStatement)
+                                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                                        if errorStatement in errCategory:
+                                        	errCategory[errorStatement] += 1
+                                        else:
+                                        	errCategory[errorStatement] = 1
+                                        
+                                        Error.flags_dict['mflvalueCheck'] += 1
 			else:
 				pass
 			return(Error, Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the MFLVALUE field.  Please inspect the value of field.")
-			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+                        errorStatement = "An unknown issue occurred with the MFLVALUE field.  Please inspect the value of field."
+                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                        if errorStatement in errCategory:
+                        	errCategory[errorStatement] += 1
+                        else:
+                        	errCategory[errorStatement] = 1
+
 		return (Error, Parcel)
 
 	# checks that the mflvalue <> landvalue
@@ -1062,16 +1771,33 @@ class Error:
 				if Error.mflLnd <= 10:
 					parcelidList.append (parcelid) # need to save parcelid to add flag if necessary
 				if Error.mflLnd > 10:
-					getattr(Parcel,errorType + "Errors").append("MFLVALUE should not equal LNDVALUE in most cases.  Please correct this issue and refer to the submission documentation for further clarification as needed.")
-					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					Error.flags_dict['mflvalueCheck'] += 1
+                                        errorStatement = "MFLVALUE should not equal LNDVALUE in most cases. Please correct this issue and refer to the submission documentation for further clarification as needed."
+                                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                                        if errorStatement in errCategory:
+                                        	errCategory[errorStatement] += 1
+                                        else:
+                                        	errCategory[errorStatement] = 1
+                                        Error.flags_dict['mflvalueCheck'] += 1
 			else:
 				pass
 
 			return(Error,Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the MFLVALUE or LNDVALUE field.  Please inspect these fields.")
-			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+                        errorStatement = "An unknown issue occurred with the MFLVALUE or LNDVALUE field.  Please inspect these fields."
+                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                        if errorStatement in errCategory:
+                        	errCategory[errorStatement] += 1
+                        else:
+                        	errCategory[errorStatement] = 1
+
 		return (Error, Parcel)
 
 	# checks that parcels with auxclass x1-x4  have taxroll values = <null>
@@ -1091,17 +1817,34 @@ class Error:
 						if val is not None:
 							probFields.append(key)
 					if len(probFields) > 0:
-						getattr(Parcel,errorType + "Errors").append("A <Null> value is expected in " + " / ".join(probFields) + "  for properties with AUXCLASS of X4. Please correct.")
-						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-						Error.flags_dict['auxclassFullyX4'] += 1
+                                                errorStatement = "A <Null> value is expected in " + " / ".join(probFields) + "  for properties with AUXCLASS of X4. Please correct."
+                                                getattr(Parcel,errorType + "Errors").append(errorStatement )
+                                                setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                                                errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                                                if errorStatement in errCategory:
+                                                	errCategory[errorStatement] += 1
+                                                else:
+                                                	errCategory[errorStatement] = 1
+
+                                                Error.flags_dict['auxclassFullyX4'] += 1
 
 				else:  #W values are okay
 					pass
 				return (Error, Parcel)
 
 		except: # using generic error handling because we don't know what errors to expect yet.
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + auxclassField.upper() + " field. Please inspect the value of this field.")
-			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+                        errorStatement = "An unknown issue occurred with the " + auxclassField.upper() + " field. Please inspect the value of this field."
+                        getattr(Parcel,errorType + "Errors").append(errorStatement)
+                        setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+                        errCategory = getattr(Error, errorType + "ErrorStatements")
+
+                        if errorStatement in errCategory:
+                        	errCategory[errorStatement] += 1
+                        else:
+                        	errCategory[errorStatement] = 1
 
 		return (Error, Parcel)
 
@@ -1121,15 +1864,33 @@ class Error:
 						if val is not None:
 							taxFields.append(key)
 					if len(taxFields) > 0:
-						getattr(Parcel,errorType + "Errors").append("A <Null> value is expected in " + " / ".join(taxFields) + "  for properties with AUXCLASS of (" + str(auxclass) + "). Please correct.")
+						errorStatement = "A <Null> value is expected in " + " / ".join(taxFields) + "  for properties with AUXCLASS of (" + str(auxclass) + "). Please correct."
+						getattr(Parcel,errorType + "Errors").append(errorStatement)
 						setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+						errCategory = getattr(Error, errorType + "ErrorStatements")
+
+						if errorStatement in errCategory:
+							errCategory[errorStatement]+= 1 
+						else:
+							errCategory[errorStatement] = 1
+
 				else:  #W values are okay
 					pass
 				return (Error, Parcel)
 
 		except: # using generic error handling because we don't know what errors to expect yet.
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the AUXCLASS field. Please inspect the value of this field.")
+			errorStatement = "An unknown issue occurred with the AUXCLASS field. Please inspect the value of this field."
+			getattr(Parcel,errorType + "Errors").append(errorStatement)
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+			errCategory = getattr(Error, errorType + "ErrorStatements")
+
+			if errorStatement in errCategory:
+				errCategory[errorStatement] += 1
+			else:
+				errCategory[errorStatement] = 1
+
 		return (Error, Parcel)
 
 	# check that propclass, net and gross with 0.0 or <Null> do not have propclass value
@@ -1143,20 +1904,47 @@ class Error:
 				if auxClassTest is not None and re.search ('AW', str(auxClassTest)):
 					pass    ## Calumet case
 				elif (re.search('1', str(propClassTest)) or re.search('2', str(propClassTest)) or re.search('3',str(propClassTest)) or re.search('4', str(propClassTest)) or re.search('5',str(propClassTest)) or re.search('6',str(propClassTest)) or re.search('7',str(propClassTest))):
-					getattr(Parcel, errorType + "Errors").append("A value greater than zero is expected in " + taxRollValue.upper() + " for properties with PROPCLASS of (" + str(propClassTest) + "). Verify value.")
+					errorStatement = "A value greater than zero is expected in " + taxRollValue.upper() + " for properties with PROPCLASS of (" + str(propClassTest) + "). Verify value."
+					getattr(Parcel, errorType + "Errors").append(errorStatement)
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
 					Error.flags_dict['cntPropClassCheck'] += 1
+
+					errCategory = getattr(Error, errorType + "ErrorStatements")
+
+					if errorStatement in errCategory:
+						errCategory[errorStatement] += 1
+					else:
+						errCategory[errorStatement] = 1
+
 				else:
 					pass
 			elif cnt is not None and float(cnt) > 0:
 				if propClassTest is None:
-					getattr(Parcel, errorType + "Errors").append("The value provided in " + taxRollValue.upper() + " does not correspond with PROPCLASS value(s) of (" + str(propClassTest) + "). Please verify.")
+					errorStatement = "The value provided in " + taxRollValue.upper() + " does not correspond with PROPCLASS value(s) of (" + str(propClassTest) + "). Please verify."
+					getattr(Parcel, errorType + "Errors").append(errorStatement)
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+					errCategory = getattr(Error, errorType + "ErrorStatements")
+
+					if errorStatement in errCategory:
+						errCategory[errorStatement] += 1
+					else:
+						errCategory[errorStatement] = 1
+
 					Error.flags_dict['cntPropClassCheck'] += 1
 
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + taxRollValue.upper() + " field.  Please inspect the <Null> value provided in PROPCLASS.")
+			errorStatement = "An unknown issue occurred with the " + taxRollValue.upper() + " field.  Please inspect the <Null> value provided in PROPCLASS."
+			getattr(Parcel,errorType + "Errors").append(errorStatement)
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+			errCategory = getattr(Error, errorType +"ErrorStatements")
+
+			if errorStatement in errCategory:
+				errCategory[errorStatement] += 1
+			else:
+				errCategory[errorStatement] = 1
+
 		return (Error, Parcel)
 
 	def propClassNetGrosCheck (Error,Parcel,propClass,auxClass, netValue, grosValue, errorType):
@@ -1172,20 +1960,44 @@ class Error:
 					pass    ## Calumet case
 
 				elif (re.search('1', str(propClassTest)) or re.search('2', str(propClassTest)) or re.search('3',str(propClassTest)) or re.search('4', str(propClassTest)) or re.search('5',str(propClassTest)) or re.search('6',str(propClassTest)) or re.search('7',str(propClassTest))):
-					getattr(Parcel, errorType + "Errors").append("A value greater than zero is expected in NETPRPTA/GRSPRPTA for properties with PROPCLASS of (" + str(propClassTest) + "). Verify value.")
+					errorStatement = "A value greater than zero is expected in NETPRPTA/GRSPRPTA for properties with PROPCLASS of (" + str(propClassTest) + "). Verify value." 
+					getattr(Parcel, errorType + "Errors").append(errorStatement)
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					#Error.flags_dict['cntPropClassCheck'] += 1
+
+					errCategory = getattr(Error, errorType + "ErrorStatements")
+
+					if errorStatement in errCategory:
+						errCategory[errorStatement] += 1
+					else:
+						errCategory[errorStatement] = 1
+					
 				else:
 					pass
 			elif (net is not None and float(net) > 0) or (gros is not None and float(gros) > 0)  :
 				if propClassTest is None:
-					getattr(Parcel, errorType + "Errors").append("The value provided in NETPRPTA/GRSPRPTA does not correspond with PROPCLASS value(s) of (" + str(propClassTest) + "). Please verify.")
+					errorStatement = "The value provided in NETPRPTA/GRSPRPTA does not correspond with PROPCLASS value(s) of (" + str(propClassTest) + "). Please verify."
+					getattr(Parcel, errorType + "Errors").append(errorStatement)
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
-					#Error.flags_dict['cntPropClassCheck'] += 1
 
+					errCategory = getattr(Error, errorType + "ErrorStatements")
+
+					if errorStatement in errCategory:
+						errCategory[errorStatement] += 1
+					else:
+						errCategory[errorStatement] = 1
+					
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the NETPRPTA/GRSPRPTA field(s).  Please inspect the <Null> value provided in PROPCLASS.")
+			errorStatement = "An unknown issue occurred with the NETPRPTA/GRSPRPTA field(s).  Please inspect the <Null> value provided in PROPCLASS."
+			getattr(Parcel,errorType + "Errors").append(errorStatement)
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+			errCategory = getattr(Error, errorType + "ErrorStatements")
+
+			if errorStatement in errCategory:
+				errCategory[errorStatement] += 1
+			else:
+				errCategory[errorStatement] = 1
+
 		return (Error, Parcel)
 
 	#check for instances of net > gross
@@ -1197,17 +2009,35 @@ class Error:
 				if float(grsIn) >= float(netIn):
 					pass
 				else:
-					getattr(Parcel,errorType + "Errors").append("The NETPRPTA value is greater than the GRSPRPTA value.  See Submission_Documentation.pdf for verification.")
+					errorStatement = "The NETPRPTA value is greater than the GRSPRPTA value.  See Submission_Documentation.pdf for verification."
+					getattr(Parcel,errorType + "Errors").append(errorStatement)
 					setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+					errCategory = getattr(Error, errorType + "ErrorStatements")
+
+					if errorStatement in errCategory:
+						errCategory[errorStatement] += 1
+					else:
+						errCategory[errorStatement] = 1
+
 					Error.netMoreGrsCnt += 1
-					#Error.flags_dict['netvsGross'] += 1
+					
 				return (Error,Parcel)
 			else:
 				pass
 			return (Error, Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the NETPRPTA or GRSPRPTA field.  Please inspect the values of these fields.")
+			errorStatement = "An unknown issue occurred with the NETPRPTA or GRSPRPTA field.  Please inspect the values of these fields."
+			getattr(Parcel,errorType + "Errors").append(errorStatement)
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+			errCategory = getattr(Error, errorType + "ErrorStatements")
+
+			if errorStatement in errCategory:
+				errCategory[errorStatement] += 1
+			else:
+				errCategory[errorStatement] = 1
+
 		return (Error, Parcel)
 
 	# What does this function do?
@@ -1246,12 +2076,28 @@ class Error:
 					stringToTest = str(getattr(Parcel,f.lower()))
 					if stringToTest is not None:
 						if re.search(testRegex,stringToTest) is not None:
-							getattr(Parcel,errorType + "Errors").append("Bad characters found in " + f.upper())
+							errorStatement = "Bad characters found in " + f.upper()
+							getattr(Parcel,errorType + "Errors").append(errorStatement)
 							setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+							errCategory =getattr (Error, errorType + "ErrorStatements")
+
+							if errorStatement in errCategory:
+								errCategory[errorStatement] += 1
+							else:
+								errCategory[errorStatement] = 1
 			return (Error, Parcel)
 		except:
-			getattr(Parcel,errorType + "Errors").append("An unknown issue occurred with the " + f.upper() + " field. Please inspect the value of this field.")
+			errorStatement = "An unknown issue occurred with the " + f.upper() + " field. Please inspect the value of this field."
+			getattr(Parcel,errorType + "Errors").append(errorStatement)
 			setattr(Error,errorType + "ErrorCount", getattr(Error,errorType + "ErrorCount") + 1)
+
+			errCategory = getattr(Error, errorType + "ErrorStatements")
+
+			if errorStatement in errCategory:
+				errCategory[errorStatement] += 1
+			else:
+				errCategory[errorStatement] = 1
 		return (Error, Parcel)
 
 	#checking strings for unacceptable chars including /n, /r, etc...

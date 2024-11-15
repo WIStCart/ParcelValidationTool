@@ -21,7 +21,7 @@ class Summary:
 		print (outSummaryJSON)
 		'''
 
-	def writeSummaryTxt(self,outDirTxt,outName,totError,outPage,outJSON):
+	def writeSummaryTxt(self,outDirTxt,outName,totError,outPage,outJSON, inject):
 		try:
 			Validation_JSON = {
 				'County_Info':{
@@ -54,6 +54,12 @@ class Summary:
 				},
 				'Unique_ParcelDate':{
 					'Pcnt_Unique_Parceldate': str(round (totError.uniqueparcelDatePercent,2))
+				},
+				'Flags_Dictionary': {
+					'General': totError.generalErrorStatements,
+					'Geometric': totError.geometricErrorStatements,
+					'Address': totError.addressErrorStatements,
+					'Tax': totError.taxErrorStatements
 				},
 				'Fields_Diffs':{
 					'PARCELID':  str(totError.comparisonDict["PARCELID"]),
@@ -195,9 +201,40 @@ class Summary:
 			self.errorSummaryFile.write("************************************************************************\n")
 			self.errorSummaryFile.close()
 			# outJSON - # full (hard coded) path to the output .json file summary.js
+			
 			with open(outJSON, 'w') as outfile:
 				outfile.write("var testValues = ")
 				json.dump(Validation_JSON, outfile)
+
+                        ## NEW CODE
+			priorCode, summaryCode, followingCode = "", "", ""         
+			with open(outJSON, 'r') as file:
+				content = file.read()
+				seekSummaryCode = 'var testValues = '
+				if seekSummaryCode in content:
+					searchSeekSummaryCode = content.index(seekSummaryCode)
+					summaryCode = content[searchSeekSummaryCode + len(seekSummaryCode)::]
+
+			with open(inject, 'r') as file:
+				content = file.read()
+				seekBeginning = ';const On='
+				seekEnding = ';function Rn(e)'
+				if seekBeginning in content and seekEnding in content: # try using split instead
+					searchSeekBeginning = content.index(seekBeginning)
+					searchSeekEnding = content.index(seekEnding)
+					priorCode = content[0:searchSeekBeginning + len(seekBeginning)]
+					followingCode = content[searchSeekEnding::]
+
+			# with open(r'C:\Users\scostaff_1\Documents\github\ValidationTool\OpenSource\summary\build\summary.js', 'w') as outfile:
+			#	outfile.write("var testValues = ")
+			#	json.dump(Validation_JSON, outfile)
+
+			with open(inject, 'w') as file:
+				file.write(priorCode)
+				json.dump(Validation_JSON, file)
+				file.write(followingCode)
+			## END OF NEW	
+				
 		except Exception as e:
 			# print("  !!!!!!!!!!Error writing summary file!!!!!!!!!!")
 			# print(str(e))
