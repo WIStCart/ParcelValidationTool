@@ -138,13 +138,11 @@ def validation_tool_run_all(inputDict):
 
 		#Execute in-cursor error tests
 		#EXAMPLE FUNCTION # totError,currParcel = Error.reallyBadChars(totError,currParcel,fieldNames,fieldNamesBadChars,'general')
-		if inputDict['isFinal'] == 'finalModeSelected': 
-			totError,currParcel = Error.checkGeometricQuality(totError,currParcel, pinSkips)
-		else:
-			if j % interval == 0:    # message to user while waiting
-				print("\n    Testing parcel data attributes for errors ...")
-			j += 1
-			totError,currParcel = Error.testParcelGeometry(totError,currParcel, pinSkips)		
+
+		if j % interval == 0:    # message to user while waiting
+			print("\n    Testing parcel data attributes for errors ...")
+		j += 1
+			#totError,currParcel = Error.testParcelGeometry(totError,currParcel, pinSkips)		
 		
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"addnum","address", True)
 		totError,currParcel = Error.checkNumericTextValue(totError,currParcel,"parcelfips","general", False)
@@ -253,10 +251,13 @@ def validation_tool_run_all(inputDict):
 	if inputDict['isFinal'] == 'testModeSelected':    
 		# Write all summary errors to file
 		outSummaryJSON = base + '\summary\summary.js' # full (hard coded) path to the output .json
-		outSummaryPage = base + '\summary\\validation.html' # full (hard coded) path to the Validation Summary Page (escape \v with a \\)
+		#outSummaryPage = base + '\summary\\validation.html' # full (hard coded) path to the Validation Summary Page (escape \v with a \\)
+		jsonInject = base + '\summary\\build\static\js\main.f051b425.js'
+		outSummaryPage = base + '\summary\\build\index.html'
 		outSummaryDir = base + '\summary' # full (hard coded) path to the Validation Summary directory
+		summary.writeSummaryTxt(outSummaryDir,inputDict['outName'],totError,outSummaryPage,outSummaryJSON,jsonInject)
 
-		summary.writeSummaryTxt(outSummaryDir,inputDict['outName'],totError,outSummaryPage,outSummaryJSON)
+		#summary.writeSummaryTxt(outSummaryDir,inputDict['outName'],totError,outSummaryPage,outSummaryJSON)
 		
 		#Write feature class from memory back out to hard disk
 		
